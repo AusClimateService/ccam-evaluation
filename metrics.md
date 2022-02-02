@@ -26,5 +26,10 @@ Please use the following table to track the metrics coded and what is still left
 | v500 | 500 hPa meridional wind | - | - | Bias, RMSE |
 | psl | Sea level pressure | - | - | Bias, RMSE |
 | zg500 | 500 hPa geopotential height | - | - | Bias, RMSE |
+| wsgsmax | Maximum daily wind gust | - | - | bias using station data (when avaliable) |
+
+| Tempest Extremes | Cyclone like vortex detection | Fortran? | - | Tony to confirm |
+| CDD | CSIRO Direct Detection | Fortran | - | Average cyclone number frequency |
+
 
 ... and so on.
