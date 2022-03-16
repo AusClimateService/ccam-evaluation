@@ -10,6 +10,7 @@ Minimum requirements:
 - Indices output in NetCDF format
 - Basic plots of Indices (in any language)
 - Basic execution (i.e. shell script) to compute indices as part of a workflow.
+- Parallel Evaluation between Climpact and Python options (xclim etc.)
 
 ## Phase 2
 
