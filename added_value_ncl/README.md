@@ -1,4 +1,3 @@
-# Added value NCL scripts
-Original version, run on CCAM ACCESS1-0.
+# Scripts to calculate & plot added value, bias, and RMSE
 
-Currently in the process of rewriting the scripts so that the AV calculation is different (Calculates mean/percentiles on all time steps, rather than on annual mean). Also merging the scripts so that annual, monthly, and seasonal AV is calculated in one script.
+Note that these scripts only run on historical data (e.g., CCAM ERA5 runs). They do not calculate PAV/RAV
