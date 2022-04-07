@@ -1,0 +1,790 @@
+ Copyright (C) 1995-2019 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.6.2
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	Tue Apr  5 19:36:25 AEST 2022
+
+Variable: obs
+Type: float
+Total Size: 26832641128 bytes
+            6708160282 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 10957] x [lat | 691] x [lon | 886]
+Coordinates: 
+            time: [49673.375..60629.375]
+            lat: [-44.5..-10]
+            lon: [112..156.25]
+Number Of Attributes: 13
+  least_significant_digit :	3
+  cell_methods :	time: sum
+  units :	mm/day
+  analysis_version_number :	3.01
+  long_name :	Daily precipitation
+  number_of_stations_reporting :	6382
+  standard_name :	lwe_thickness_of_precipitation_amount
+  frequency :	daily
+  length_scale_for_analysis :	  80
+  grid_mapping :	crs
+  _FillValue :	1e+20
+  coverage_content_type :	physicalMeasurement
+  valid_range :	(  0, 100000 )
+
+Variable: rcm_hist
+Type: double
+Total Size: 9261382336 bytes
+            1157672792 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 10957] x [lat | 281] x [lon | 376]
+Coordinates: 
+            time: [720..1.577736e+07]
+            lat: [-45..-10]
+            lon: [110.625..157.5]
+Number Of Attributes: 6
+  standard_name :	precipitation_flux
+  long_name :	Precipitation
+  units :	mm/day
+  _FillValue :	9.969209968386869e+36
+  missing_value :	9.969209968386869e+36
+  cell_methods :	time: mean
+
+Variable: gdd_hist
+Type: double
+Total Size: 2323585248 bytes
+            290448156 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 10957] x [lat | 141] x [lon | 188]
+Coordinates: 
+            time: [753875..1016819]
+            lat: [-45..-10]
+            lon: [110.75..157.5]
+Number Of Attributes: 5
+  long_name :	Total precipitation
+  units :	m
+  _FillValue :	-32767
+  missing_value :	-32767
+  cell_methods :	time: sum
+(0)	Tue Apr  5 19:45:06 AEST 2022
+(0)	Finished reading files, starting interpolation
+(0)	Tue Apr  5 21:40:27 AEST 2022
+(0)	Finished interpolation, masking data
+(0)	Tue Apr  5 22:08:48 AEST 2022
+(0)	Finished masking, starting annual statistics calculation
+(0)	Wed Apr  6 00:33:53 AEST 2022
+(0)	Looping over years (non-shifted)
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	0
+(0)	Wed Apr  6 00:34:00 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	1
+(0)	Wed Apr  6 00:34:53 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	2
+(0)	Wed Apr  6 00:35:46 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	3
+(0)	Wed Apr  6 00:36:39 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	4
+(0)	Wed Apr  6 00:37:32 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	5
+(0)	Wed Apr  6 00:38:25 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	6
+(0)	Wed Apr  6 00:39:17 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	7
+(0)	Wed Apr  6 00:40:11 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	8
+(0)	Wed Apr  6 00:41:04 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	9
+(0)	Wed Apr  6 00:41:56 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	10
+(0)	Wed Apr  6 00:42:49 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	11
+(0)	Wed Apr  6 00:43:42 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	12
+(0)	Wed Apr  6 00:44:35 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	13
+(0)	Wed Apr  6 00:45:29 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	14
+(0)	Wed Apr  6 00:46:22 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	15
+(0)	Wed Apr  6 00:47:15 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	16
+(0)	Wed Apr  6 00:48:08 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	17
+(0)	Wed Apr  6 00:49:00 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	18
+(0)	Wed Apr  6 00:49:53 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	19
+(0)	Wed Apr  6 00:50:45 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	20
+(0)	Wed Apr  6 00:51:38 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	21
+(0)	Wed Apr  6 00:52:30 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	22
+(0)	Wed Apr  6 00:53:23 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	23
+(0)	Wed Apr  6 00:54:15 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	24
+(0)	Wed Apr  6 00:55:07 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	25
+(0)	Wed Apr  6 00:56:01 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	26
+(0)	Wed Apr  6 00:56:55 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	27
+(0)	Wed Apr  6 00:57:47 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	28
+(0)	Wed Apr  6 00:58:40 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	29
+(0)	Wed Apr  6 00:59:32 AEST 2022
+(0)	Wed Apr  6 01:00:25 AEST 2022
+(0)	Wed Apr  6 01:00:32 AEST 2022
+(0)	ANN
+(0)	Wed Apr  6 01:00:46 AEST 2022
+(0)	JAN
+(0)	Wed Apr  6 01:00:56 AEST 2022
+(0)	FEB
+(0)	Wed Apr  6 01:01:06 AEST 2022
+(0)	MAR
+(0)	Wed Apr  6 01:01:21 AEST 2022
+(0)	APR
+(0)	Wed Apr  6 01:01:30 AEST 2022
+(0)	MAY
+(0)	Wed Apr  6 01:01:43 AEST 2022
+(0)	JUN
+(0)	Wed Apr  6 01:01:55 AEST 2022
+(0)	JUL
+(0)	Wed Apr  6 01:02:08 AEST 2022
+(0)	AUG
+(0)	Wed Apr  6 01:02:22 AEST 2022
+(0)	SEP
+(0)	Wed Apr  6 01:02:32 AEST 2022
+(0)	OCT
+(0)	Wed Apr  6 01:02:43 AEST 2022
+(0)	NOV
+(0)	Wed Apr  6 01:02:57 AEST 2022
+(0)	DEC
+(0)	Wed Apr  6 01:03:10 AEST 2022
+(0)	Starting shifted data calculation
+(0)	Wed Apr  6 01:03:17 AEST 2022
+(0)	Starting seasonal statistics calculation
+(0)	Wed Apr  6 02:04:53 AEST 2022
+(0)	Looping over years (shifted)
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	0
+(0)	Wed Apr  6 02:04:55 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	1
+(0)	Wed Apr  6 02:05:18 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	2
+(0)	Wed Apr  6 02:05:44 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	3
+(0)	Wed Apr  6 02:06:10 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	4
+(0)	Wed Apr  6 02:06:36 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	5
+(0)	Wed Apr  6 02:07:02 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	6
+(0)	Wed Apr  6 02:07:27 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	7
+(0)	Wed Apr  6 02:07:53 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	8
+(0)	Wed Apr  6 02:08:19 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	9
+(0)	Wed Apr  6 02:08:44 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	10
+(0)	Wed Apr  6 02:09:10 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	11
+(0)	Wed Apr  6 02:09:36 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	12
+(0)	Wed Apr  6 02:10:02 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	13
+(0)	Wed Apr  6 02:10:28 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	14
+(0)	Wed Apr  6 02:10:54 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	15
+(0)	Wed Apr  6 02:11:20 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	16
+(0)	Wed Apr  6 02:11:46 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	17
+(0)	Wed Apr  6 02:12:11 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	18
+(0)	Wed Apr  6 02:12:37 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	19
+(0)	Wed Apr  6 02:13:03 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	20
+(0)	Wed Apr  6 02:13:28 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	21
+(0)	Wed Apr  6 02:13:54 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	22
+(0)	Wed Apr  6 02:14:19 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	23
+(0)	Wed Apr  6 02:14:45 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	24
+(0)	Wed Apr  6 02:15:10 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	25
+(0)	Wed Apr  6 02:15:37 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	26
+(0)	Wed Apr  6 02:16:03 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	27
+(0)	Wed Apr  6 02:16:28 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	28
+(0)	Wed Apr  6 02:16:54 AEST 2022
+
+
+Variable: nyrc
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	29
+(0)	Wed Apr  6 02:17:20 AEST 2022
+(0)	Wed Apr  6 02:17:47 AEST 2022
+(0)	Wed Apr  6 02:17:47 AEST 2022
+(0)	DJF
+(0)	Wed Apr  6 02:17:54 AEST 2022
+(0)	MAM
+(0)	Wed Apr  6 02:17:58 AEST 2022
+(0)	JJA
+(0)	Wed Apr  6 02:18:04 AEST 2022
+(0)	SON
+(0)	Wed Apr  6 02:18:09 AEST 2022
+
+======================================================================================
+                  Resource Usage on 2022-04-06 02:18:12:
+   Job Id:             37799194.gadi-pbs
+   Project:            xv83
+   Exit Status:        0
+   Service Units:      321.44
+   NCPUs Requested:    14                     NCPUs Used: 14              
+                                           CPU Time Used: 06:36:34                                   
+   Memory Requested:   512.0GB               Memory Used: 356.48GB        
+   Walltime requested: 12:00:00            Walltime Used: 06:41:48        
+   JobFS requested:    100.0GB                JobFS used: 0B              
+======================================================================================

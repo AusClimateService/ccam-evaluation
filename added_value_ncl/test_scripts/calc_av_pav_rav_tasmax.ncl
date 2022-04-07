@@ -1,0 +1,4334 @@
+; calculate Added Value (AV)
+
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
+load "/g/data/xv83/bxn599/CaRSA/rav_ncl/percentiles.ncl"
+
+begin
+  var = "tasmax" ; daily rainfall
+  season = "seasonal"
+  statistic = "99"
+  hist_start = 1986
+  hist_start_day = 19860101
+  hist_end = 2005
+  hist_end_day = 20051231
+  fut_start = 2080
+  fut_start_day = 20800101
+  fut_end = 2099
+  fut_end_day = 20991231
+  window = hist_end - hist_start + 1
+
+  fout_name_ANN = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_ANN_added_value_test.nc"
+
+  fout_name_DJF = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_DJF_added_value_test.nc"
+  fout_name_MAM = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_MAM_added_value_test.nc"
+  fout_name_JJA = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_JJA_added_value_test.nc"
+  fout_name_SON = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_SON_added_value_test.nc"
+
+  fout_name_JAN = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_JAN_added_value_test.nc"
+  fout_name_FEB = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_FEB_added_value_test.nc"
+  fout_name_MAR = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_MAR_added_value_test.nc"
+  fout_name_APR = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_APR_added_value_test.nc"
+  fout_name_MAY = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_MAY_added_value_test.nc"
+  fout_name_JUN = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_JUN_added_value_test.nc"
+  fout_name_JUL = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_JUL_added_value_test.nc"
+  fout_name_AUG = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_AUG_added_value_test.nc"
+  fout_name_SEP = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_SEP_added_value_test.nc"
+  fout_name_OCT = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_OCT_added_value_test.nc"
+  fout_name_NOV = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_NOV_added_value_test.nc"
+  fout_name_DEC = "CCAM_ACCESS1-0_"+hist_start+"-"+hist_end+"_"+fut_start+"-"+fut_end+"_"+var+"_DEC_added_value_test.nc"
+
+  yyyy_hist = ispan(hist_start, hist_end, 1)
+  yyyy_fut = ispan(fut_start, fut_end, 1)
+  ls_gdd_hist = systemfunc("ls /g/data/rr3/publications/CMIP5/output1/CSIRO-BOM/ACCESS1-0/historical/day/atmos/day/r1i1p1/latest/tasmax/tasmax*.nc")
+  ls_gdd_fut = systemfunc("ls /g/data/rr3/publications/CMIP5/output1/CSIRO-BOM/ACCESS1-0/rcp85/day/atmos/day/r1i1p1/latest/tasmax/tasmax*.nc")
+  ls_rcm_hist = "/scratch/e53/mxt599/esci/ccam_access1-0_aus_12km/regrid/tasmax_AUS-12_CSIRO-BOM-ACCESS1-0_historical_r1i1p1_CSIRO-CCAM_r4602_day_"+yyyy_hist+"0101-"+yyyy_hist+"1231.nc"
+  ls_rcm_fut = "/scratch/e53/mxt599/esci/ccam_access1-0_aus_12km/regrid/tasmax_AUS-12_CSIRO-BOM-ACCESS1-0_rcp85_r1i1p1_CSIRO-CCAM_r4602_day_"+yyyy_fut+"0101-"+yyyy_fut+"1231.nc"
+  ls_obs = "/g/data/zv2/agcd/v1/tmax/mean/r005/01day/agcd_v1_tmax_mean_r005_daily_"+yyyy_hist+".nc"
+
+  ifile_gdd_hist = addfiles(ls_gdd_hist, "r")
+  ifile_gdd_fut = addfiles(ls_gdd_fut, "r")
+  ifile_rcm_hist = addfiles(ls_rcm_hist, "r")
+  ifile_rcm_fut = addfiles(ls_rcm_fut, "r")
+  ifile_obs = addfiles(ls_obs, "r")
+
+  ; land sea mask file
+  f2 = addfile("/scratch/e53/mxt599/esci/sftrf_AWAP0.05_NRMv3.nc", "r")
+  lsmask = f2->AUS
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Reading files, restrict to hist/fut periods")
+  gdd_hist = ifile_gdd_hist[:]->tasmax
+  if gdd_hist@units .eq. "K" .or. gdd_hist@units .eq."degK" then
+    gdd_hist = gdd_hist-273.15
+    gdd_hist@units = "degC"
+  end if
+  gdd_hist_date = cd_calendar(gdd_hist&time, -2)
+  gdd_hist_st0 = ind(gdd_hist_date.eq.hist_start_day)
+  gdd_hist_ed0 = ind(gdd_hist_date.eq.hist_end_day)
+  delete(gdd_hist_date)
+  gdd_hist_ = gdd_hist(gdd_hist_st0:gdd_hist_ed0,{-45:-10},{110.625:157.5}) ; restrict to aus region
+  delete(gdd_hist)
+  gdd_hist = gdd_hist_
+  delete(gdd_hist_)
+
+  gdd_fut = ifile_gdd_fut[:]->tasmax
+  if gdd_fut@units .eq. "K" .or. gdd_fut@units .eq."degK" then
+    gdd_fut = gdd_fut-273.15
+    gdd_fut@units = "degC"
+  end if
+  gdd_fut_date = cd_calendar(gdd_fut&time, -2)
+  gdd_fut_st0 = ind(gdd_fut_date.eq.fut_start_day)
+  gdd_fut_ed0 = ind(gdd_fut_date.eq.fut_end_day)
+  delete(gdd_fut_date)
+  gdd_fut_ = gdd_fut(gdd_fut_st0:gdd_fut_ed0,{-45:-10},{110.625:157.5}) ; restrict to aus region
+  delete(gdd_fut)
+  gdd_fut = gdd_fut_
+  delete(gdd_fut_)
+
+  rcm_hist = ifile_rcm_hist[:]->tasmax
+  if rcm_hist@units .eq. "K" .or. rcm_hist@units .eq."degK" then
+    rcm_hist = rcm_hist-273.15
+    rcm_hist@units = "degC"
+  end if
+
+  rcm_fut = ifile_rcm_fut[:]->tasmax
+  if rcm_fut@units .eq. "K" .or. rcm_fut@units .eq."degK" then
+    rcm_fut = rcm_fut-273.15
+    rcm_fut@units = "degC"
+  end if
+
+  obs = ifile_obs[:]->tmax
+  if obs@units .eq. "K" .or. obs@units .eq."degK" then
+    obs = obs-273.15
+    obs@units = "degC"
+  end if
+
+  asciiwrite("obs_all_months_original_time", obs(:,{-37.5},{145}))
+  asciiwrite("rcm_hist_all_months_original_time", rcm_hist(:,{-37.5},{145}))
+  asciiwrite("rcm_fut_all_months_original_time", rcm_fut(:,{-37.5},{145}))
+  asciiwrite("gdd_hist_all_months_original_time", gdd_hist(:,{-37.5},{145}))
+  asciiwrite("gdd_fut_all_months_original_time", gdd_fut(:,{-37.5},{145}))
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Finished reading files, starting interpolation")
+  ; interpolate to common grid
+  newlat = fspan(-44.5, -10., 691)
+  newlon = fspan(112., 156.25, 886)
+  newlat@units = "degrees_north"
+  newlon@units = "degrees_east"
+
+  gdd_hist_regrid = linint2_Wrap(gdd_hist&lon, gdd_hist&lat, gdd_hist, False, newlon, newlat, 0)
+  gdd_hist_regrid!1   = "lat"
+  gdd_hist_regrid!2   = "lon"
+  gdd_hist_regrid&lat = newlat
+  gdd_hist_regrid&lon = newlon
+  delete(gdd_hist)
+  gdd_hist = gdd_hist_regrid
+  delete(gdd_hist_regrid)
+
+  gdd_fut_regrid = linint2_Wrap(gdd_fut&lon, gdd_fut&lat, gdd_fut, False, newlon, newlat, 0)
+  gdd_fut_regrid!1   = "lat"
+  gdd_fut_regrid!2   = "lon"
+  gdd_fut_regrid&lat = newlat
+  gdd_fut_regrid&lon = newlon
+  delete(gdd_fut)
+  gdd_fut = gdd_fut_regrid
+  delete(gdd_fut_regrid)
+
+  rcm_hist_regrid = linint2_Wrap(rcm_hist&lon, rcm_hist&lat, rcm_hist, False, newlon, newlat, 0)
+  rcm_hist_regrid!1   = "lat"
+  rcm_hist_regrid!2   = "lon"
+  rcm_hist_regrid&lat = newlat
+  rcm_hist_regrid&lon = newlon
+  delete(rcm_hist)
+  rcm_hist = rcm_hist_regrid
+  delete(rcm_hist_regrid)
+
+  rcm_fut_regrid = linint2_Wrap(rcm_fut&lon, rcm_fut&lat, rcm_fut, False, newlon, newlat, 0)
+  rcm_fut_regrid!1   = "lat"
+  rcm_fut_regrid!2   = "lon"
+  rcm_fut_regrid&lat = newlat
+  rcm_fut_regrid&lon = newlon
+  delete(rcm_fut)
+  rcm_fut = rcm_fut_regrid
+  delete(rcm_fut_regrid)
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Finished interpolation, masking data")
+  rcm_hist_mask = rcm_hist
+  rcm_hist_mask = mask(rcm_hist, conform(rcm_hist, lsmask, (/1,2/)), 1)
+  delete(rcm_hist)
+  rcm_hist = rcm_hist_mask
+  delete(rcm_hist_mask)
+
+  rcm_fut_mask = rcm_fut
+  rcm_fut_mask = mask(rcm_fut, conform(rcm_fut, lsmask, (/1,2/)), 1)
+  delete(rcm_fut)
+  rcm_fut = rcm_fut_mask
+  delete(rcm_fut_mask)
+
+  gdd_hist_mask = gdd_hist
+  gdd_hist_mask = mask(gdd_hist, conform(gdd_hist, lsmask, (/1,2/)), 1)
+  delete(gdd_hist)
+  gdd_hist = gdd_hist_mask
+  delete(gdd_hist_mask)
+
+  gdd_fut_mask = gdd_fut
+  gdd_fut_mask = mask(gdd_fut, conform(gdd_fut, lsmask, (/1,2/)), 1)
+  delete(gdd_fut)
+  gdd_fut = gdd_fut_mask
+  delete(gdd_fut_mask)
+
+  obs_mask = obs
+  obs_mask = mask(obs, conform(obs, lsmask, (/1,2/)), 1)
+  delete(obs)
+  obs = obs_mask
+  delete(obs_mask)
+  delete(lsmask)
+
+;if .not.fileexists(fout_name_ANN) then
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Finished masking, starting annual statistics calculation")
+
+; calculate statistics (e.g., mean, percentiles)
+; annual stats
+  gdd_hist_ANN_avg = dim_avg_n_Wrap(gdd_hist, 0)
+  gdd_hist_ANN_var = dim_variance_n_Wrap(gdd_hist, 0)
+  gdd_hist_ANN_99p = percent_to_value_2d(gdd_hist, 99)
+  gdd_hist_ANN_01p = percent_to_value_2d(gdd_hist, 1)
+  gdd_fut_ANN_avg = dim_avg_n_Wrap(gdd_fut, 0)
+  gdd_fut_ANN_var = dim_variance_n_Wrap(gdd_fut, 0)
+  gdd_fut_ANN_99p = percent_to_value_2d(gdd_fut, 99)
+  gdd_fut_ANN_01p = percent_to_value_2d(gdd_fut, 1)
+
+  rcm_hist_ANN_avg = dim_avg_n_Wrap(rcm_hist, 0)
+  rcm_hist_ANN_var = dim_variance_n_Wrap(rcm_hist, 0)
+  rcm_hist_ANN_99p = percent_to_value_2d(rcm_hist, 99)
+  rcm_hist_ANN_01p = percent_to_value_2d(rcm_hist, 1)
+  rcm_fut_ANN_avg = dim_avg_n_Wrap(rcm_fut, 0)
+  rcm_fut_ANN_var = dim_variance_n_Wrap(rcm_fut, 0)
+  rcm_fut_ANN_99p = percent_to_value_2d(rcm_fut, 99)
+  rcm_fut_ANN_01p = percent_to_value_2d(rcm_fut, 1)
+
+  obs_ANN_avg = dim_avg_n_Wrap(obs, 0)
+  obs_ANN_99p = percent_to_value_2d(obs, 99)
+  obs_ANN_01p = percent_to_value_2d(obs, 1)
+  obs_ANN_var = dim_variance_n_Wrap(obs, 0)
+
+  hist_date_sel = cd_calendar(rcm_hist&time, 0)
+  hist_date_mth = hist_date_sel(:,1)
+  delete(hist_date_sel)
+
+  fut_date_sel = cd_calendar(rcm_fut&time, 0)
+  fut_date_mth = fut_date_sel(:,1)
+  delete(fut_date_sel)
+
+; monthly stats
+  hist_date_JAN = ind(hist_date_mth.eq.1)
+  rcm_hist_JAN = rcm_hist(hist_date_JAN,:,:)
+  rcm_hist_JAN_avg = dim_avg_n_Wrap(rcm_hist_JAN, 0)
+  rcm_hist_JAN_var = dim_variance_n_Wrap(rcm_hist_JAN, 0)
+  rcm_hist_JAN_99p = percent_to_value_2d(rcm_hist_JAN, 99)
+  rcm_hist_JAN_01p = percent_to_value_2d(rcm_hist_JAN, 1)
+  delete(rcm_hist_JAN)
+
+  fut_date_JAN = ind(fut_date_mth.eq.1)
+  rcm_fut_JAN = rcm_fut(fut_date_JAN,:,:)
+  rcm_fut_JAN_avg = dim_avg_n_Wrap(rcm_fut_JAN, 0)
+  rcm_fut_JAN_var = dim_variance_n_Wrap(rcm_fut_JAN, 0)
+  rcm_fut_JAN_99p = percent_to_value_2d(rcm_fut_JAN, 99)
+  rcm_fut_JAN_01p = percent_to_value_2d(rcm_fut_JAN, 1)
+  delete(rcm_fut_JAN)
+
+  gdd_hist_JAN = gdd_hist(hist_date_JAN,:,:)
+  gdd_hist_JAN_avg = dim_avg_n_Wrap(gdd_hist_JAN, 0)
+  gdd_hist_JAN_var = dim_variance_n_Wrap(gdd_hist_JAN, 0)
+  gdd_hist_JAN_01p = percent_to_value_2d(gdd_hist_JAN, 1)
+  gdd_hist_JAN_99p = percent_to_value_2d(gdd_hist_JAN, 99)
+  delete(gdd_hist_JAN)
+
+  gdd_fut_JAN = gdd_fut(fut_date_JAN,:,:)
+  gdd_fut_JAN_avg = dim_avg_n_Wrap(gdd_fut_JAN, 0)
+  gdd_fut_JAN_var = dim_variance_n_Wrap(gdd_fut_JAN, 0)
+  gdd_fut_JAN_01p = percent_to_value_2d(gdd_fut_JAN, 1)
+  gdd_fut_JAN_99p = percent_to_value_2d(gdd_fut_JAN, 99)
+  delete(gdd_fut_JAN)
+
+  obs_JAN = obs(hist_date_JAN,:,:)
+  obs_JAN_avg = dim_avg_n_Wrap(obs_JAN, 0)
+  obs_JAN_var = dim_variance_n_Wrap(obs_JAN, 0)
+  obs_JAN_01p = percent_to_value_2d(obs_JAN, 1)
+  obs_JAN_99p = percent_to_value_2d(obs_JAN, 99)
+  delete(obs_JAN)
+  delete(hist_date_JAN)
+  delete(fut_date_JAN)
+
+  hist_date_FEB = ind(hist_date_mth.eq.2)
+  rcm_hist_FEB = rcm_hist(hist_date_FEB,:,:)
+  rcm_hist_FEB_avg = dim_avg_n_Wrap(rcm_hist_FEB, 0)
+  rcm_hist_FEB_var = dim_variance_n_Wrap(rcm_hist_FEB, 0)
+  rcm_hist_FEB_99p = percent_to_value_2d(rcm_hist_FEB, 99)
+  rcm_hist_FEB_01p = percent_to_value_2d(rcm_hist_FEB, 1)
+  delete(rcm_hist_FEB)
+
+  fut_date_FEB = ind(fut_date_mth.eq.2)
+  rcm_fut_FEB = rcm_fut(fut_date_FEB,:,:)
+  rcm_fut_FEB_avg = dim_avg_n_Wrap(rcm_fut_FEB, 0)
+  rcm_fut_FEB_var = dim_variance_n_Wrap(rcm_fut_FEB, 0)
+  rcm_fut_FEB_99p = percent_to_value_2d(rcm_fut_FEB, 99)
+  rcm_fut_FEB_01p = percent_to_value_2d(rcm_fut_FEB, 1)
+  delete(rcm_fut_FEB)
+
+  gdd_hist_FEB = gdd_hist(hist_date_FEB,:,:)
+  gdd_hist_FEB_avg = dim_avg_n_Wrap(gdd_hist_FEB, 0)
+  gdd_hist_FEB_var = dim_variance_n_Wrap(gdd_hist_FEB, 0)
+  gdd_hist_FEB_01p = percent_to_value_2d(gdd_hist_FEB, 1)
+  gdd_hist_FEB_99p = percent_to_value_2d(gdd_hist_FEB, 99)
+  delete(gdd_hist_FEB)
+
+  gdd_fut_FEB = gdd_fut(fut_date_FEB,:,:)
+  gdd_fut_FEB_avg = dim_avg_n_Wrap(gdd_fut_FEB, 0)
+  gdd_fut_FEB_var = dim_variance_n_Wrap(gdd_fut_FEB, 0)
+  gdd_fut_FEB_01p = percent_to_value_2d(gdd_fut_FEB, 1)
+  gdd_fut_FEB_99p = percent_to_value_2d(gdd_fut_FEB, 99)
+  delete(gdd_fut_FEB)
+
+  obs_FEB = obs(hist_date_FEB,:,:)
+  obs_FEB_avg = dim_avg_n_Wrap(obs_FEB, 0)
+  obs_FEB_var = dim_variance_n_Wrap(obs_FEB, 0)
+  obs_FEB_01p = percent_to_value_2d(obs_FEB, 1)
+  obs_FEB_99p = percent_to_value_2d(obs_FEB, 99)
+  delete(obs_FEB)
+  delete(hist_date_FEB)
+  delete(fut_date_FEB)
+
+  hist_date_MAR = ind(hist_date_mth.eq.3)
+  rcm_hist_MAR = rcm_hist(hist_date_MAR,:,:)
+  rcm_hist_MAR_avg = dim_avg_n_Wrap(rcm_hist_MAR, 0)
+  rcm_hist_MAR_var = dim_variance_n_Wrap(rcm_hist_MAR, 0)
+  rcm_hist_MAR_99p = percent_to_value_2d(rcm_hist_MAR, 99)
+  rcm_hist_MAR_01p = percent_to_value_2d(rcm_hist_MAR, 1)
+  delete(rcm_hist_MAR)
+
+  fut_date_MAR = ind(fut_date_mth.eq.3)
+  rcm_fut_MAR = rcm_fut(fut_date_MAR,:,:)
+  rcm_fut_MAR_avg = dim_avg_n_Wrap(rcm_fut_MAR, 0)
+  rcm_fut_MAR_var = dim_variance_n_Wrap(rcm_fut_MAR, 0)
+  rcm_fut_MAR_99p = percent_to_value_2d(rcm_fut_MAR, 99)
+  rcm_fut_MAR_01p = percent_to_value_2d(rcm_fut_MAR, 1)
+  delete(rcm_fut_MAR)
+
+  gdd_hist_MAR = gdd_hist(hist_date_MAR,:,:)
+  gdd_hist_MAR_avg = dim_avg_n_Wrap(gdd_hist_MAR, 0)
+  gdd_hist_MAR_var = dim_variance_n_Wrap(gdd_hist_MAR, 0)
+  gdd_hist_MAR_01p = percent_to_value_2d(gdd_hist_MAR, 1)
+  gdd_hist_MAR_99p = percent_to_value_2d(gdd_hist_MAR, 99)
+  delete(gdd_hist_MAR)
+
+  gdd_fut_MAR = gdd_fut(fut_date_MAR,:,:)
+  gdd_fut_MAR_avg = dim_avg_n_Wrap(gdd_fut_MAR, 0)
+  gdd_fut_MAR_var = dim_variance_n_Wrap(gdd_fut_MAR, 0)
+  gdd_fut_MAR_01p = percent_to_value_2d(gdd_fut_MAR, 1)
+  gdd_fut_MAR_99p = percent_to_value_2d(gdd_fut_MAR, 99)
+  delete(gdd_fut_MAR)
+
+  obs_MAR = obs(hist_date_MAR,:,:)
+  obs_MAR_avg = dim_avg_n_Wrap(obs_MAR, 0)
+  obs_MAR_var = dim_variance_n_Wrap(obs_MAR, 0)
+  obs_MAR_01p = percent_to_value_2d(obs_MAR, 1)
+  obs_MAR_99p = percent_to_value_2d(obs_MAR, 99)
+  delete(obs_MAR)
+  delete(hist_date_MAR)
+  delete(fut_date_MAR)
+
+  hist_date_APR = ind(hist_date_mth.eq.4)
+  rcm_hist_APR = rcm_hist(hist_date_APR,:,:)
+  rcm_hist_APR_avg = dim_avg_n_Wrap(rcm_hist_APR, 0)
+  rcm_hist_APR_var = dim_variance_n_Wrap(rcm_hist_APR, 0)
+  rcm_hist_APR_99p = percent_to_value_2d(rcm_hist_APR, 99)
+  rcm_hist_APR_01p = percent_to_value_2d(rcm_hist_APR, 1)
+  delete(rcm_hist_APR)
+
+  fut_date_APR = ind(fut_date_mth.eq.4)
+  rcm_fut_APR = rcm_fut(fut_date_APR,:,:)
+  rcm_fut_APR_avg = dim_avg_n_Wrap(rcm_fut_APR, 0)
+  rcm_fut_APR_var = dim_variance_n_Wrap(rcm_fut_APR, 0)
+  rcm_fut_APR_99p = percent_to_value_2d(rcm_fut_APR, 99)
+  rcm_fut_APR_01p = percent_to_value_2d(rcm_fut_APR, 1)
+  delete(rcm_fut_APR)
+
+  gdd_hist_APR = gdd_hist(hist_date_APR,:,:)
+  gdd_hist_APR_avg = dim_avg_n_Wrap(gdd_hist_APR, 0)
+  gdd_hist_APR_var = dim_variance_n_Wrap(gdd_hist_APR, 0)
+  gdd_hist_APR_01p = percent_to_value_2d(gdd_hist_APR, 1)
+  gdd_hist_APR_99p = percent_to_value_2d(gdd_hist_APR, 99)
+  delete(gdd_hist_APR)
+
+  gdd_fut_APR = gdd_fut(fut_date_APR,:,:)
+  gdd_fut_APR_avg = dim_avg_n_Wrap(gdd_fut_APR, 0)
+  gdd_fut_APR_var = dim_variance_n_Wrap(gdd_fut_APR, 0)
+  gdd_fut_APR_01p = percent_to_value_2d(gdd_fut_APR, 1)
+  gdd_fut_APR_99p = percent_to_value_2d(gdd_fut_APR, 99)
+  delete(gdd_fut_APR)
+
+  obs_APR = obs(hist_date_APR,:,:)
+  obs_APR_avg = dim_avg_n_Wrap(obs_APR, 0)
+  obs_APR_var = dim_variance_n_Wrap(obs_APR, 0)
+  obs_APR_01p = percent_to_value_2d(obs_APR, 1)
+  obs_APR_99p = percent_to_value_2d(obs_APR, 99)
+  delete(obs_APR)
+  delete(hist_date_APR)
+  delete(fut_date_APR)
+
+  hist_date_MAY = ind(hist_date_mth.eq.5)
+  rcm_hist_MAY = rcm_hist(hist_date_MAY,:,:)
+  rcm_hist_MAY_avg = dim_avg_n_Wrap(rcm_hist_MAY, 0)
+  rcm_hist_MAY_var = dim_variance_n_Wrap(rcm_hist_MAY, 0)
+  rcm_hist_MAY_99p = percent_to_value_2d(rcm_hist_MAY, 99)
+  rcm_hist_MAY_01p = percent_to_value_2d(rcm_hist_MAY, 1)
+  delete(rcm_hist_MAY)
+
+  fut_date_MAY = ind(fut_date_mth.eq.5)
+  rcm_fut_MAY = rcm_fut(fut_date_MAY,:,:)
+  rcm_fut_MAY_avg = dim_avg_n_Wrap(rcm_fut_MAY, 0)
+  rcm_fut_MAY_var = dim_variance_n_Wrap(rcm_fut_MAY, 0)
+  rcm_fut_MAY_99p = percent_to_value_2d(rcm_fut_MAY, 99)
+  rcm_fut_MAY_01p = percent_to_value_2d(rcm_fut_MAY, 1)
+  delete(rcm_fut_MAY)
+
+  gdd_hist_MAY = gdd_hist(hist_date_MAY,:,:)
+  gdd_hist_MAY_avg = dim_avg_n_Wrap(gdd_hist_MAY, 0)
+  gdd_hist_MAY_var = dim_variance_n_Wrap(gdd_hist_MAY, 0)
+  gdd_hist_MAY_01p = percent_to_value_2d(gdd_hist_MAY, 1)
+  gdd_hist_MAY_99p = percent_to_value_2d(gdd_hist_MAY, 99)
+  delete(gdd_hist_MAY)
+
+  gdd_fut_MAY = gdd_fut(fut_date_MAY,:,:)
+  gdd_fut_MAY_avg = dim_avg_n_Wrap(gdd_fut_MAY, 0)
+  gdd_fut_MAY_var = dim_variance_n_Wrap(gdd_fut_MAY, 0)
+  gdd_fut_MAY_01p = percent_to_value_2d(gdd_fut_MAY, 1)
+  gdd_fut_MAY_99p = percent_to_value_2d(gdd_fut_MAY, 99)
+  delete(gdd_fut_MAY)
+
+  obs_MAY = obs(hist_date_MAY,:,:)
+  obs_MAY_avg = dim_avg_n_Wrap(obs_MAY, 0)
+  obs_MAY_var = dim_variance_n_Wrap(obs_MAY, 0)
+  obs_MAY_01p = percent_to_value_2d(obs_MAY, 1)
+  obs_MAY_99p = percent_to_value_2d(obs_MAY, 99)
+  delete(obs_MAY)
+  delete(hist_date_MAY)
+  delete(fut_date_MAY)
+
+  hist_date_JUN = ind(hist_date_mth.eq.6)
+  rcm_hist_JUN = rcm_hist(hist_date_JUN,:,:)
+  rcm_hist_JUN_avg = dim_avg_n_Wrap(rcm_hist_JUN, 0)
+  rcm_hist_JUN_var = dim_variance_n_Wrap(rcm_hist_JUN, 0)
+  rcm_hist_JUN_99p = percent_to_value_2d(rcm_hist_JUN, 99)
+  rcm_hist_JUN_01p = percent_to_value_2d(rcm_hist_JUN, 1)
+  delete(rcm_hist_JUN)
+
+  fut_date_JUN = ind(fut_date_mth.eq.6)
+  rcm_fut_JUN = rcm_fut(fut_date_JUN,:,:)
+  rcm_fut_JUN_avg = dim_avg_n_Wrap(rcm_fut_JUN, 0)
+  rcm_fut_JUN_var = dim_variance_n_Wrap(rcm_fut_JUN, 0)
+  rcm_fut_JUN_99p = percent_to_value_2d(rcm_fut_JUN, 99)
+  rcm_fut_JUN_01p = percent_to_value_2d(rcm_fut_JUN, 1)
+  delete(rcm_fut_JUN)
+
+  gdd_hist_JUN = gdd_hist(hist_date_JUN,:,:)
+  gdd_hist_JUN_avg = dim_avg_n_Wrap(gdd_hist_JUN, 0)
+  gdd_hist_JUN_var = dim_variance_n_Wrap(gdd_hist_JUN, 0)
+  gdd_hist_JUN_01p = percent_to_value_2d(gdd_hist_JUN, 1)
+  gdd_hist_JUN_99p = percent_to_value_2d(gdd_hist_JUN, 99)
+  delete(gdd_hist_JUN)
+
+  gdd_fut_JUN = gdd_fut(fut_date_JUN,:,:)
+  gdd_fut_JUN_avg = dim_avg_n_Wrap(gdd_fut_JUN, 0)
+  gdd_fut_JUN_var = dim_variance_n_Wrap(gdd_fut_JUN, 0)
+  gdd_fut_JUN_01p = percent_to_value_2d(gdd_fut_JUN, 1)
+  gdd_fut_JUN_99p = percent_to_value_2d(gdd_fut_JUN, 99)
+  delete(gdd_fut_JUN)
+
+  obs_JUN = obs(hist_date_JUN,:,:)
+  obs_JUN_avg = dim_avg_n_Wrap(obs_JUN, 0)
+  obs_JUN_var = dim_variance_n_Wrap(obs_JUN, 0)
+  obs_JUN_01p = percent_to_value_2d(obs_JUN, 1)
+  obs_JUN_99p = percent_to_value_2d(obs_JUN, 99)
+  delete(obs_JUN)
+  delete(hist_date_JUN)
+  delete(fut_date_JUN)
+
+  hist_date_JUL = ind(hist_date_mth.eq.7)
+  rcm_hist_JUL = rcm_hist(hist_date_JUL,:,:)
+  rcm_hist_JUL_avg = dim_avg_n_Wrap(rcm_hist_JUL, 0)
+  rcm_hist_JUL_var = dim_variance_n_Wrap(rcm_hist_JUL, 0)
+  rcm_hist_JUL_99p = percent_to_value_2d(rcm_hist_JUL, 99)
+  rcm_hist_JUL_01p = percent_to_value_2d(rcm_hist_JUL, 1)
+  delete(rcm_hist_JUL)
+
+  fut_date_JUL = ind(fut_date_mth.eq.7)
+  rcm_fut_JUL = rcm_fut(fut_date_JUL,:,:)
+  rcm_fut_JUL_avg = dim_avg_n_Wrap(rcm_fut_JUL, 0)
+  rcm_fut_JUL_var = dim_variance_n_Wrap(rcm_fut_JUL, 0)
+  rcm_fut_JUL_99p = percent_to_value_2d(rcm_fut_JUL, 99)
+  rcm_fut_JUL_01p = percent_to_value_2d(rcm_fut_JUL, 1)
+  delete(rcm_fut_JUL)
+
+  gdd_hist_JUL = gdd_hist(hist_date_JUL,:,:)
+  gdd_hist_JUL_avg = dim_avg_n_Wrap(gdd_hist_JUL, 0)
+  gdd_hist_JUL_var = dim_variance_n_Wrap(gdd_hist_JUL, 0)
+  gdd_hist_JUL_01p = percent_to_value_2d(gdd_hist_JUL, 1)
+  gdd_hist_JUL_99p = percent_to_value_2d(gdd_hist_JUL, 99)
+  delete(gdd_hist_JUL)
+
+  gdd_fut_JUL = gdd_fut(fut_date_JUL,:,:)
+  gdd_fut_JUL_avg = dim_avg_n_Wrap(gdd_fut_JUL, 0)
+  gdd_fut_JUL_var = dim_variance_n_Wrap(gdd_fut_JUL, 0)
+  gdd_fut_JUL_01p = percent_to_value_2d(gdd_fut_JUL, 1)
+  gdd_fut_JUL_99p = percent_to_value_2d(gdd_fut_JUL, 99)
+  delete(gdd_fut_JUL)
+
+  obs_JUL = obs(hist_date_JUL,:,:)
+  obs_JUL_avg = dim_avg_n_Wrap(obs_JUL, 0)
+  obs_JUL_var = dim_variance_n_Wrap(obs_JUL, 0)
+  obs_JUL_01p = percent_to_value_2d(obs_JUL, 1)
+  obs_JUL_99p = percent_to_value_2d(obs_JUL, 99)
+  delete(obs_JUL)
+  delete(hist_date_JUL)
+  delete(fut_date_JUL)
+
+  hist_date_AUG = ind(hist_date_mth.eq.8)
+  rcm_hist_AUG = rcm_hist(hist_date_AUG,:,:)
+  rcm_hist_AUG_avg = dim_avg_n_Wrap(rcm_hist_AUG, 0)
+  rcm_hist_AUG_var = dim_variance_n_Wrap(rcm_hist_AUG, 0)
+  rcm_hist_AUG_99p = percent_to_value_2d(rcm_hist_AUG, 99)
+  rcm_hist_AUG_01p = percent_to_value_2d(rcm_hist_AUG, 1)
+  delete(rcm_hist_AUG)
+
+  fut_date_AUG = ind(fut_date_mth.eq.8)
+  rcm_fut_AUG = rcm_fut(fut_date_AUG,:,:)
+  rcm_fut_AUG_avg = dim_avg_n_Wrap(rcm_fut_AUG, 0)
+  rcm_fut_AUG_var = dim_variance_n_Wrap(rcm_fut_AUG, 0)
+  rcm_fut_AUG_99p = percent_to_value_2d(rcm_fut_AUG, 99)
+  rcm_fut_AUG_01p = percent_to_value_2d(rcm_fut_AUG, 1)
+  delete(rcm_fut_AUG)
+
+  gdd_hist_AUG = gdd_hist(hist_date_AUG,:,:)
+  gdd_hist_AUG_avg = dim_avg_n_Wrap(gdd_hist_AUG, 0)
+  gdd_hist_AUG_var = dim_variance_n_Wrap(gdd_hist_AUG, 0)
+  gdd_hist_AUG_01p = percent_to_value_2d(gdd_hist_AUG, 1)
+  gdd_hist_AUG_99p = percent_to_value_2d(gdd_hist_AUG, 99)
+  delete(gdd_hist_AUG)
+
+  gdd_fut_AUG = gdd_fut(fut_date_AUG,:,:)
+  gdd_fut_AUG_avg = dim_avg_n_Wrap(gdd_fut_AUG, 0)
+  gdd_fut_AUG_var = dim_variance_n_Wrap(gdd_fut_AUG, 0)
+  gdd_fut_AUG_01p = percent_to_value_2d(gdd_fut_AUG, 1)
+  gdd_fut_AUG_99p = percent_to_value_2d(gdd_fut_AUG, 99)
+  delete(gdd_fut_AUG)
+
+  obs_AUG = obs(hist_date_AUG,:,:)
+  obs_AUG_avg = dim_avg_n_Wrap(obs_AUG, 0)
+  obs_AUG_var = dim_variance_n_Wrap(obs_AUG, 0)
+  obs_AUG_01p = percent_to_value_2d(obs_AUG, 1)
+  obs_AUG_99p = percent_to_value_2d(obs_AUG, 99)
+  delete(obs_AUG)
+  delete(hist_date_AUG)
+  delete(fut_date_AUG)
+
+  hist_date_SEP = ind(hist_date_mth.eq.9)
+  rcm_hist_SEP = rcm_hist(hist_date_SEP,:,:)
+  rcm_hist_SEP_avg = dim_avg_n_Wrap(rcm_hist_SEP, 0)
+  rcm_hist_SEP_var = dim_variance_n_Wrap(rcm_hist_SEP, 0)
+  rcm_hist_SEP_99p = percent_to_value_2d(rcm_hist_SEP, 99)
+  rcm_hist_SEP_01p = percent_to_value_2d(rcm_hist_SEP, 1)
+  delete(rcm_hist_SEP)
+
+  fut_date_SEP = ind(fut_date_mth.eq.9)
+  rcm_fut_SEP = rcm_fut(fut_date_SEP,:,:)
+  rcm_fut_SEP_avg = dim_avg_n_Wrap(rcm_fut_SEP, 0)
+  rcm_fut_SEP_var = dim_variance_n_Wrap(rcm_fut_SEP, 0)
+  rcm_fut_SEP_99p = percent_to_value_2d(rcm_fut_SEP, 99)
+  rcm_fut_SEP_01p = percent_to_value_2d(rcm_fut_SEP, 1)
+  delete(rcm_fut_SEP)
+
+  gdd_hist_SEP = gdd_hist(hist_date_SEP,:,:)
+  gdd_hist_SEP_avg = dim_avg_n_Wrap(gdd_hist_SEP, 0)
+  gdd_hist_SEP_var = dim_variance_n_Wrap(gdd_hist_SEP, 0)
+  gdd_hist_SEP_01p = percent_to_value_2d(gdd_hist_SEP, 1)
+  gdd_hist_SEP_99p = percent_to_value_2d(gdd_hist_SEP, 99)
+  delete(gdd_hist_SEP)
+
+  gdd_fut_SEP = gdd_fut(fut_date_SEP,:,:)
+  gdd_fut_SEP_avg = dim_avg_n_Wrap(gdd_fut_SEP, 0)
+  gdd_fut_SEP_var = dim_variance_n_Wrap(gdd_fut_SEP, 0)
+  gdd_fut_SEP_01p = percent_to_value_2d(gdd_fut_SEP, 1)
+  gdd_fut_SEP_99p = percent_to_value_2d(gdd_fut_SEP, 99)
+  delete(gdd_fut_SEP)
+
+  obs_SEP = obs(hist_date_SEP,:,:)
+  obs_SEP_avg = dim_avg_n_Wrap(obs_SEP, 0)
+  obs_SEP_var = dim_variance_n_Wrap(obs_SEP, 0)
+  obs_SEP_01p = percent_to_value_2d(obs_SEP, 1)
+  obs_SEP_99p = percent_to_value_2d(obs_SEP, 99)
+  delete(obs_SEP)
+  delete(hist_date_SEP)
+  delete(fut_date_SEP)
+
+  hist_date_OCT = ind(hist_date_mth.eq.10)
+  rcm_hist_OCT = rcm_hist(hist_date_OCT,:,:)
+  rcm_hist_OCT_avg = dim_avg_n_Wrap(rcm_hist_OCT, 0)
+  rcm_hist_OCT_var = dim_variance_n_Wrap(rcm_hist_OCT, 0)
+  rcm_hist_OCT_99p = percent_to_value_2d(rcm_hist_OCT, 99)
+  rcm_hist_OCT_01p = percent_to_value_2d(rcm_hist_OCT, 1)
+  delete(rcm_hist_OCT)
+
+  fut_date_OCT = ind(fut_date_mth.eq.10)
+  rcm_fut_OCT = rcm_fut(fut_date_OCT,:,:)
+  rcm_fut_OCT_avg = dim_avg_n_Wrap(rcm_fut_OCT, 0)
+  rcm_fut_OCT_var = dim_variance_n_Wrap(rcm_fut_OCT, 0)
+  rcm_fut_OCT_99p = percent_to_value_2d(rcm_fut_OCT, 99)
+  rcm_fut_OCT_01p = percent_to_value_2d(rcm_fut_OCT, 1)
+  delete(rcm_fut_OCT)
+
+  gdd_hist_OCT = gdd_hist(hist_date_OCT,:,:)
+  gdd_hist_OCT_avg = dim_avg_n_Wrap(gdd_hist_OCT, 0)
+  gdd_hist_OCT_var = dim_variance_n_Wrap(gdd_hist_OCT, 0)
+  gdd_hist_OCT_01p = percent_to_value_2d(gdd_hist_OCT, 1)
+  gdd_hist_OCT_99p = percent_to_value_2d(gdd_hist_OCT, 99)
+  delete(gdd_hist_OCT)
+
+  gdd_fut_OCT = gdd_fut(fut_date_OCT,:,:)
+  gdd_fut_OCT_avg = dim_avg_n_Wrap(gdd_fut_OCT, 0)
+  gdd_fut_OCT_var = dim_variance_n_Wrap(gdd_fut_OCT, 0)
+  gdd_fut_OCT_01p = percent_to_value_2d(gdd_fut_OCT, 1)
+  gdd_fut_OCT_99p = percent_to_value_2d(gdd_fut_OCT, 99)
+  delete(gdd_fut_OCT)
+
+  obs_OCT = obs(hist_date_OCT,:,:)
+  obs_OCT_avg = dim_avg_n_Wrap(obs_OCT, 0)
+  obs_OCT_var = dim_variance_n_Wrap(obs_OCT, 0)
+  obs_OCT_01p = percent_to_value_2d(obs_OCT, 1)
+  obs_OCT_99p = percent_to_value_2d(obs_OCT, 99)
+  delete(obs_OCT)
+  delete(hist_date_OCT)
+  delete(fut_date_OCT)
+
+  hist_date_NOV = ind(hist_date_mth.eq.11)
+  rcm_hist_NOV = rcm_hist(hist_date_NOV,:,:)
+  rcm_hist_NOV_avg = dim_avg_n_Wrap(rcm_hist_NOV, 0)
+  rcm_hist_NOV_var = dim_variance_n_Wrap(rcm_hist_NOV, 0)
+  rcm_hist_NOV_99p = percent_to_value_2d(rcm_hist_NOV, 99)
+  rcm_hist_NOV_01p = percent_to_value_2d(rcm_hist_NOV, 1)
+  delete(rcm_hist_NOV)
+
+  fut_date_NOV = ind(fut_date_mth.eq.11)
+  rcm_fut_NOV = rcm_fut(fut_date_NOV,:,:)
+  rcm_fut_NOV_avg = dim_avg_n_Wrap(rcm_fut_NOV, 0)
+  rcm_fut_NOV_var = dim_variance_n_Wrap(rcm_fut_NOV, 0)
+  rcm_fut_NOV_99p = percent_to_value_2d(rcm_fut_NOV, 99)
+  rcm_fut_NOV_01p = percent_to_value_2d(rcm_fut_NOV, 1)
+  delete(rcm_fut_NOV)
+
+  gdd_hist_NOV = gdd_hist(hist_date_NOV,:,:)
+  gdd_hist_NOV_avg = dim_avg_n_Wrap(gdd_hist_NOV, 0)
+  gdd_hist_NOV_var = dim_variance_n_Wrap(gdd_hist_NOV, 0)
+  gdd_hist_NOV_01p = percent_to_value_2d(gdd_hist_NOV, 1)
+  gdd_hist_NOV_99p = percent_to_value_2d(gdd_hist_NOV, 99)
+  delete(gdd_hist_NOV)
+
+  gdd_fut_NOV = gdd_fut(fut_date_NOV,:,:)
+  gdd_fut_NOV_avg = dim_avg_n_Wrap(gdd_fut_NOV, 0)
+  gdd_fut_NOV_var = dim_variance_n_Wrap(gdd_fut_NOV, 0)
+  gdd_fut_NOV_01p = percent_to_value_2d(gdd_fut_NOV, 1)
+  gdd_fut_NOV_99p = percent_to_value_2d(gdd_fut_NOV, 99)
+  delete(gdd_fut_NOV)
+
+  obs_NOV = obs(hist_date_NOV,:,:)
+  obs_NOV_avg = dim_avg_n_Wrap(obs_NOV, 0)
+  obs_NOV_var = dim_variance_n_Wrap(obs_NOV, 0)
+  obs_NOV_01p = percent_to_value_2d(obs_NOV, 1)
+  obs_NOV_99p = percent_to_value_2d(obs_NOV, 99)
+  delete(obs_NOV)
+  delete(hist_date_NOV)
+  delete(fut_date_NOV)
+
+  hist_date_DEC = ind(hist_date_mth.eq.12)
+  rcm_hist_DEC = rcm_hist(hist_date_DEC,:,:)
+  rcm_hist_DEC_avg = dim_avg_n_Wrap(rcm_hist_DEC, 0)
+  rcm_hist_DEC_var = dim_variance_n_Wrap(rcm_hist_DEC, 0)
+  rcm_hist_DEC_99p = percent_to_value_2d(rcm_hist_DEC, 99)
+  rcm_hist_DEC_01p = percent_to_value_2d(rcm_hist_DEC, 1)
+  delete(rcm_hist_DEC)
+
+  fut_date_DEC = ind(fut_date_mth.eq.12)
+  rcm_fut_DEC = rcm_fut(fut_date_DEC,:,:)
+  rcm_fut_DEC_avg = dim_avg_n_Wrap(rcm_fut_DEC, 0)
+  rcm_fut_DEC_var = dim_variance_n_Wrap(rcm_fut_DEC, 0)
+  rcm_fut_DEC_99p = percent_to_value_2d(rcm_fut_DEC, 99)
+  rcm_fut_DEC_01p = percent_to_value_2d(rcm_fut_DEC, 1)
+  delete(rcm_fut_DEC)
+
+  gdd_hist_DEC = gdd_hist(hist_date_DEC,:,:)
+  gdd_hist_DEC_avg = dim_avg_n_Wrap(gdd_hist_DEC, 0)
+  gdd_hist_DEC_var = dim_variance_n_Wrap(gdd_hist_DEC, 0)
+  gdd_hist_DEC_01p = percent_to_value_2d(gdd_hist_DEC, 1)
+  gdd_hist_DEC_99p = percent_to_value_2d(gdd_hist_DEC, 99)
+  delete(gdd_hist_DEC)
+
+  gdd_fut_DEC = gdd_fut(fut_date_DEC,:,:)
+  gdd_fut_DEC_avg = dim_avg_n_Wrap(gdd_fut_DEC, 0)
+  gdd_fut_DEC_var = dim_variance_n_Wrap(gdd_fut_DEC, 0)
+  gdd_fut_DEC_01p = percent_to_value_2d(gdd_fut_DEC, 1)
+  gdd_fut_DEC_99p = percent_to_value_2d(gdd_fut_DEC, 99)
+  delete(gdd_fut_DEC)
+
+  obs_DEC = obs(hist_date_DEC,:,:)
+  obs_DEC_avg = dim_avg_n_Wrap(obs_DEC, 0)
+  obs_DEC_var = dim_variance_n_Wrap(obs_DEC, 0)
+  obs_DEC_01p = percent_to_value_2d(obs_DEC, 1)
+  obs_DEC_99p = percent_to_value_2d(obs_DEC, 99)
+  delete(obs_DEC)
+  delete(hist_date_DEC)
+  delete(fut_date_DEC)
+  delete(hist_date_mth)
+  delete(fut_date_mth)
+
+  hist_date = cd_calendar(rcm_hist&time, -2)
+  hist_year = hist_date/10000
+  hist_years = ispan(min(hist_year), max(hist_year), 1)
+
+  lat = rcm_hist&lat
+  lon = rcm_hist&lon
+  nlat = dimsizes(lat)
+  nlon = dimsizes(lon)
+
+; create new arrays for inter-annual statistics (obs only)
+  obs_ANN_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_ANN_avg_yearly!0 = "year"
+  obs_ANN_avg_yearly!1 = "lat"
+  obs_ANN_avg_yearly!2 = "lon"
+  obs_ANN_avg_yearly&year = hist_years
+  obs_ANN_avg_yearly&lat = lat
+  obs_ANN_avg_yearly&lon = lon
+  obs_ANN_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_ANN_var_yearly!0 = "year"
+  obs_ANN_var_yearly!1 = "lat"
+  obs_ANN_var_yearly!2 = "lon"
+  obs_ANN_var_yearly&year = hist_years
+  obs_ANN_var_yearly&lat = lat
+  obs_ANN_var_yearly&lon = lon
+  obs_ANN_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_ANN_99p_yearly!0 = "year"
+  obs_ANN_99p_yearly!1 = "lat"
+  obs_ANN_99p_yearly!2 = "lon"
+  obs_ANN_99p_yearly&year = hist_years
+  obs_ANN_99p_yearly&lat = lat
+  obs_ANN_99p_yearly&lon = lon
+  obs_ANN_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_ANN_01p_yearly!0 = "year"
+  obs_ANN_01p_yearly!1 = "lat"
+  obs_ANN_01p_yearly!2 = "lon"
+  obs_ANN_01p_yearly&year = hist_years
+  obs_ANN_01p_yearly&lat = lat
+  obs_ANN_01p_yearly&lon = lon
+
+  obs_JAN_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_JAN_avg_yearly!0 = "year"
+  obs_JAN_avg_yearly!1 = "lat"
+  obs_JAN_avg_yearly!2 = "lon"
+  obs_JAN_avg_yearly&year = hist_years
+  obs_JAN_avg_yearly&lat = lat
+  obs_JAN_avg_yearly&lon = lon
+  obs_JAN_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_JAN_var_yearly!0 = "year"
+  obs_JAN_var_yearly!1 = "lat"
+  obs_JAN_var_yearly!2 = "lon"
+  obs_JAN_var_yearly&year = hist_years
+  obs_JAN_var_yearly&lat = lat
+  obs_JAN_var_yearly&lon = lon
+  obs_JAN_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_JAN_99p_yearly!0 = "year"
+  obs_JAN_99p_yearly!1 = "lat"
+  obs_JAN_99p_yearly!2 = "lon"
+  obs_JAN_99p_yearly&year = hist_years
+  obs_JAN_99p_yearly&lat = lat
+  obs_JAN_99p_yearly&lon = lon
+  obs_JAN_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_JAN_01p_yearly!0 = "year"
+  obs_JAN_01p_yearly!1 = "lat"
+  obs_JAN_01p_yearly!2 = "lon"
+  obs_JAN_01p_yearly&year = hist_years
+  obs_JAN_01p_yearly&lat = lat
+  obs_JAN_01p_yearly&lon = lon
+
+  obs_FEB_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_FEB_avg_yearly!0 = "year"
+  obs_FEB_avg_yearly!1 = "lat"
+  obs_FEB_avg_yearly!2 = "lon"
+  obs_FEB_avg_yearly&year = hist_years
+  obs_FEB_avg_yearly&lat = lat
+  obs_FEB_avg_yearly&lon = lon
+  obs_FEB_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_FEB_var_yearly!0 = "year"
+  obs_FEB_var_yearly!1 = "lat"
+  obs_FEB_var_yearly!2 = "lon"
+  obs_FEB_var_yearly&year = hist_years
+  obs_FEB_var_yearly&lat = lat
+  obs_FEB_var_yearly&lon = lon
+  obs_FEB_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_FEB_99p_yearly!0 = "year"
+  obs_FEB_99p_yearly!1 = "lat"
+  obs_FEB_99p_yearly!2 = "lon"
+  obs_FEB_99p_yearly&year = hist_years
+  obs_FEB_99p_yearly&lat = lat
+  obs_FEB_99p_yearly&lon = lon
+  obs_FEB_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_FEB_01p_yearly!0 = "year"
+  obs_FEB_01p_yearly!1 = "lat"
+  obs_FEB_01p_yearly!2 = "lon"
+  obs_FEB_01p_yearly&year = hist_years
+  obs_FEB_01p_yearly&lat = lat
+  obs_FEB_01p_yearly&lon = lon
+
+  obs_MAR_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_MAR_avg_yearly!0 = "year"
+  obs_MAR_avg_yearly!1 = "lat"
+  obs_MAR_avg_yearly!2 = "lon"
+  obs_MAR_avg_yearly&year = hist_years
+  obs_MAR_avg_yearly&lat = lat
+  obs_MAR_avg_yearly&lon = lon
+  obs_MAR_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_MAR_var_yearly!0 = "year"
+  obs_MAR_var_yearly!1 = "lat"
+  obs_MAR_var_yearly!2 = "lon"
+  obs_MAR_var_yearly&year = hist_years
+  obs_MAR_var_yearly&lat = lat
+  obs_MAR_var_yearly&lon = lon
+  obs_MAR_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_MAR_99p_yearly!0 = "year"
+  obs_MAR_99p_yearly!1 = "lat"
+  obs_MAR_99p_yearly!2 = "lon"
+  obs_MAR_99p_yearly&year = hist_years
+  obs_MAR_99p_yearly&lat = lat
+  obs_MAR_99p_yearly&lon = lon
+  obs_MAR_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_MAR_01p_yearly!0 = "year"
+  obs_MAR_01p_yearly!1 = "lat"
+  obs_MAR_01p_yearly!2 = "lon"
+  obs_MAR_01p_yearly&year = hist_years
+  obs_MAR_01p_yearly&lat = lat
+  obs_MAR_01p_yearly&lon = lon
+
+  obs_APR_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_APR_avg_yearly!0 = "year"
+  obs_APR_avg_yearly!1 = "lat"
+  obs_APR_avg_yearly!2 = "lon"
+  obs_APR_avg_yearly&year = hist_years
+  obs_APR_avg_yearly&lat = lat
+  obs_APR_avg_yearly&lon = lon
+  obs_APR_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_APR_var_yearly!0 = "year"
+  obs_APR_var_yearly!1 = "lat"
+  obs_APR_var_yearly!2 = "lon"
+  obs_APR_var_yearly&year = hist_years
+  obs_APR_var_yearly&lat = lat
+  obs_APR_var_yearly&lon = lon
+  obs_APR_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_APR_99p_yearly!0 = "year"
+  obs_APR_99p_yearly!1 = "lat"
+  obs_APR_99p_yearly!2 = "lon"
+  obs_APR_99p_yearly&year = hist_years
+  obs_APR_99p_yearly&lat = lat
+  obs_APR_99p_yearly&lon = lon
+  obs_APR_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_APR_01p_yearly!0 = "year"
+  obs_APR_01p_yearly!1 = "lat"
+  obs_APR_01p_yearly!2 = "lon"
+  obs_APR_01p_yearly&year = hist_years
+  obs_APR_01p_yearly&lat = lat
+  obs_APR_01p_yearly&lon = lon
+
+  obs_MAY_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_MAY_avg_yearly!0 = "year"
+  obs_MAY_avg_yearly!1 = "lat"
+  obs_MAY_avg_yearly!2 = "lon"
+  obs_MAY_avg_yearly&year = hist_years
+  obs_MAY_avg_yearly&lat = lat
+  obs_MAY_avg_yearly&lon = lon
+  obs_MAY_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_MAY_var_yearly!0 = "year"
+  obs_MAY_var_yearly!1 = "lat"
+  obs_MAY_var_yearly!2 = "lon"
+  obs_MAY_var_yearly&year = hist_years
+  obs_MAY_var_yearly&lat = lat
+  obs_MAY_var_yearly&lon = lon
+  obs_MAY_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_MAY_99p_yearly!0 = "year"
+  obs_MAY_99p_yearly!1 = "lat"
+  obs_MAY_99p_yearly!2 = "lon"
+  obs_MAY_99p_yearly&year = hist_years
+  obs_MAY_99p_yearly&lat = lat
+  obs_MAY_99p_yearly&lon = lon
+  obs_MAY_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_MAY_01p_yearly!0 = "year"
+  obs_MAY_01p_yearly!1 = "lat"
+  obs_MAY_01p_yearly!2 = "lon"
+  obs_MAY_01p_yearly&year = hist_years
+  obs_MAY_01p_yearly&lat = lat
+  obs_MAY_01p_yearly&lon = lon
+
+  obs_JUN_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_JUN_avg_yearly!0 = "year"
+  obs_JUN_avg_yearly!1 = "lat"
+  obs_JUN_avg_yearly!2 = "lon"
+  obs_JUN_avg_yearly&year = hist_years
+  obs_JUN_avg_yearly&lat = lat
+  obs_JUN_avg_yearly&lon = lon
+  obs_JUN_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_JUN_var_yearly!0 = "year"
+  obs_JUN_var_yearly!1 = "lat"
+  obs_JUN_var_yearly!2 = "lon"
+  obs_JUN_var_yearly&year = hist_years
+  obs_JUN_var_yearly&lat = lat
+  obs_JUN_var_yearly&lon = lon
+  obs_JUN_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_JUN_99p_yearly!0 = "year"
+  obs_JUN_99p_yearly!1 = "lat"
+  obs_JUN_99p_yearly!2 = "lon"
+  obs_JUN_99p_yearly&year = hist_years
+  obs_JUN_99p_yearly&lat = lat
+  obs_JUN_99p_yearly&lon = lon
+  obs_JUN_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_JUN_01p_yearly!0 = "year"
+  obs_JUN_01p_yearly!1 = "lat"
+  obs_JUN_01p_yearly!2 = "lon"
+  obs_JUN_01p_yearly&year = hist_years
+  obs_JUN_01p_yearly&lat = lat
+  obs_JUN_01p_yearly&lon = lon
+
+  obs_JUL_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_JUL_avg_yearly!0 = "year"
+  obs_JUL_avg_yearly!1 = "lat"
+  obs_JUL_avg_yearly!2 = "lon"
+  obs_JUL_avg_yearly&year = hist_years
+  obs_JUL_avg_yearly&lat = lat
+  obs_JUL_avg_yearly&lon = lon
+  obs_JUL_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_JUL_var_yearly!0 = "year"
+  obs_JUL_var_yearly!1 = "lat"
+  obs_JUL_var_yearly!2 = "lon"
+  obs_JUL_var_yearly&year = hist_years
+  obs_JUL_var_yearly&lat = lat
+  obs_JUL_var_yearly&lon = lon
+  obs_JUL_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_JUL_99p_yearly!0 = "year"
+  obs_JUL_99p_yearly!1 = "lat"
+  obs_JUL_99p_yearly!2 = "lon"
+  obs_JUL_99p_yearly&year = hist_years
+  obs_JUL_99p_yearly&lat = lat
+  obs_JUL_99p_yearly&lon = lon
+  obs_JUL_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_JUL_01p_yearly!0 = "year"
+  obs_JUL_01p_yearly!1 = "lat"
+  obs_JUL_01p_yearly!2 = "lon"
+  obs_JUL_01p_yearly&year = hist_years
+  obs_JUL_01p_yearly&lat = lat
+  obs_JUL_01p_yearly&lon = lon
+
+  obs_AUG_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_AUG_avg_yearly!0 = "year"
+  obs_AUG_avg_yearly!1 = "lat"
+  obs_AUG_avg_yearly!2 = "lon"
+  obs_AUG_avg_yearly&year = hist_years
+  obs_AUG_avg_yearly&lat = lat
+  obs_AUG_avg_yearly&lon = lon
+  obs_AUG_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_AUG_var_yearly!0 = "year"
+  obs_AUG_var_yearly!1 = "lat"
+  obs_AUG_var_yearly!2 = "lon"
+  obs_AUG_var_yearly&year = hist_years
+  obs_AUG_var_yearly&lat = lat
+  obs_AUG_var_yearly&lon = lon
+  obs_AUG_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_AUG_99p_yearly!0 = "year"
+  obs_AUG_99p_yearly!1 = "lat"
+  obs_AUG_99p_yearly!2 = "lon"
+  obs_AUG_99p_yearly&year = hist_years
+  obs_AUG_99p_yearly&lat = lat
+  obs_AUG_99p_yearly&lon = lon
+  obs_AUG_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_AUG_01p_yearly!0 = "year"
+  obs_AUG_01p_yearly!1 = "lat"
+  obs_AUG_01p_yearly!2 = "lon"
+  obs_AUG_01p_yearly&year = hist_years
+  obs_AUG_01p_yearly&lat = lat
+  obs_AUG_01p_yearly&lon = lon
+
+  obs_SEP_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_SEP_avg_yearly!0 = "year"
+  obs_SEP_avg_yearly!1 = "lat"
+  obs_SEP_avg_yearly!2 = "lon"
+  obs_SEP_avg_yearly&year = hist_years
+  obs_SEP_avg_yearly&lat = lat
+  obs_SEP_avg_yearly&lon = lon
+  obs_SEP_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_SEP_var_yearly!0 = "year"
+  obs_SEP_var_yearly!1 = "lat"
+  obs_SEP_var_yearly!2 = "lon"
+  obs_SEP_var_yearly&year = hist_years
+  obs_SEP_var_yearly&lat = lat
+  obs_SEP_var_yearly&lon = lon
+  obs_SEP_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_SEP_99p_yearly!0 = "year"
+  obs_SEP_99p_yearly!1 = "lat"
+  obs_SEP_99p_yearly!2 = "lon"
+  obs_SEP_99p_yearly&year = hist_years
+  obs_SEP_99p_yearly&lat = lat
+  obs_SEP_99p_yearly&lon = lon
+  obs_SEP_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_SEP_01p_yearly!0 = "year"
+  obs_SEP_01p_yearly!1 = "lat"
+  obs_SEP_01p_yearly!2 = "lon"
+  obs_SEP_01p_yearly&year = hist_years
+  obs_SEP_01p_yearly&lat = lat
+  obs_SEP_01p_yearly&lon = lon
+
+  obs_OCT_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_OCT_avg_yearly!0 = "year"
+  obs_OCT_avg_yearly!1 = "lat"
+  obs_OCT_avg_yearly!2 = "lon"
+  obs_OCT_avg_yearly&year = hist_years
+  obs_OCT_avg_yearly&lat = lat
+  obs_OCT_avg_yearly&lon = lon
+  obs_OCT_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_OCT_var_yearly!0 = "year"
+  obs_OCT_var_yearly!1 = "lat"
+  obs_OCT_var_yearly!2 = "lon"
+  obs_OCT_var_yearly&year = hist_years
+  obs_OCT_var_yearly&lat = lat
+  obs_OCT_var_yearly&lon = lon
+  obs_OCT_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_OCT_99p_yearly!0 = "year"
+  obs_OCT_99p_yearly!1 = "lat"
+  obs_OCT_99p_yearly!2 = "lon"
+  obs_OCT_99p_yearly&year = hist_years
+  obs_OCT_99p_yearly&lat = lat
+  obs_OCT_99p_yearly&lon = lon
+  obs_OCT_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_OCT_01p_yearly!0 = "year"
+  obs_OCT_01p_yearly!1 = "lat"
+  obs_OCT_01p_yearly!2 = "lon"
+  obs_OCT_01p_yearly&year = hist_years
+  obs_OCT_01p_yearly&lat = lat
+  obs_OCT_01p_yearly&lon = lon
+
+  obs_NOV_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_NOV_avg_yearly!0 = "year"
+  obs_NOV_avg_yearly!1 = "lat"
+  obs_NOV_avg_yearly!2 = "lon"
+  obs_NOV_avg_yearly&year = hist_years
+  obs_NOV_avg_yearly&lat = lat
+  obs_NOV_avg_yearly&lon = lon
+  obs_NOV_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_NOV_var_yearly!0 = "year"
+  obs_NOV_var_yearly!1 = "lat"
+  obs_NOV_var_yearly!2 = "lon"
+  obs_NOV_var_yearly&year = hist_years
+  obs_NOV_var_yearly&lat = lat
+  obs_NOV_var_yearly&lon = lon
+  obs_NOV_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_NOV_99p_yearly!0 = "year"
+  obs_NOV_99p_yearly!1 = "lat"
+  obs_NOV_99p_yearly!2 = "lon"
+  obs_NOV_99p_yearly&year = hist_years
+  obs_NOV_99p_yearly&lat = lat
+  obs_NOV_99p_yearly&lon = lon
+  obs_NOV_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_NOV_01p_yearly!0 = "year"
+  obs_NOV_01p_yearly!1 = "lat"
+  obs_NOV_01p_yearly!2 = "lon"
+  obs_NOV_01p_yearly&year = hist_years
+  obs_NOV_01p_yearly&lat = lat
+  obs_NOV_01p_yearly&lon = lon
+
+  obs_DEC_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_DEC_avg_yearly!0 = "year"
+  obs_DEC_avg_yearly!1 = "lat"
+  obs_DEC_avg_yearly!2 = "lon"
+  obs_DEC_avg_yearly&year = hist_years
+  obs_DEC_avg_yearly&lat = lat
+  obs_DEC_avg_yearly&lon = lon
+  obs_DEC_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_DEC_var_yearly!0 = "year"
+  obs_DEC_var_yearly!1 = "lat"
+  obs_DEC_var_yearly!2 = "lon"
+  obs_DEC_var_yearly&year = hist_years
+  obs_DEC_var_yearly&lat = lat
+  obs_DEC_var_yearly&lon = lon
+  obs_DEC_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_DEC_99p_yearly!0 = "year"
+  obs_DEC_99p_yearly!1 = "lat"
+  obs_DEC_99p_yearly!2 = "lon"
+  obs_DEC_99p_yearly&year = hist_years
+  obs_DEC_99p_yearly&lat = lat
+  obs_DEC_99p_yearly&lon = lon
+  obs_DEC_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_DEC_01p_yearly!0 = "year"
+  obs_DEC_01p_yearly!1 = "lat"
+  obs_DEC_01p_yearly!2 = "lon"
+  obs_DEC_01p_yearly&year = hist_years
+  obs_DEC_01p_yearly&lat = lat
+  obs_DEC_01p_yearly&lon = lon
+
+;******************************
+; Loop over years using non-shifted data
+;******************************
+  print(systemfunc("date"))
+  print("Looping over years (non-shifted)")
+  do nyrc=0, window-1
+    print(nyrc)
+    print(systemfunc("date"))
+    hist_yrs = min(hist_year)+nyrc
+    hist_yr_sel = ind(hist_year.eq.hist_yrs)
+    obs_temp = obs(hist_yr_sel,:,:)
+
+    hist_date_sel = cd_calendar(obs_temp&time, 0)
+    hist_date_mth = hist_date_sel(:,1)
+    delete(hist_date_sel)
+    
+    hist_date_JAN = ind(hist_date_mth.eq.1)
+    hist_date_FEB = ind(hist_date_mth.eq.2)
+    hist_date_MAR = ind(hist_date_mth.eq.3)
+    hist_date_APR = ind(hist_date_mth.eq.4)
+    hist_date_MAY = ind(hist_date_mth.eq.5)
+    hist_date_JUN = ind(hist_date_mth.eq.6)
+    hist_date_JUL = ind(hist_date_mth.eq.7)
+    hist_date_AUG = ind(hist_date_mth.eq.8)
+    hist_date_SEP = ind(hist_date_mth.eq.9)
+    hist_date_OCT = ind(hist_date_mth.eq.10)
+    hist_date_NOV = ind(hist_date_mth.eq.11)
+    hist_date_DEC = ind(hist_date_mth.eq.12)
+    delete(hist_date_mth)
+
+    ; calculate stats
+    obs_temp_avg = dim_avg_n_Wrap(obs_temp, 0)
+    obs_temp_var = dim_variance_n_Wrap(obs_temp, 0)
+    obs_temp_99p = percent_to_value_2d(obs_temp, 99)
+    obs_temp_01p = percent_to_value_2d(obs_temp, 1)
+
+    ; put into array
+    obs_ANN_avg_yearly(nyrc,:,:) = (/obs_temp_avg/)
+    obs_ANN_var_yearly(nyrc,:,:) = (/obs_temp_var/)
+    obs_ANN_99p_yearly(nyrc,:,:) = (/obs_temp_99p/)
+    obs_ANN_01p_yearly(nyrc,:,:) = (/obs_temp_01p/)
+
+    obs_temp_JAN = obs_temp(hist_date_JAN,:,:)
+    obs_temp_FEB = obs_temp(hist_date_FEB,:,:)
+    obs_temp_MAR = obs_temp(hist_date_MAR,:,:)
+    obs_temp_APR = obs_temp(hist_date_APR,:,:)
+    obs_temp_MAY = obs_temp(hist_date_MAY,:,:)
+    obs_temp_JUN = obs_temp(hist_date_JUN,:,:)
+    obs_temp_JUL = obs_temp(hist_date_JUL,:,:)
+    obs_temp_AUG = obs_temp(hist_date_AUG,:,:)
+    obs_temp_SEP = obs_temp(hist_date_SEP,:,:)
+    obs_temp_OCT = obs_temp(hist_date_OCT,:,:)
+    obs_temp_NOV = obs_temp(hist_date_NOV,:,:)
+    obs_temp_DEC = obs_temp(hist_date_DEC,:,:)
+
+    delete([/hist_date_JAN, hist_date_FEB, hist_date_MAR, hist_date_APR, hist_date_MAY, hist_date_JUN, hist_date_JUL, hist_date_AUG, hist_date_SEP, hist_date_OCT, hist_date_NOV, hist_date_DEC/])
+
+    obs_temp_JAN_avg = dim_avg_n_Wrap(obs_temp_JAN, 0)
+    obs_temp_JAN_var = dim_variance_n_Wrap(obs_temp_JAN, 0)
+    obs_temp_JAN_99p = percent_to_value_2d(obs_temp_JAN, 99)
+    obs_temp_JAN_01p = percent_to_value_2d(obs_temp_JAN, 1)
+    obs_temp_FEB_avg = dim_avg_n_Wrap(obs_temp_FEB, 0)
+    obs_temp_FEB_var = dim_variance_n_Wrap(obs_temp_FEB, 0)
+    obs_temp_FEB_99p = percent_to_value_2d(obs_temp_FEB, 99)
+    obs_temp_FEB_01p = percent_to_value_2d(obs_temp_FEB, 1)
+    obs_temp_MAR_avg = dim_avg_n_Wrap(obs_temp_MAR, 0)
+    obs_temp_MAR_var = dim_variance_n_Wrap(obs_temp_MAR, 0)
+    obs_temp_MAR_99p = percent_to_value_2d(obs_temp_MAR, 99)
+    obs_temp_MAR_01p = percent_to_value_2d(obs_temp_MAR, 1)
+    obs_temp_APR_avg = dim_avg_n_Wrap(obs_temp_APR, 0)
+    obs_temp_APR_var = dim_variance_n_Wrap(obs_temp_APR, 0)
+    obs_temp_APR_99p = percent_to_value_2d(obs_temp_APR, 99)
+    obs_temp_APR_01p = percent_to_value_2d(obs_temp_APR, 1)
+    obs_temp_MAY_avg = dim_avg_n_Wrap(obs_temp_MAY, 0)
+    obs_temp_MAY_var = dim_variance_n_Wrap(obs_temp_MAY, 0)
+    obs_temp_MAY_99p = percent_to_value_2d(obs_temp_MAY, 99)
+    obs_temp_MAY_01p = percent_to_value_2d(obs_temp_MAY, 1)
+    obs_temp_JUN_avg = dim_avg_n_Wrap(obs_temp_JUN, 0)
+    obs_temp_JUN_var = dim_variance_n_Wrap(obs_temp_JUN, 0)
+    obs_temp_JUN_99p = percent_to_value_2d(obs_temp_JUN, 99)
+    obs_temp_JUN_01p = percent_to_value_2d(obs_temp_JUN, 1)
+    obs_temp_JUL_avg = dim_avg_n_Wrap(obs_temp_JUL, 0)
+    obs_temp_JUL_var = dim_variance_n_Wrap(obs_temp_JUL, 0)
+    obs_temp_JUL_99p = percent_to_value_2d(obs_temp_JUL, 99)
+    obs_temp_JUL_01p = percent_to_value_2d(obs_temp_JUL, 1)
+    obs_temp_AUG_avg = dim_avg_n_Wrap(obs_temp_AUG, 0)
+    obs_temp_AUG_var = dim_variance_n_Wrap(obs_temp_AUG, 0)
+    obs_temp_AUG_99p = percent_to_value_2d(obs_temp_AUG, 99)
+    obs_temp_AUG_01p = percent_to_value_2d(obs_temp_AUG, 1)
+    obs_temp_SEP_avg = dim_avg_n_Wrap(obs_temp_SEP, 0)
+    obs_temp_SEP_var = dim_variance_n_Wrap(obs_temp_SEP, 0)
+    obs_temp_SEP_99p = percent_to_value_2d(obs_temp_SEP, 99)
+    obs_temp_SEP_01p = percent_to_value_2d(obs_temp_SEP, 1)
+    obs_temp_OCT_avg = dim_avg_n_Wrap(obs_temp_OCT, 0)
+    obs_temp_OCT_var = dim_variance_n_Wrap(obs_temp_OCT, 0)
+    obs_temp_OCT_99p = percent_to_value_2d(obs_temp_OCT, 99)
+    obs_temp_OCT_01p = percent_to_value_2d(obs_temp_OCT, 1)
+    obs_temp_NOV_avg = dim_avg_n_Wrap(obs_temp_NOV, 0)
+    obs_temp_NOV_var = dim_variance_n_Wrap(obs_temp_NOV, 0)
+    obs_temp_NOV_99p = percent_to_value_2d(obs_temp_NOV, 99)
+    obs_temp_NOV_01p = percent_to_value_2d(obs_temp_NOV, 1)
+    obs_temp_DEC_avg = dim_avg_n_Wrap(obs_temp_DEC, 0)
+    obs_temp_DEC_var = dim_variance_n_Wrap(obs_temp_DEC, 0)
+    obs_temp_DEC_99p = percent_to_value_2d(obs_temp_DEC, 99)
+    obs_temp_DEC_01p = percent_to_value_2d(obs_temp_DEC, 1)
+
+    obs_JAN_avg_yearly(nyrc,:,:) = (/obs_temp_JAN_avg/)
+    obs_JAN_var_yearly(nyrc,:,:) = (/obs_temp_JAN_var/)
+    obs_JAN_99p_yearly(nyrc,:,:) = (/obs_temp_JAN_99p/)
+    obs_JAN_01p_yearly(nyrc,:,:) = (/obs_temp_JAN_01p/)
+    obs_FEB_avg_yearly(nyrc,:,:) = (/obs_temp_FEB_avg/)
+    obs_FEB_var_yearly(nyrc,:,:) = (/obs_temp_FEB_var/)
+    obs_FEB_99p_yearly(nyrc,:,:) = (/obs_temp_FEB_99p/)
+    obs_FEB_01p_yearly(nyrc,:,:) = (/obs_temp_FEB_01p/)
+    obs_MAR_avg_yearly(nyrc,:,:) = (/obs_temp_MAR_avg/)
+    obs_MAR_var_yearly(nyrc,:,:) = (/obs_temp_MAR_var/)
+    obs_MAR_99p_yearly(nyrc,:,:) = (/obs_temp_MAR_99p/)
+    obs_MAR_01p_yearly(nyrc,:,:) = (/obs_temp_MAR_01p/)
+    obs_APR_avg_yearly(nyrc,:,:) = (/obs_temp_APR_avg/)
+    obs_APR_var_yearly(nyrc,:,:) = (/obs_temp_APR_var/)
+    obs_APR_99p_yearly(nyrc,:,:) = (/obs_temp_APR_99p/)
+    obs_APR_01p_yearly(nyrc,:,:) = (/obs_temp_APR_01p/)
+    obs_MAY_avg_yearly(nyrc,:,:) = (/obs_temp_MAY_avg/)
+    obs_MAY_var_yearly(nyrc,:,:) = (/obs_temp_MAY_var/)
+    obs_MAY_99p_yearly(nyrc,:,:) = (/obs_temp_MAY_99p/)
+    obs_MAY_01p_yearly(nyrc,:,:) = (/obs_temp_MAY_01p/)
+    obs_JUN_avg_yearly(nyrc,:,:) = (/obs_temp_JUN_avg/)
+    obs_JUN_var_yearly(nyrc,:,:) = (/obs_temp_JUN_var/)
+    obs_JUN_99p_yearly(nyrc,:,:) = (/obs_temp_JUN_99p/)
+    obs_JUN_01p_yearly(nyrc,:,:) = (/obs_temp_JUN_01p/)
+    obs_JUL_avg_yearly(nyrc,:,:) = (/obs_temp_JUL_avg/)
+    obs_JUL_var_yearly(nyrc,:,:) = (/obs_temp_JUL_var/)
+    obs_JUL_99p_yearly(nyrc,:,:) = (/obs_temp_JUL_99p/)
+    obs_JUL_01p_yearly(nyrc,:,:) = (/obs_temp_JUL_01p/)
+    obs_AUG_avg_yearly(nyrc,:,:) = (/obs_temp_AUG_avg/)
+    obs_AUG_var_yearly(nyrc,:,:) = (/obs_temp_AUG_var/)
+    obs_AUG_99p_yearly(nyrc,:,:) = (/obs_temp_AUG_99p/)
+    obs_AUG_01p_yearly(nyrc,:,:) = (/obs_temp_AUG_01p/)
+    obs_SEP_avg_yearly(nyrc,:,:) = (/obs_temp_SEP_avg/)
+    obs_SEP_var_yearly(nyrc,:,:) = (/obs_temp_SEP_var/)
+    obs_SEP_99p_yearly(nyrc,:,:) = (/obs_temp_SEP_99p/)
+    obs_SEP_01p_yearly(nyrc,:,:) = (/obs_temp_SEP_01p/)
+    obs_OCT_avg_yearly(nyrc,:,:) = (/obs_temp_OCT_avg/)
+    obs_OCT_var_yearly(nyrc,:,:) = (/obs_temp_OCT_var/)
+    obs_OCT_99p_yearly(nyrc,:,:) = (/obs_temp_OCT_99p/)
+    obs_OCT_01p_yearly(nyrc,:,:) = (/obs_temp_OCT_01p/)
+    obs_NOV_avg_yearly(nyrc,:,:) = (/obs_temp_NOV_avg/)
+    obs_NOV_var_yearly(nyrc,:,:) = (/obs_temp_NOV_var/)
+    obs_NOV_99p_yearly(nyrc,:,:) = (/obs_temp_NOV_99p/)
+    obs_NOV_01p_yearly(nyrc,:,:) = (/obs_temp_NOV_01p/)
+    obs_DEC_avg_yearly(nyrc,:,:) = (/obs_temp_DEC_avg/)
+    obs_DEC_var_yearly(nyrc,:,:) = (/obs_temp_DEC_var/)
+    obs_DEC_99p_yearly(nyrc,:,:) = (/obs_temp_DEC_99p/)
+    obs_DEC_01p_yearly(nyrc,:,:) = (/obs_temp_DEC_01p/)
+
+    delete([/obs_temp_avg, obs_temp_var, obs_temp_99p, obs_temp_01p, obs_temp/])
+    delete([/hist_yr_sel, hist_yrs/])
+    delete([/obs_temp_JAN, obs_temp_JAN_avg, obs_temp_JAN_var, obs_temp_JAN_99p, obs_temp_JAN_01p/])
+    delete([/obs_temp_FEB, obs_temp_FEB_avg, obs_temp_FEB_var, obs_temp_FEB_99p, obs_temp_FEB_01p/])
+    delete([/obs_temp_MAR, obs_temp_MAR_avg, obs_temp_MAR_var, obs_temp_MAR_99p, obs_temp_MAR_01p/])
+    delete([/obs_temp_APR, obs_temp_APR_avg, obs_temp_APR_var, obs_temp_APR_99p, obs_temp_APR_01p/])
+    delete([/obs_temp_MAY, obs_temp_MAY_avg, obs_temp_MAY_var, obs_temp_MAY_99p, obs_temp_MAY_01p/])
+    delete([/obs_temp_JUN, obs_temp_JUN_avg, obs_temp_JUN_var, obs_temp_JUN_99p, obs_temp_JUN_01p/])
+    delete([/obs_temp_JUL, obs_temp_JUL_avg, obs_temp_JUL_var, obs_temp_JUL_99p, obs_temp_JUL_01p/])
+    delete([/obs_temp_AUG, obs_temp_AUG_avg, obs_temp_AUG_var, obs_temp_AUG_99p, obs_temp_AUG_01p/])
+    delete([/obs_temp_SEP, obs_temp_SEP_avg, obs_temp_SEP_var, obs_temp_SEP_99p, obs_temp_SEP_01p/])
+    delete([/obs_temp_OCT, obs_temp_OCT_avg, obs_temp_OCT_var, obs_temp_OCT_99p, obs_temp_OCT_01p/])
+    delete([/obs_temp_NOV, obs_temp_NOV_avg, obs_temp_NOV_var, obs_temp_NOV_99p, obs_temp_NOV_01p/])
+    delete([/obs_temp_DEC, obs_temp_DEC_avg, obs_temp_DEC_var, obs_temp_DEC_99p, obs_temp_DEC_01p/])
+  end do
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Calculating annual/monthly AV, PAV, RAV")
+
+; ANNUAL
+  print(systemfunc("date"))
+  print("ANN")
+  rcm_ANN_avg_rmse = rcm_hist_ANN_avg
+  rcm_ANN_avg_rmse = sqrt((rcm_hist_ANN_avg - obs_ANN_avg)^2)
+  rcm_ANN_var_rmse = rcm_hist_ANN_var
+  rcm_ANN_var_rmse = sqrt((rcm_hist_ANN_var - obs_ANN_var)^2)
+  rcm_ANN_99p_rmse = rcm_hist_ANN_99p
+  rcm_ANN_99p_rmse = sqrt((rcm_hist_ANN_99p - obs_ANN_99p)^2)
+  rcm_ANN_01p_rmse = rcm_hist_ANN_01p
+  rcm_ANN_01p_rmse = sqrt((rcm_hist_ANN_01p - obs_ANN_01p)^2)
+
+  gdd_ANN_avg_rmse = gdd_hist_ANN_avg
+  gdd_ANN_avg_rmse = sqrt((gdd_hist_ANN_avg - obs_ANN_avg)^2)
+  gdd_ANN_var_rmse = gdd_hist_ANN_var
+  gdd_ANN_var_rmse = sqrt((gdd_hist_ANN_var - obs_ANN_var)^2)
+  gdd_ANN_99p_rmse = gdd_hist_ANN_99p
+  gdd_ANN_99p_rmse = sqrt((gdd_hist_ANN_99p - obs_ANN_99p)^2)
+  gdd_ANN_01p_rmse = gdd_hist_ANN_01p
+  gdd_ANN_01p_rmse = sqrt((gdd_hist_ANN_01p - obs_ANN_01p)^2)
+
+  av_ANN_avg = gdd_ANN_avg_rmse
+  av_ANN_avg = gdd_ANN_avg_rmse - rcm_ANN_avg_rmse
+  av_ANN_var = gdd_ANN_var_rmse
+  av_ANN_var = gdd_ANN_var_rmse - rcm_ANN_var_rmse
+  av_ANN_99p = gdd_ANN_99p_rmse
+  av_ANN_99p = gdd_ANN_99p_rmse - rcm_ANN_99p_rmse
+  av_ANN_01p = gdd_ANN_01p_rmse
+  av_ANN_01p = gdd_ANN_01p_rmse - rcm_ANN_01p_rmse
+
+  rcm_ANN_avg_cc = rcm_fut_ANN_avg
+  rcm_ANN_avg_cc = rcm_fut_ANN_avg - rcm_hist_ANN_avg
+  rcm_ANN_var_cc = rcm_fut_ANN_var
+  rcm_ANN_var_cc = rcm_fut_ANN_var - rcm_hist_ANN_var
+  rcm_ANN_99p_cc = rcm_fut_ANN_99p
+  rcm_ANN_99p_cc = rcm_fut_ANN_99p - rcm_hist_ANN_99p
+  rcm_ANN_01p_cc = rcm_fut_ANN_01p
+  rcm_ANN_01p_cc = rcm_fut_ANN_01p - rcm_hist_ANN_01p
+
+  gdd_ANN_avg_cc = gdd_fut_ANN_avg
+  gdd_ANN_avg_cc = gdd_fut_ANN_avg - gdd_hist_ANN_avg
+  gdd_ANN_var_cc = gdd_fut_ANN_var
+  gdd_ANN_var_cc = gdd_fut_ANN_var - gdd_hist_ANN_var
+  gdd_ANN_99p_cc = gdd_fut_ANN_99p
+  gdd_ANN_99p_cc = gdd_fut_ANN_99p - gdd_hist_ANN_99p
+  gdd_ANN_01p_cc = gdd_fut_ANN_01p
+  gdd_ANN_01p_cc = gdd_fut_ANN_01p - gdd_hist_ANN_01p
+
+  pav_ANN_avg = rcm_ANN_avg_cc
+  pav_ANN_avg = rcm_ANN_avg_cc - gdd_ANN_avg_cc
+  pav_ANN_var = rcm_ANN_var_cc
+  pav_ANN_var = rcm_ANN_var_cc - gdd_ANN_var_cc
+  pav_ANN_99p = rcm_ANN_99p_cc
+  pav_ANN_99p = rcm_ANN_99p_cc - gdd_ANN_99p_cc
+  pav_ANN_01p = rcm_ANN_01p_cc
+  pav_ANN_01p = rcm_ANN_01p_cc - gdd_ANN_01p_cc
+
+  obs_ANN_avg_variance = dim_variance_n_Wrap(obs_ANN_avg_yearly, 0)
+  obs_ANN_var_variance = dim_variance_n_Wrap(obs_ANN_var_yearly, 0)
+  obs_ANN_99p_variance = dim_variance_n_Wrap(obs_ANN_99p_yearly, 0)
+  obs_ANN_01p_variance = dim_variance_n_Wrap(obs_ANN_01p_yearly, 0)
+
+  delete([/obs_ANN_avg_yearly, obs_ANN_var_yearly, obs_ANN_99p_yearly, obs_ANN_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_ANN_avg_variance_mask = obs_ANN_avg_variance
+  obs_ANN_avg_variance_mask = where(obs_ANN_avg_variance_mask.eq.0, obs_ANN_avg_variance_mask@_FillValue, obs_ANN_avg_variance_mask)
+  delete(obs_ANN_avg_variance)
+  obs_ANN_avg_variance = obs_ANN_avg_variance_mask
+  delete(obs_ANN_avg_variance_mask)
+  obs_ANN_var_variance_mask = obs_ANN_var_variance
+  obs_ANN_var_variance_mask = where(obs_ANN_var_variance_mask.eq.0, obs_ANN_var_variance_mask@_FillValue, obs_ANN_var_variance_mask)
+  delete(obs_ANN_var_variance)
+  obs_ANN_var_variance = obs_ANN_var_variance_mask
+  delete(obs_ANN_var_variance_mask)
+  obs_ANN_99p_variance_mask = obs_ANN_99p_variance
+  obs_ANN_99p_variance_mask = where(obs_ANN_99p_variance_mask.eq.0, obs_ANN_99p_variance_mask@_FillValue, obs_ANN_99p_variance_mask)
+  delete(obs_ANN_99p_variance)
+  obs_ANN_99p_variance = obs_ANN_99p_variance_mask
+  delete(obs_ANN_99p_variance_mask)
+  obs_ANN_01p_variance_mask = obs_ANN_01p_variance
+  obs_ANN_01p_variance_mask = where(obs_ANN_01p_variance_mask.eq.0, obs_ANN_01p_variance_mask@_FillValue, obs_ANN_01p_variance_mask)
+  delete(obs_ANN_01p_variance)
+  obs_ANN_01p_variance = obs_ANN_01p_variance_mask
+  delete(obs_ANN_01p_variance_mask)
+
+  rav_ANN_avg = av_ANN_avg
+  rav_ANN_avg = (av_ANN_avg * abs(pav_ANN_avg))/obs_ANN_avg_variance
+  rav_ANN_var = av_ANN_var
+  rav_ANN_var = (av_ANN_var * abs(pav_ANN_var))/obs_ANN_var_variance
+  rav_ANN_99p = av_ANN_99p
+  rav_ANN_99p = (av_ANN_99p * abs(pav_ANN_99p))/obs_ANN_99p_variance
+  rav_ANN_01p = av_ANN_01p
+  rav_ANN_01p = (av_ANN_01p * abs(pav_ANN_01p))/obs_ANN_01p_variance
+
+  fout_ANN = addfile(fout_name_ANN, "c")
+  fout_ANN->av_ANN_avg = av_ANN_avg
+  fout_ANN->gdd_ANN_avg_rmse = gdd_ANN_avg_rmse
+  fout_ANN->rcm_ANN_avg_rmse = rcm_ANN_avg_rmse
+  fout_ANN->pav_ANN_avg = pav_ANN_avg
+  fout_ANN->rav_ANN_avg = rav_ANN_avg
+  fout_ANN->obs_ANN_avg_variance = obs_ANN_avg_variance
+  fout_ANN->gdd_ANN_avg_cc = gdd_ANN_avg_cc
+  fout_ANN->rcm_ANN_avg_cc = rcm_ANN_avg_cc
+  fout_ANN->obs_ANN_avg = obs_ANN_avg
+  fout_ANN->gdd_hist_ANN_avg = gdd_hist_ANN_avg
+  fout_ANN->gdd_fut_ANN_avg = gdd_fut_ANN_avg
+  fout_ANN->rcm_hist_ANN_avg = rcm_hist_ANN_avg
+  fout_ANN->rcm_fut_ANN_avg = rcm_fut_ANN_avg
+  fout_ANN->av_ANN_var = av_ANN_var
+  fout_ANN->gdd_ANN_var_rmse = gdd_ANN_var_rmse
+  fout_ANN->rcm_ANN_var_rmse = rcm_ANN_var_rmse
+  fout_ANN->pav_ANN_var = pav_ANN_var
+  fout_ANN->rav_ANN_var = rav_ANN_var
+  fout_ANN->obs_ANN_var_variance = obs_ANN_var_variance
+  fout_ANN->gdd_ANN_var_cc = gdd_ANN_var_cc
+  fout_ANN->rcm_ANN_var_cc = rcm_ANN_var_cc
+  fout_ANN->obs_ANN_var = obs_ANN_var
+  fout_ANN->gdd_hist_ANN_var = gdd_hist_ANN_var
+  fout_ANN->gdd_fut_ANN_var = gdd_fut_ANN_var
+  fout_ANN->rcm_hist_ANN_var = rcm_hist_ANN_var
+  fout_ANN->rcm_fut_ANN_var = rcm_fut_ANN_var
+  fout_ANN->av_ANN_99p = av_ANN_99p
+  fout_ANN->gdd_ANN_99p_rmse = gdd_ANN_99p_rmse
+  fout_ANN->rcm_ANN_99p_rmse = rcm_ANN_99p_rmse
+  fout_ANN->pav_ANN_99p = pav_ANN_99p
+  fout_ANN->rav_ANN_99p = rav_ANN_99p
+  fout_ANN->obs_ANN_99p_variance = obs_ANN_99p_variance
+  fout_ANN->gdd_ANN_99p_cc = gdd_ANN_99p_cc
+  fout_ANN->rcm_ANN_99p_cc = rcm_ANN_99p_cc
+  fout_ANN->obs_ANN_99p = obs_ANN_99p
+  fout_ANN->gdd_hist_ANN_99p = gdd_hist_ANN_99p
+  fout_ANN->gdd_fut_ANN_99p = gdd_fut_ANN_99p
+  fout_ANN->rcm_hist_ANN_99p = rcm_hist_ANN_99p
+  fout_ANN->rcm_fut_ANN_99p = rcm_fut_ANN_99p
+  fout_ANN->av_ANN_01p = av_ANN_01p
+  fout_ANN->gdd_ANN_01p_rmse = gdd_ANN_01p_rmse
+  fout_ANN->rcm_ANN_01p_rmse = rcm_ANN_01p_rmse
+  fout_ANN->pav_ANN_01p = pav_ANN_01p
+  fout_ANN->rav_ANN_01p = rav_ANN_01p
+  fout_ANN->obs_ANN_01p_variance = obs_ANN_01p_variance
+  fout_ANN->gdd_ANN_01p_cc = gdd_ANN_01p_cc
+  fout_ANN->rcm_ANN_01p_cc = rcm_ANN_01p_cc
+  fout_ANN->obs_ANN_01p = obs_ANN_01p
+  fout_ANN->gdd_hist_ANN_01p = gdd_hist_ANN_01p
+  fout_ANN->gdd_fut_ANN_01p = gdd_fut_ANN_01p
+  fout_ANN->rcm_hist_ANN_01p = rcm_hist_ANN_01p
+  fout_ANN->rcm_fut_ANN_01p = rcm_fut_ANN_01p
+
+  delete([/av_ANN_avg, gdd_ANN_avg_rmse, rcm_ANN_avg_rmse, pav_ANN_avg, rav_ANN_avg, obs_ANN_avg_variance, gdd_ANN_avg_cc, rcm_ANN_avg_cc, obs_ANN_avg, gdd_hist_ANN_avg, gdd_fut_ANN_avg, rcm_hist_ANN_avg, rcm_fut_ANN_avg, av_ANN_var, gdd_ANN_var_rmse, rcm_ANN_var_rmse, pav_ANN_var, rav_ANN_var, obs_ANN_var_variance, gdd_ANN_var_cc, rcm_ANN_var_cc, obs_ANN_var, gdd_hist_ANN_var, gdd_fut_ANN_var, rcm_hist_ANN_var, rcm_fut_ANN_var, av_ANN_99p, gdd_ANN_99p_rmse, rcm_ANN_99p_rmse, pav_ANN_99p, rav_ANN_99p, obs_ANN_99p_variance, gdd_ANN_99p_cc, rcm_ANN_99p_cc, obs_ANN_99p, gdd_hist_ANN_99p, gdd_fut_ANN_99p, rcm_hist_ANN_99p, rcm_fut_ANN_99p, av_ANN_01p, gdd_ANN_01p_rmse, rcm_ANN_01p_rmse, pav_ANN_01p, rav_ANN_01p, obs_ANN_01p_variance, gdd_ANN_01p_cc, rcm_ANN_01p_cc, obs_ANN_01p, gdd_hist_ANN_01p, gdd_fut_ANN_01p, rcm_hist_ANN_01p, rcm_fut_ANN_01p/])
+  delete(fout_ANN)
+
+; JAN
+  print(systemfunc("date"))
+  print("JAN")
+  rcm_JAN_avg_rmse = rcm_hist_JAN_avg
+  rcm_JAN_avg_rmse = sqrt((rcm_hist_JAN_avg - obs_JAN_avg)^2)
+  rcm_JAN_var_rmse = rcm_hist_JAN_var
+  rcm_JAN_var_rmse = sqrt((rcm_hist_JAN_var - obs_JAN_var)^2)
+  rcm_JAN_99p_rmse = rcm_hist_JAN_99p
+  rcm_JAN_99p_rmse = sqrt((rcm_hist_JAN_99p - obs_JAN_99p)^2)
+  rcm_JAN_01p_rmse = rcm_hist_JAN_01p
+  rcm_JAN_01p_rmse = sqrt((rcm_hist_JAN_01p - obs_JAN_01p)^2)
+
+  gdd_JAN_avg_rmse = gdd_hist_JAN_avg
+  gdd_JAN_avg_rmse = sqrt((gdd_hist_JAN_avg - obs_JAN_avg)^2)
+  gdd_JAN_var_rmse = gdd_hist_JAN_var
+  gdd_JAN_var_rmse = sqrt((gdd_hist_JAN_var - obs_JAN_var)^2)
+  gdd_JAN_99p_rmse = gdd_hist_JAN_99p
+  gdd_JAN_99p_rmse = sqrt((gdd_hist_JAN_99p - obs_JAN_99p)^2)
+  gdd_JAN_01p_rmse = gdd_hist_JAN_01p
+  gdd_JAN_01p_rmse = sqrt((gdd_hist_JAN_01p - obs_JAN_01p)^2)
+
+  av_JAN_avg = gdd_JAN_avg_rmse
+  av_JAN_avg = gdd_JAN_avg_rmse - rcm_JAN_avg_rmse
+  av_JAN_var = gdd_JAN_var_rmse
+  av_JAN_var = gdd_JAN_var_rmse - rcm_JAN_var_rmse
+  av_JAN_99p = gdd_JAN_99p_rmse
+  av_JAN_99p = gdd_JAN_99p_rmse - rcm_JAN_99p_rmse
+  av_JAN_01p = gdd_JAN_01p_rmse
+  av_JAN_01p = gdd_JAN_01p_rmse - rcm_JAN_01p_rmse
+  
+  rcm_JAN_avg_cc = rcm_fut_JAN_avg
+  rcm_JAN_avg_cc = rcm_fut_JAN_avg - rcm_hist_JAN_avg
+  rcm_JAN_var_cc = rcm_fut_JAN_var
+  rcm_JAN_var_cc = rcm_fut_JAN_var - rcm_hist_JAN_var
+  rcm_JAN_99p_cc = rcm_fut_JAN_99p
+  rcm_JAN_99p_cc = rcm_fut_JAN_99p - rcm_hist_JAN_99p
+  rcm_JAN_01p_cc = rcm_fut_JAN_01p
+  rcm_JAN_01p_cc = rcm_fut_JAN_01p - rcm_hist_JAN_01p
+  
+  gdd_JAN_avg_cc = gdd_fut_JAN_avg
+  gdd_JAN_avg_cc = gdd_fut_JAN_avg - gdd_hist_JAN_avg
+  gdd_JAN_var_cc = gdd_fut_JAN_var
+  gdd_JAN_var_cc = gdd_fut_JAN_var - gdd_hist_JAN_var
+  gdd_JAN_99p_cc = gdd_fut_JAN_99p
+  gdd_JAN_99p_cc = gdd_fut_JAN_99p - gdd_hist_JAN_99p
+  gdd_JAN_01p_cc = gdd_fut_JAN_01p
+  gdd_JAN_01p_cc = gdd_fut_JAN_01p - gdd_hist_JAN_01p
+
+  pav_JAN_avg = rcm_JAN_avg_cc
+  pav_JAN_avg = rcm_JAN_avg_cc - gdd_JAN_avg_cc
+  pav_JAN_var = rcm_JAN_var_cc
+  pav_JAN_var = rcm_JAN_var_cc - gdd_JAN_var_cc
+  pav_JAN_99p = rcm_JAN_99p_cc
+  pav_JAN_99p = rcm_JAN_99p_cc - gdd_JAN_99p_cc
+  pav_JAN_01p = rcm_JAN_01p_cc
+  pav_JAN_01p = rcm_JAN_01p_cc - gdd_JAN_01p_cc
+
+  obs_JAN_avg_variance = dim_variance_n_Wrap(obs_JAN_avg_yearly, 0)
+  obs_JAN_var_variance = dim_variance_n_Wrap(obs_JAN_var_yearly, 0)
+  obs_JAN_99p_variance = dim_variance_n_Wrap(obs_JAN_99p_yearly, 0)
+  obs_JAN_01p_variance = dim_variance_n_Wrap(obs_JAN_01p_yearly, 0)
+
+  delete([/obs_JAN_avg_yearly, obs_JAN_var_yearly, obs_JAN_99p_yearly, obs_JAN_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_JAN_avg_variance_mask = obs_JAN_avg_variance
+  obs_JAN_avg_variance_mask = where(obs_JAN_avg_variance_mask.eq.0, obs_JAN_avg_variance_mask@_FillValue, obs_JAN_avg_variance_mask)
+  delete(obs_JAN_avg_variance)
+  obs_JAN_avg_variance = obs_JAN_avg_variance_mask
+  delete(obs_JAN_avg_variance_mask)
+  obs_JAN_var_variance_mask = obs_JAN_var_variance
+  obs_JAN_var_variance_mask = where(obs_JAN_var_variance_mask.eq.0, obs_JAN_var_variance_mask@_FillValue, obs_JAN_var_variance_mask)
+  delete(obs_JAN_var_variance)
+  obs_JAN_var_variance = obs_JAN_var_variance_mask
+  delete(obs_JAN_var_variance_mask)
+  obs_JAN_99p_variance_mask = obs_JAN_99p_variance
+  obs_JAN_99p_variance_mask = where(obs_JAN_99p_variance_mask.eq.0, obs_JAN_99p_variance_mask@_FillValue, obs_JAN_99p_variance_mask)
+  delete(obs_JAN_99p_variance)
+  obs_JAN_99p_variance = obs_JAN_99p_variance_mask
+  delete(obs_JAN_99p_variance_mask)
+  obs_JAN_01p_variance_mask = obs_JAN_01p_variance
+  obs_JAN_01p_variance_mask = where(obs_JAN_01p_variance_mask.eq.0, obs_JAN_01p_variance_mask@_FillValue, obs_JAN_01p_variance_mask)
+  delete(obs_JAN_01p_variance)
+  obs_JAN_01p_variance = obs_JAN_01p_variance_mask
+  delete(obs_JAN_01p_variance_mask)
+
+  rav_JAN_avg = av_JAN_avg
+  rav_JAN_avg = (av_JAN_avg * abs(pav_JAN_avg))/obs_JAN_avg_variance
+  rav_JAN_var = av_JAN_var
+  rav_JAN_var = (av_JAN_var * abs(pav_JAN_var))/obs_JAN_var_variance
+  rav_JAN_99p = av_JAN_99p
+  rav_JAN_99p = (av_JAN_99p * abs(pav_JAN_99p))/obs_JAN_99p_variance
+  rav_JAN_01p = av_JAN_01p
+  rav_JAN_01p = (av_JAN_01p * abs(pav_JAN_01p))/obs_JAN_01p_variance
+
+  fout_JAN = addfile(fout_name_JAN, "c")
+  fout_JAN->av_JAN_avg = av_JAN_avg
+  fout_JAN->gdd_JAN_avg_rmse = gdd_JAN_avg_rmse
+  fout_JAN->rcm_JAN_avg_rmse = rcm_JAN_avg_rmse
+  fout_JAN->pav_JAN_avg = pav_JAN_avg
+  fout_JAN->rav_JAN_avg = rav_JAN_avg
+  fout_JAN->obs_JAN_avg_variance = obs_JAN_avg_variance
+  fout_JAN->gdd_JAN_avg_cc = gdd_JAN_avg_cc
+  fout_JAN->rcm_JAN_avg_cc = rcm_JAN_avg_cc
+  fout_JAN->obs_JAN_avg = obs_JAN_avg
+  fout_JAN->gdd_hist_JAN_avg = gdd_hist_JAN_avg
+  fout_JAN->gdd_fut_JAN_avg = gdd_fut_JAN_avg
+  fout_JAN->rcm_hist_JAN_avg = rcm_hist_JAN_avg
+  fout_JAN->rcm_fut_JAN_avg = rcm_fut_JAN_avg
+  fout_JAN->av_JAN_var = av_JAN_var
+  fout_JAN->gdd_JAN_var_rmse = gdd_JAN_var_rmse
+  fout_JAN->rcm_JAN_var_rmse = rcm_JAN_var_rmse
+  fout_JAN->pav_JAN_var = pav_JAN_var
+  fout_JAN->rav_JAN_var = rav_JAN_var
+  fout_JAN->obs_JAN_var_variance = obs_JAN_var_variance
+  fout_JAN->gdd_JAN_var_cc = gdd_JAN_var_cc
+  fout_JAN->rcm_JAN_var_cc = rcm_JAN_var_cc
+  fout_JAN->obs_JAN_var = obs_JAN_var
+  fout_JAN->gdd_hist_JAN_var = gdd_hist_JAN_var
+  fout_JAN->gdd_fut_JAN_var = gdd_fut_JAN_var
+  fout_JAN->rcm_hist_JAN_var = rcm_hist_JAN_var
+  fout_JAN->rcm_fut_JAN_var = rcm_fut_JAN_var
+  fout_JAN->av_JAN_99p = av_JAN_99p
+  fout_JAN->gdd_JAN_99p_rmse = gdd_JAN_99p_rmse
+  fout_JAN->rcm_JAN_99p_rmse = rcm_JAN_99p_rmse
+  fout_JAN->pav_JAN_99p = pav_JAN_99p
+  fout_JAN->rav_JAN_99p = rav_JAN_99p
+  fout_JAN->obs_JAN_99p_variance = obs_JAN_99p_variance
+  fout_JAN->gdd_JAN_99p_cc = gdd_JAN_99p_cc
+  fout_JAN->rcm_JAN_99p_cc = rcm_JAN_99p_cc
+  fout_JAN->obs_JAN_99p = obs_JAN_99p
+  fout_JAN->gdd_hist_JAN_99p = gdd_hist_JAN_99p
+  fout_JAN->gdd_fut_JAN_99p = gdd_fut_JAN_99p
+  fout_JAN->rcm_hist_JAN_99p = rcm_hist_JAN_99p
+  fout_JAN->rcm_fut_JAN_99p = rcm_fut_JAN_99p
+  fout_JAN->av_JAN_01p = av_JAN_01p
+  fout_JAN->gdd_JAN_01p_rmse = gdd_JAN_01p_rmse
+  fout_JAN->rcm_JAN_01p_rmse = rcm_JAN_01p_rmse
+  fout_JAN->pav_JAN_01p = pav_JAN_01p
+  fout_JAN->rav_JAN_01p = rav_JAN_01p
+  fout_JAN->obs_JAN_01p_variance = obs_JAN_01p_variance
+  fout_JAN->gdd_JAN_01p_cc = gdd_JAN_01p_cc
+  fout_JAN->rcm_JAN_01p_cc = rcm_JAN_01p_cc
+  fout_JAN->obs_JAN_01p = obs_JAN_01p
+  fout_JAN->gdd_hist_JAN_01p = gdd_hist_JAN_01p
+  fout_JAN->gdd_fut_JAN_01p = gdd_fut_JAN_01p
+  fout_JAN->rcm_hist_JAN_01p = rcm_hist_JAN_01p
+  fout_JAN->rcm_fut_JAN_01p = rcm_fut_JAN_01p
+
+  delete([/av_JAN_avg, gdd_JAN_avg_rmse, rcm_JAN_avg_rmse, pav_JAN_avg, rav_JAN_avg, obs_JAN_avg_variance, gdd_JAN_avg_cc, rcm_JAN_avg_cc, obs_JAN_avg, gdd_hist_JAN_avg, gdd_fut_JAN_avg, rcm_hist_JAN_avg, rcm_fut_JAN_avg, av_JAN_var, gdd_JAN_var_rmse, rcm_JAN_var_rmse, pav_JAN_var, rav_JAN_var, obs_JAN_var_variance, gdd_JAN_var_cc, rcm_JAN_var_cc, obs_JAN_var, gdd_hist_JAN_var, gdd_fut_JAN_var, rcm_hist_JAN_var, rcm_fut_JAN_var, av_JAN_99p, gdd_JAN_99p_rmse, rcm_JAN_99p_rmse, pav_JAN_99p, rav_JAN_99p, obs_JAN_99p_variance, gdd_JAN_99p_cc, rcm_JAN_99p_cc, obs_JAN_99p, gdd_hist_JAN_99p, gdd_fut_JAN_99p, rcm_hist_JAN_99p, rcm_fut_JAN_99p, av_JAN_01p, gdd_JAN_01p_rmse, rcm_JAN_01p_rmse, pav_JAN_01p, rav_JAN_01p, obs_JAN_01p_variance, gdd_JAN_01p_cc, rcm_JAN_01p_cc, obs_JAN_01p, gdd_hist_JAN_01p, gdd_fut_JAN_01p, rcm_hist_JAN_01p, rcm_fut_JAN_01p/])
+  delete(fout_JAN)
+  
+; FEB
+  print(systemfunc("date"))
+  print("FEB")
+  rcm_FEB_avg_rmse = rcm_hist_FEB_avg
+  rcm_FEB_avg_rmse = sqrt((rcm_hist_FEB_avg - obs_FEB_avg)^2)
+  rcm_FEB_var_rmse = rcm_hist_FEB_var
+  rcm_FEB_var_rmse = sqrt((rcm_hist_FEB_var - obs_FEB_var)^2)
+  rcm_FEB_99p_rmse = rcm_hist_FEB_99p
+  rcm_FEB_99p_rmse = sqrt((rcm_hist_FEB_99p - obs_FEB_99p)^2)
+  rcm_FEB_01p_rmse = rcm_hist_FEB_01p
+  rcm_FEB_01p_rmse = sqrt((rcm_hist_FEB_01p - obs_FEB_01p)^2)
+
+  gdd_FEB_avg_rmse = gdd_hist_FEB_avg
+  gdd_FEB_avg_rmse = sqrt((gdd_hist_FEB_avg - obs_FEB_avg)^2)
+  gdd_FEB_var_rmse = gdd_hist_FEB_var
+  gdd_FEB_var_rmse = sqrt((gdd_hist_FEB_var - obs_FEB_var)^2)
+  gdd_FEB_99p_rmse = gdd_hist_FEB_99p
+  gdd_FEB_99p_rmse = sqrt((gdd_hist_FEB_99p - obs_FEB_99p)^2)
+  gdd_FEB_01p_rmse = gdd_hist_FEB_01p
+  gdd_FEB_01p_rmse = sqrt((gdd_hist_FEB_01p - obs_FEB_01p)^2)
+
+  av_FEB_avg = gdd_FEB_avg_rmse
+  av_FEB_avg = gdd_FEB_avg_rmse - rcm_FEB_avg_rmse
+  av_FEB_var = gdd_FEB_var_rmse
+  av_FEB_var = gdd_FEB_var_rmse - rcm_FEB_var_rmse
+  av_FEB_99p = gdd_FEB_99p_rmse
+  av_FEB_99p = gdd_FEB_99p_rmse - rcm_FEB_99p_rmse
+  av_FEB_01p = gdd_FEB_01p_rmse
+  av_FEB_01p = gdd_FEB_01p_rmse - rcm_FEB_01p_rmse
+
+  rcm_FEB_avg_cc = rcm_fut_FEB_avg
+  rcm_FEB_avg_cc = rcm_fut_FEB_avg - rcm_hist_FEB_avg
+  rcm_FEB_var_cc = rcm_fut_FEB_var
+  rcm_FEB_var_cc = rcm_fut_FEB_var - rcm_hist_FEB_var
+  rcm_FEB_99p_cc = rcm_fut_FEB_99p
+  rcm_FEB_99p_cc = rcm_fut_FEB_99p - rcm_hist_FEB_99p
+  rcm_FEB_01p_cc = rcm_fut_FEB_01p
+  rcm_FEB_01p_cc = rcm_fut_FEB_01p - rcm_hist_FEB_01p
+
+  gdd_FEB_avg_cc = gdd_fut_FEB_avg
+  gdd_FEB_avg_cc = gdd_fut_FEB_avg - gdd_hist_FEB_avg
+  gdd_FEB_var_cc = gdd_fut_FEB_var
+  gdd_FEB_var_cc = gdd_fut_FEB_var - gdd_hist_FEB_var
+  gdd_FEB_99p_cc = gdd_fut_FEB_99p
+  gdd_FEB_99p_cc = gdd_fut_FEB_99p - gdd_hist_FEB_99p
+  gdd_FEB_01p_cc = gdd_fut_FEB_01p
+  gdd_FEB_01p_cc = gdd_fut_FEB_01p - gdd_hist_FEB_01p
+
+  pav_FEB_avg = rcm_FEB_avg_cc
+  pav_FEB_avg = rcm_FEB_avg_cc - gdd_FEB_avg_cc
+  pav_FEB_var = rcm_FEB_var_cc
+  pav_FEB_var = rcm_FEB_var_cc - gdd_FEB_var_cc
+  pav_FEB_99p = rcm_FEB_99p_cc
+  pav_FEB_99p = rcm_FEB_99p_cc - gdd_FEB_99p_cc
+  pav_FEB_01p = rcm_FEB_01p_cc
+  pav_FEB_01p = rcm_FEB_01p_cc - gdd_FEB_01p_cc
+
+  obs_FEB_avg_variance = dim_variance_n_Wrap(obs_FEB_avg_yearly, 0)
+  obs_FEB_var_variance = dim_variance_n_Wrap(obs_FEB_var_yearly, 0)
+  obs_FEB_99p_variance = dim_variance_n_Wrap(obs_FEB_99p_yearly, 0)
+  obs_FEB_01p_variance = dim_variance_n_Wrap(obs_FEB_01p_yearly, 0)
+
+  delete([/obs_FEB_avg_yearly, obs_FEB_var_yearly, obs_FEB_99p_yearly, obs_FEB_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_FEB_avg_variance_mask = obs_FEB_avg_variance
+  obs_FEB_avg_variance_mask = where(obs_FEB_avg_variance_mask.eq.0, obs_FEB_avg_variance_mask@_FillValue, obs_FEB_avg_variance_mask)
+  delete(obs_FEB_avg_variance)
+  obs_FEB_avg_variance = obs_FEB_avg_variance_mask
+  delete(obs_FEB_avg_variance_mask)
+  obs_FEB_var_variance_mask = obs_FEB_var_variance
+  obs_FEB_var_variance_mask = where(obs_FEB_var_variance_mask.eq.0, obs_FEB_var_variance_mask@_FillValue, obs_FEB_var_variance_mask)
+  delete(obs_FEB_var_variance)
+  obs_FEB_var_variance = obs_FEB_var_variance_mask
+  delete(obs_FEB_var_variance_mask)
+  obs_FEB_99p_variance_mask = obs_FEB_99p_variance
+  obs_FEB_99p_variance_mask = where(obs_FEB_99p_variance_mask.eq.0, obs_FEB_99p_variance_mask@_FillValue, obs_FEB_99p_variance_mask)
+  delete(obs_FEB_99p_variance)
+  obs_FEB_99p_variance = obs_FEB_99p_variance_mask
+  delete(obs_FEB_99p_variance_mask)
+  obs_FEB_01p_variance_mask = obs_FEB_01p_variance
+  obs_FEB_01p_variance_mask = where(obs_FEB_01p_variance_mask.eq.0, obs_FEB_01p_variance_mask@_FillValue, obs_FEB_01p_variance_mask)
+  delete(obs_FEB_01p_variance)
+  obs_FEB_01p_variance = obs_FEB_01p_variance_mask
+  delete(obs_FEB_01p_variance_mask)
+
+  rav_FEB_avg = av_FEB_avg
+  rav_FEB_avg = (av_FEB_avg * abs(pav_FEB_avg))/obs_FEB_avg_variance
+  rav_FEB_var = av_FEB_var
+  rav_FEB_var = (av_FEB_var * abs(pav_FEB_var))/obs_FEB_var_variance
+  rav_FEB_99p = av_FEB_99p
+  rav_FEB_99p = (av_FEB_99p * abs(pav_FEB_99p))/obs_FEB_99p_variance
+  rav_FEB_01p = av_FEB_01p
+  rav_FEB_01p = (av_FEB_01p * abs(pav_FEB_01p))/obs_FEB_01p_variance
+
+  fout_FEB = addfile(fout_name_FEB, "c")
+  fout_FEB->av_FEB_avg = av_FEB_avg
+  fout_FEB->gdd_FEB_avg_rmse = gdd_FEB_avg_rmse
+  fout_FEB->rcm_FEB_avg_rmse = rcm_FEB_avg_rmse
+  fout_FEB->pav_FEB_avg = pav_FEB_avg
+  fout_FEB->rav_FEB_avg = rav_FEB_avg
+  fout_FEB->obs_FEB_avg_variance = obs_FEB_avg_variance
+  fout_FEB->gdd_FEB_avg_cc = gdd_FEB_avg_cc
+  fout_FEB->rcm_FEB_avg_cc = rcm_FEB_avg_cc
+  fout_FEB->obs_FEB_avg = obs_FEB_avg
+  fout_FEB->gdd_hist_FEB_avg = gdd_hist_FEB_avg
+  fout_FEB->gdd_fut_FEB_avg = gdd_fut_FEB_avg
+  fout_FEB->rcm_hist_FEB_avg = rcm_hist_FEB_avg
+  fout_FEB->rcm_fut_FEB_avg = rcm_fut_FEB_avg
+  fout_FEB->av_FEB_var = av_FEB_var
+  fout_FEB->gdd_FEB_var_rmse = gdd_FEB_var_rmse
+  fout_FEB->rcm_FEB_var_rmse = rcm_FEB_var_rmse
+  fout_FEB->pav_FEB_var = pav_FEB_var
+  fout_FEB->rav_FEB_var = rav_FEB_var
+  fout_FEB->obs_FEB_var_variance = obs_FEB_var_variance
+  fout_FEB->gdd_FEB_var_cc = gdd_FEB_var_cc
+  fout_FEB->rcm_FEB_var_cc = rcm_FEB_var_cc
+  fout_FEB->obs_FEB_var = obs_FEB_var
+  fout_FEB->gdd_hist_FEB_var = gdd_hist_FEB_var
+  fout_FEB->gdd_fut_FEB_var = gdd_fut_FEB_var
+  fout_FEB->rcm_hist_FEB_var = rcm_hist_FEB_var
+  fout_FEB->rcm_fut_FEB_var = rcm_fut_FEB_var
+  fout_FEB->av_FEB_99p = av_FEB_99p
+  fout_FEB->gdd_FEB_99p_rmse = gdd_FEB_99p_rmse
+  fout_FEB->rcm_FEB_99p_rmse = rcm_FEB_99p_rmse
+  fout_FEB->pav_FEB_99p = pav_FEB_99p
+  fout_FEB->rav_FEB_99p = rav_FEB_99p
+  fout_FEB->obs_FEB_99p_variance = obs_FEB_99p_variance
+  fout_FEB->gdd_FEB_99p_cc = gdd_FEB_99p_cc
+  fout_FEB->rcm_FEB_99p_cc = rcm_FEB_99p_cc
+  fout_FEB->obs_FEB_99p = obs_FEB_99p
+  fout_FEB->gdd_hist_FEB_99p = gdd_hist_FEB_99p
+  fout_FEB->gdd_fut_FEB_99p = gdd_fut_FEB_99p
+  fout_FEB->rcm_hist_FEB_99p = rcm_hist_FEB_99p
+  fout_FEB->rcm_fut_FEB_99p = rcm_fut_FEB_99p
+  fout_FEB->av_FEB_01p = av_FEB_01p
+  fout_FEB->gdd_FEB_01p_rmse = gdd_FEB_01p_rmse
+  fout_FEB->rcm_FEB_01p_rmse = rcm_FEB_01p_rmse
+  fout_FEB->pav_FEB_01p = pav_FEB_01p
+  fout_FEB->rav_FEB_01p = rav_FEB_01p
+  fout_FEB->obs_FEB_01p_variance = obs_FEB_01p_variance
+  fout_FEB->gdd_FEB_01p_cc = gdd_FEB_01p_cc
+  fout_FEB->rcm_FEB_01p_cc = rcm_FEB_01p_cc
+  fout_FEB->obs_FEB_01p = obs_FEB_01p
+  fout_FEB->gdd_hist_FEB_01p = gdd_hist_FEB_01p
+  fout_FEB->gdd_fut_FEB_01p = gdd_fut_FEB_01p
+  fout_FEB->rcm_hist_FEB_01p = rcm_hist_FEB_01p
+  fout_FEB->rcm_fut_FEB_01p = rcm_fut_FEB_01p
+
+  delete([/av_FEB_avg, gdd_FEB_avg_rmse, rcm_FEB_avg_rmse, pav_FEB_avg, rav_FEB_avg, obs_FEB_avg_variance, gdd_FEB_avg_cc, rcm_FEB_avg_cc, obs_FEB_avg, gdd_hist_FEB_avg, gdd_fut_FEB_avg, rcm_hist_FEB_avg, rcm_fut_FEB_avg, av_FEB_var, gdd_FEB_var_rmse, rcm_FEB_var_rmse, pav_FEB_var, rav_FEB_var, obs_FEB_var_variance, gdd_FEB_var_cc, rcm_FEB_var_cc, obs_FEB_var, gdd_hist_FEB_var, gdd_fut_FEB_var, rcm_hist_FEB_var, rcm_fut_FEB_var, av_FEB_99p, gdd_FEB_99p_rmse, rcm_FEB_99p_rmse, pav_FEB_99p, rav_FEB_99p, obs_FEB_99p_variance, gdd_FEB_99p_cc, rcm_FEB_99p_cc, obs_FEB_99p, gdd_hist_FEB_99p, gdd_fut_FEB_99p, rcm_hist_FEB_99p, rcm_fut_FEB_99p, av_FEB_01p, gdd_FEB_01p_rmse, rcm_FEB_01p_rmse, pav_FEB_01p, rav_FEB_01p, obs_FEB_01p_variance, gdd_FEB_01p_cc, rcm_FEB_01p_cc, obs_FEB_01p, gdd_hist_FEB_01p, gdd_fut_FEB_01p, rcm_hist_FEB_01p, rcm_fut_FEB_01p/])
+  delete(fout_FEB)
+
+; MAR
+  print(systemfunc("date"))
+  print("MAR")
+  rcm_MAR_avg_rmse = rcm_hist_MAR_avg
+  rcm_MAR_avg_rmse = sqrt((rcm_hist_MAR_avg - obs_MAR_avg)^2)
+  rcm_MAR_var_rmse = rcm_hist_MAR_var
+  rcm_MAR_var_rmse = sqrt((rcm_hist_MAR_var - obs_MAR_var)^2)
+  rcm_MAR_99p_rmse = rcm_hist_MAR_99p
+  rcm_MAR_99p_rmse = sqrt((rcm_hist_MAR_99p - obs_MAR_99p)^2)
+  rcm_MAR_01p_rmse = rcm_hist_MAR_01p
+  rcm_MAR_01p_rmse = sqrt((rcm_hist_MAR_01p - obs_MAR_01p)^2)
+
+  gdd_MAR_avg_rmse = gdd_hist_MAR_avg
+  gdd_MAR_avg_rmse = sqrt((gdd_hist_MAR_avg - obs_MAR_avg)^2)
+  gdd_MAR_var_rmse = gdd_hist_MAR_var
+  gdd_MAR_var_rmse = sqrt((gdd_hist_MAR_var - obs_MAR_var)^2)
+  gdd_MAR_99p_rmse = gdd_hist_MAR_99p
+  gdd_MAR_99p_rmse = sqrt((gdd_hist_MAR_99p - obs_MAR_99p)^2)
+  gdd_MAR_01p_rmse = gdd_hist_MAR_01p
+  gdd_MAR_01p_rmse = sqrt((gdd_hist_MAR_01p - obs_MAR_01p)^2)
+
+  av_MAR_avg = gdd_MAR_avg_rmse
+  av_MAR_avg = gdd_MAR_avg_rmse - rcm_MAR_avg_rmse
+  av_MAR_var = gdd_MAR_var_rmse
+  av_MAR_var = gdd_MAR_var_rmse - rcm_MAR_var_rmse
+  av_MAR_99p = gdd_MAR_99p_rmse
+  av_MAR_99p = gdd_MAR_99p_rmse - rcm_MAR_99p_rmse
+  av_MAR_01p = gdd_MAR_01p_rmse
+  av_MAR_01p = gdd_MAR_01p_rmse - rcm_MAR_01p_rmse
+
+  rcm_MAR_avg_cc = rcm_fut_MAR_avg
+  rcm_MAR_avg_cc = rcm_fut_MAR_avg - rcm_hist_MAR_avg
+  rcm_MAR_var_cc = rcm_fut_MAR_var
+  rcm_MAR_var_cc = rcm_fut_MAR_var - rcm_hist_MAR_var
+  rcm_MAR_99p_cc = rcm_fut_MAR_99p
+  rcm_MAR_99p_cc = rcm_fut_MAR_99p - rcm_hist_MAR_99p
+  rcm_MAR_01p_cc = rcm_fut_MAR_01p
+  rcm_MAR_01p_cc = rcm_fut_MAR_01p - rcm_hist_MAR_01p
+
+  gdd_MAR_avg_cc = gdd_fut_MAR_avg
+  gdd_MAR_avg_cc = gdd_fut_MAR_avg - gdd_hist_MAR_avg
+  gdd_MAR_var_cc = gdd_fut_MAR_var
+  gdd_MAR_var_cc = gdd_fut_MAR_var - gdd_hist_MAR_var
+  gdd_MAR_99p_cc = gdd_fut_MAR_99p
+  gdd_MAR_99p_cc = gdd_fut_MAR_99p - gdd_hist_MAR_99p
+  gdd_MAR_01p_cc = gdd_fut_MAR_01p
+  gdd_MAR_01p_cc = gdd_fut_MAR_01p - gdd_hist_MAR_01p
+
+  pav_MAR_avg = rcm_MAR_avg_cc
+  pav_MAR_avg = rcm_MAR_avg_cc - gdd_MAR_avg_cc
+  pav_MAR_var = rcm_MAR_var_cc
+  pav_MAR_var = rcm_MAR_var_cc - gdd_MAR_var_cc
+  pav_MAR_99p = rcm_MAR_99p_cc
+  pav_MAR_99p = rcm_MAR_99p_cc - gdd_MAR_99p_cc
+  pav_MAR_01p = rcm_MAR_01p_cc
+  pav_MAR_01p = rcm_MAR_01p_cc - gdd_MAR_01p_cc
+
+  obs_MAR_avg_variance = dim_variance_n_Wrap(obs_MAR_avg_yearly, 0)
+  obs_MAR_var_variance = dim_variance_n_Wrap(obs_MAR_var_yearly, 0)
+  obs_MAR_99p_variance = dim_variance_n_Wrap(obs_MAR_99p_yearly, 0)
+  obs_MAR_01p_variance = dim_variance_n_Wrap(obs_MAR_01p_yearly, 0)
+
+  delete([/obs_MAR_avg_yearly, obs_MAR_var_yearly, obs_MAR_99p_yearly, obs_MAR_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_MAR_avg_variance_mask = obs_MAR_avg_variance
+  obs_MAR_avg_variance_mask = where(obs_MAR_avg_variance_mask.eq.0, obs_MAR_avg_variance_mask@_FillValue, obs_MAR_avg_variance_mask)
+  delete(obs_MAR_avg_variance)
+  obs_MAR_avg_variance = obs_MAR_avg_variance_mask
+  delete(obs_MAR_avg_variance_mask)
+  obs_MAR_var_variance_mask = obs_MAR_var_variance
+  obs_MAR_var_variance_mask = where(obs_MAR_var_variance_mask.eq.0, obs_MAR_var_variance_mask@_FillValue, obs_MAR_var_variance_mask)
+  delete(obs_MAR_var_variance)
+  obs_MAR_var_variance = obs_MAR_var_variance_mask
+  delete(obs_MAR_var_variance_mask)
+  obs_MAR_99p_variance_mask = obs_MAR_99p_variance
+  obs_MAR_99p_variance_mask = where(obs_MAR_99p_variance_mask.eq.0, obs_MAR_99p_variance_mask@_FillValue, obs_MAR_99p_variance_mask)
+  delete(obs_MAR_99p_variance)
+  obs_MAR_99p_variance = obs_MAR_99p_variance_mask
+  delete(obs_MAR_99p_variance_mask)
+  obs_MAR_01p_variance_mask = obs_MAR_01p_variance
+  obs_MAR_01p_variance_mask = where(obs_MAR_01p_variance_mask.eq.0, obs_MAR_01p_variance_mask@_FillValue, obs_MAR_01p_variance_mask)
+  delete(obs_MAR_01p_variance)
+  obs_MAR_01p_variance = obs_MAR_01p_variance_mask
+  delete(obs_MAR_01p_variance_mask)
+
+  rav_MAR_avg = av_MAR_avg
+  rav_MAR_avg = (av_MAR_avg * abs(pav_MAR_avg))/obs_MAR_avg_variance
+  rav_MAR_var = av_MAR_var
+  rav_MAR_var = (av_MAR_var * abs(pav_MAR_var))/obs_MAR_var_variance
+  rav_MAR_99p = av_MAR_99p
+  rav_MAR_99p = (av_MAR_99p * abs(pav_MAR_99p))/obs_MAR_99p_variance
+  rav_MAR_01p = av_MAR_01p
+  rav_MAR_01p = (av_MAR_01p * abs(pav_MAR_01p))/obs_MAR_01p_variance
+
+  fout_MAR = addfile(fout_name_MAR, "c")
+  fout_MAR->av_MAR_avg = av_MAR_avg
+  fout_MAR->gdd_MAR_avg_rmse = gdd_MAR_avg_rmse
+  fout_MAR->rcm_MAR_avg_rmse = rcm_MAR_avg_rmse
+  fout_MAR->pav_MAR_avg = pav_MAR_avg
+  fout_MAR->rav_MAR_avg = rav_MAR_avg
+  fout_MAR->obs_MAR_avg_variance = obs_MAR_avg_variance
+  fout_MAR->gdd_MAR_avg_cc = gdd_MAR_avg_cc
+  fout_MAR->rcm_MAR_avg_cc = rcm_MAR_avg_cc
+  fout_MAR->obs_MAR_avg = obs_MAR_avg
+  fout_MAR->gdd_hist_MAR_avg = gdd_hist_MAR_avg
+  fout_MAR->gdd_fut_MAR_avg = gdd_fut_MAR_avg
+  fout_MAR->rcm_hist_MAR_avg = rcm_hist_MAR_avg
+  fout_MAR->rcm_fut_MAR_avg = rcm_fut_MAR_avg
+  fout_MAR->av_MAR_var = av_MAR_var
+  fout_MAR->gdd_MAR_var_rmse = gdd_MAR_var_rmse
+  fout_MAR->rcm_MAR_var_rmse = rcm_MAR_var_rmse
+  fout_MAR->pav_MAR_var = pav_MAR_var
+  fout_MAR->rav_MAR_var = rav_MAR_var
+  fout_MAR->obs_MAR_var_variance = obs_MAR_var_variance
+  fout_MAR->gdd_MAR_var_cc = gdd_MAR_var_cc
+  fout_MAR->rcm_MAR_var_cc = rcm_MAR_var_cc
+  fout_MAR->obs_MAR_var = obs_MAR_var
+  fout_MAR->gdd_hist_MAR_var = gdd_hist_MAR_var
+  fout_MAR->gdd_fut_MAR_var = gdd_fut_MAR_var
+  fout_MAR->rcm_hist_MAR_var = rcm_hist_MAR_var
+  fout_MAR->rcm_fut_MAR_var = rcm_fut_MAR_var
+  fout_MAR->av_MAR_99p = av_MAR_99p
+  fout_MAR->gdd_MAR_99p_rmse = gdd_MAR_99p_rmse
+  fout_MAR->rcm_MAR_99p_rmse = rcm_MAR_99p_rmse
+  fout_MAR->pav_MAR_99p = pav_MAR_99p
+  fout_MAR->rav_MAR_99p = rav_MAR_99p
+  fout_MAR->obs_MAR_99p_variance = obs_MAR_99p_variance
+  fout_MAR->gdd_MAR_99p_cc = gdd_MAR_99p_cc
+  fout_MAR->rcm_MAR_99p_cc = rcm_MAR_99p_cc
+  fout_MAR->obs_MAR_99p = obs_MAR_99p
+  fout_MAR->gdd_hist_MAR_99p = gdd_hist_MAR_99p
+  fout_MAR->gdd_fut_MAR_99p = gdd_fut_MAR_99p
+  fout_MAR->rcm_hist_MAR_99p = rcm_hist_MAR_99p
+  fout_MAR->rcm_fut_MAR_99p = rcm_fut_MAR_99p
+  fout_MAR->av_MAR_01p = av_MAR_01p
+  fout_MAR->gdd_MAR_01p_rmse = gdd_MAR_01p_rmse
+  fout_MAR->rcm_MAR_01p_rmse = rcm_MAR_01p_rmse
+  fout_MAR->pav_MAR_01p = pav_MAR_01p
+  fout_MAR->rav_MAR_01p = rav_MAR_01p
+  fout_MAR->obs_MAR_01p_variance = obs_MAR_01p_variance
+  fout_MAR->gdd_MAR_01p_cc = gdd_MAR_01p_cc
+  fout_MAR->rcm_MAR_01p_cc = rcm_MAR_01p_cc
+  fout_MAR->obs_MAR_01p = obs_MAR_01p
+  fout_MAR->gdd_hist_MAR_01p = gdd_hist_MAR_01p
+  fout_MAR->gdd_fut_MAR_01p = gdd_fut_MAR_01p
+  fout_MAR->rcm_hist_MAR_01p = rcm_hist_MAR_01p
+  fout_MAR->rcm_fut_MAR_01p = rcm_fut_MAR_01p
+
+  delete([/av_MAR_avg, gdd_MAR_avg_rmse, rcm_MAR_avg_rmse, pav_MAR_avg, rav_MAR_avg, obs_MAR_avg_variance, gdd_MAR_avg_cc, rcm_MAR_avg_cc, obs_MAR_avg, gdd_hist_MAR_avg, gdd_fut_MAR_avg, rcm_hist_MAR_avg, rcm_fut_MAR_avg, av_MAR_var, gdd_MAR_var_rmse, rcm_MAR_var_rmse, pav_MAR_var, rav_MAR_var, obs_MAR_var_variance, gdd_MAR_var_cc, rcm_MAR_var_cc, obs_MAR_var, gdd_hist_MAR_var, gdd_fut_MAR_var, rcm_hist_MAR_var, rcm_fut_MAR_var, av_MAR_99p, gdd_MAR_99p_rmse, rcm_MAR_99p_rmse, pav_MAR_99p, rav_MAR_99p, obs_MAR_99p_variance, gdd_MAR_99p_cc, rcm_MAR_99p_cc, obs_MAR_99p, gdd_hist_MAR_99p, gdd_fut_MAR_99p, rcm_hist_MAR_99p, rcm_fut_MAR_99p, av_MAR_01p, gdd_MAR_01p_rmse, rcm_MAR_01p_rmse, pav_MAR_01p, rav_MAR_01p, obs_MAR_01p_variance, gdd_MAR_01p_cc, rcm_MAR_01p_cc, obs_MAR_01p, gdd_hist_MAR_01p, gdd_fut_MAR_01p, rcm_hist_MAR_01p, rcm_fut_MAR_01p/])
+  delete(fout_MAR)
+
+; APR
+  print(systemfunc("date"))
+  print("APR")
+  rcm_APR_avg_rmse = rcm_hist_APR_avg
+  rcm_APR_avg_rmse = sqrt((rcm_hist_APR_avg - obs_APR_avg)^2)
+  rcm_APR_var_rmse = rcm_hist_APR_var
+  rcm_APR_var_rmse = sqrt((rcm_hist_APR_var - obs_APR_var)^2)
+  rcm_APR_99p_rmse = rcm_hist_APR_99p
+  rcm_APR_99p_rmse = sqrt((rcm_hist_APR_99p - obs_APR_99p)^2)
+  rcm_APR_01p_rmse = rcm_hist_APR_01p
+  rcm_APR_01p_rmse = sqrt((rcm_hist_APR_01p - obs_APR_01p)^2)
+
+  gdd_APR_avg_rmse = gdd_hist_APR_avg
+  gdd_APR_avg_rmse = sqrt((gdd_hist_APR_avg - obs_APR_avg)^2)
+  gdd_APR_var_rmse = gdd_hist_APR_var
+  gdd_APR_var_rmse = sqrt((gdd_hist_APR_var - obs_APR_var)^2)
+  gdd_APR_99p_rmse = gdd_hist_APR_99p
+  gdd_APR_99p_rmse = sqrt((gdd_hist_APR_99p - obs_APR_99p)^2)
+  gdd_APR_01p_rmse = gdd_hist_APR_01p
+  gdd_APR_01p_rmse = sqrt((gdd_hist_APR_01p - obs_APR_01p)^2)
+
+  av_APR_avg = gdd_APR_avg_rmse
+  av_APR_avg = gdd_APR_avg_rmse - rcm_APR_avg_rmse
+  av_APR_var = gdd_APR_var_rmse
+  av_APR_var = gdd_APR_var_rmse - rcm_APR_var_rmse
+  av_APR_99p = gdd_APR_99p_rmse
+  av_APR_99p = gdd_APR_99p_rmse - rcm_APR_99p_rmse
+  av_APR_01p = gdd_APR_01p_rmse
+  av_APR_01p = gdd_APR_01p_rmse - rcm_APR_01p_rmse
+
+  rcm_APR_avg_cc = rcm_fut_APR_avg
+  rcm_APR_avg_cc = rcm_fut_APR_avg - rcm_hist_APR_avg
+  rcm_APR_var_cc = rcm_fut_APR_var
+  rcm_APR_var_cc = rcm_fut_APR_var - rcm_hist_APR_var
+  rcm_APR_99p_cc = rcm_fut_APR_99p
+  rcm_APR_99p_cc = rcm_fut_APR_99p - rcm_hist_APR_99p
+  rcm_APR_01p_cc = rcm_fut_APR_01p
+  rcm_APR_01p_cc = rcm_fut_APR_01p - rcm_hist_APR_01p
+
+  gdd_APR_avg_cc = gdd_fut_APR_avg
+  gdd_APR_avg_cc = gdd_fut_APR_avg - gdd_hist_APR_avg
+  gdd_APR_var_cc = gdd_fut_APR_var
+  gdd_APR_var_cc = gdd_fut_APR_var - gdd_hist_APR_var
+  gdd_APR_99p_cc = gdd_fut_APR_99p
+  gdd_APR_99p_cc = gdd_fut_APR_99p - gdd_hist_APR_99p
+  gdd_APR_01p_cc = gdd_fut_APR_01p
+  gdd_APR_01p_cc = gdd_fut_APR_01p - gdd_hist_APR_01p
+
+  pav_APR_avg = rcm_APR_avg_cc
+  pav_APR_avg = rcm_APR_avg_cc - gdd_APR_avg_cc
+  pav_APR_var = rcm_APR_var_cc
+  pav_APR_var = rcm_APR_var_cc - gdd_APR_var_cc
+  pav_APR_99p = rcm_APR_99p_cc
+  pav_APR_99p = rcm_APR_99p_cc - gdd_APR_99p_cc
+  pav_APR_01p = rcm_APR_01p_cc
+  pav_APR_01p = rcm_APR_01p_cc - gdd_APR_01p_cc
+
+  obs_APR_avg_variance = dim_variance_n_Wrap(obs_APR_avg_yearly, 0)
+  obs_APR_var_variance = dim_variance_n_Wrap(obs_APR_var_yearly, 0)
+  obs_APR_99p_variance = dim_variance_n_Wrap(obs_APR_99p_yearly, 0)
+  obs_APR_01p_variance = dim_variance_n_Wrap(obs_APR_01p_yearly, 0)
+
+  delete([/obs_APR_avg_yearly, obs_APR_var_yearly, obs_APR_99p_yearly, obs_APR_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_APR_avg_variance_mask = obs_APR_avg_variance
+  obs_APR_avg_variance_mask = where(obs_APR_avg_variance_mask.eq.0, obs_APR_avg_variance_mask@_FillValue, obs_APR_avg_variance_mask)
+  delete(obs_APR_avg_variance)
+  obs_APR_avg_variance = obs_APR_avg_variance_mask
+  delete(obs_APR_avg_variance_mask)
+  obs_APR_var_variance_mask = obs_APR_var_variance
+  obs_APR_var_variance_mask = where(obs_APR_var_variance_mask.eq.0, obs_APR_var_variance_mask@_FillValue, obs_APR_var_variance_mask)
+  delete(obs_APR_var_variance)
+  obs_APR_var_variance = obs_APR_var_variance_mask
+  delete(obs_APR_var_variance_mask)
+  obs_APR_99p_variance_mask = obs_APR_99p_variance
+  obs_APR_99p_variance_mask = where(obs_APR_99p_variance_mask.eq.0, obs_APR_99p_variance_mask@_FillValue, obs_APR_99p_variance_mask)
+  delete(obs_APR_99p_variance)
+  obs_APR_99p_variance = obs_APR_99p_variance_mask
+  delete(obs_APR_99p_variance_mask)
+  obs_APR_01p_variance_mask = obs_APR_01p_variance
+  obs_APR_01p_variance_mask = where(obs_APR_01p_variance_mask.eq.0, obs_APR_01p_variance_mask@_FillValue, obs_APR_01p_variance_mask)
+  delete(obs_APR_01p_variance)
+  obs_APR_01p_variance = obs_APR_01p_variance_mask
+  delete(obs_APR_01p_variance_mask)
+
+  rav_APR_avg = av_APR_avg
+  rav_APR_avg = (av_APR_avg * abs(pav_APR_avg))/obs_APR_avg_variance
+  rav_APR_var = av_APR_var
+  rav_APR_var = (av_APR_var * abs(pav_APR_var))/obs_APR_var_variance
+  rav_APR_99p = av_APR_99p
+  rav_APR_99p = (av_APR_99p * abs(pav_APR_99p))/obs_APR_99p_variance
+  rav_APR_01p = av_APR_01p
+  rav_APR_01p = (av_APR_01p * abs(pav_APR_01p))/obs_APR_01p_variance
+
+  fout_APR = addfile(fout_name_APR, "c")
+  fout_APR->av_APR_avg = av_APR_avg
+  fout_APR->gdd_APR_avg_rmse = gdd_APR_avg_rmse
+  fout_APR->rcm_APR_avg_rmse = rcm_APR_avg_rmse
+  fout_APR->pav_APR_avg = pav_APR_avg
+  fout_APR->rav_APR_avg = rav_APR_avg
+  fout_APR->obs_APR_avg_variance = obs_APR_avg_variance
+  fout_APR->gdd_APR_avg_cc = gdd_APR_avg_cc
+  fout_APR->rcm_APR_avg_cc = rcm_APR_avg_cc
+  fout_APR->obs_APR_avg = obs_APR_avg
+  fout_APR->gdd_hist_APR_avg = gdd_hist_APR_avg
+  fout_APR->gdd_fut_APR_avg = gdd_fut_APR_avg
+  fout_APR->rcm_hist_APR_avg = rcm_hist_APR_avg
+  fout_APR->rcm_fut_APR_avg = rcm_fut_APR_avg
+  fout_APR->av_APR_var = av_APR_var
+  fout_APR->gdd_APR_var_rmse = gdd_APR_var_rmse
+  fout_APR->rcm_APR_var_rmse = rcm_APR_var_rmse
+  fout_APR->pav_APR_var = pav_APR_var
+  fout_APR->rav_APR_var = rav_APR_var
+  fout_APR->obs_APR_var_variance = obs_APR_var_variance
+  fout_APR->gdd_APR_var_cc = gdd_APR_var_cc
+  fout_APR->rcm_APR_var_cc = rcm_APR_var_cc
+  fout_APR->obs_APR_var = obs_APR_var
+  fout_APR->gdd_hist_APR_var = gdd_hist_APR_var
+  fout_APR->gdd_fut_APR_var = gdd_fut_APR_var
+  fout_APR->rcm_hist_APR_var = rcm_hist_APR_var
+  fout_APR->rcm_fut_APR_var = rcm_fut_APR_var
+  fout_APR->av_APR_99p = av_APR_99p
+  fout_APR->gdd_APR_99p_rmse = gdd_APR_99p_rmse
+  fout_APR->rcm_APR_99p_rmse = rcm_APR_99p_rmse
+  fout_APR->pav_APR_99p = pav_APR_99p
+  fout_APR->rav_APR_99p = rav_APR_99p
+  fout_APR->obs_APR_99p_variance = obs_APR_99p_variance
+  fout_APR->gdd_APR_99p_cc = gdd_APR_99p_cc
+  fout_APR->rcm_APR_99p_cc = rcm_APR_99p_cc
+  fout_APR->obs_APR_99p = obs_APR_99p
+  fout_APR->gdd_hist_APR_99p = gdd_hist_APR_99p
+  fout_APR->gdd_fut_APR_99p = gdd_fut_APR_99p
+  fout_APR->rcm_hist_APR_99p = rcm_hist_APR_99p
+  fout_APR->rcm_fut_APR_99p = rcm_fut_APR_99p
+  fout_APR->av_APR_01p = av_APR_01p
+  fout_APR->gdd_APR_01p_rmse = gdd_APR_01p_rmse
+  fout_APR->rcm_APR_01p_rmse = rcm_APR_01p_rmse
+  fout_APR->pav_APR_01p = pav_APR_01p
+  fout_APR->rav_APR_01p = rav_APR_01p
+  fout_APR->obs_APR_01p_variance = obs_APR_01p_variance
+  fout_APR->gdd_APR_01p_cc = gdd_APR_01p_cc
+  fout_APR->rcm_APR_01p_cc = rcm_APR_01p_cc
+  fout_APR->obs_APR_01p = obs_APR_01p
+  fout_APR->gdd_hist_APR_01p = gdd_hist_APR_01p
+  fout_APR->gdd_fut_APR_01p = gdd_fut_APR_01p
+  fout_APR->rcm_hist_APR_01p = rcm_hist_APR_01p
+  fout_APR->rcm_fut_APR_01p = rcm_fut_APR_01p
+
+  delete([/av_APR_avg, gdd_APR_avg_rmse, rcm_APR_avg_rmse, pav_APR_avg, rav_APR_avg, obs_APR_avg_variance, gdd_APR_avg_cc, rcm_APR_avg_cc, obs_APR_avg, gdd_hist_APR_avg, gdd_fut_APR_avg, rcm_hist_APR_avg, rcm_fut_APR_avg, av_APR_var, gdd_APR_var_rmse, rcm_APR_var_rmse, pav_APR_var, rav_APR_var, obs_APR_var_variance, gdd_APR_var_cc, rcm_APR_var_cc, obs_APR_var, gdd_hist_APR_var, gdd_fut_APR_var, rcm_hist_APR_var, rcm_fut_APR_var, av_APR_99p, gdd_APR_99p_rmse, rcm_APR_99p_rmse, pav_APR_99p, rav_APR_99p, obs_APR_99p_variance, gdd_APR_99p_cc, rcm_APR_99p_cc, obs_APR_99p, gdd_hist_APR_99p, gdd_fut_APR_99p, rcm_hist_APR_99p, rcm_fut_APR_99p, av_APR_01p, gdd_APR_01p_rmse, rcm_APR_01p_rmse, pav_APR_01p, rav_APR_01p, obs_APR_01p_variance, gdd_APR_01p_cc, rcm_APR_01p_cc, obs_APR_01p, gdd_hist_APR_01p, gdd_fut_APR_01p, rcm_hist_APR_01p, rcm_fut_APR_01p/])
+  delete(fout_APR)
+
+; MAY
+  print(systemfunc("date"))
+  print("MAY")
+  rcm_MAY_avg_rmse = rcm_hist_MAY_avg
+  rcm_MAY_avg_rmse = sqrt((rcm_hist_MAY_avg - obs_MAY_avg)^2)
+  rcm_MAY_var_rmse = rcm_hist_MAY_var
+  rcm_MAY_var_rmse = sqrt((rcm_hist_MAY_var - obs_MAY_var)^2)
+  rcm_MAY_99p_rmse = rcm_hist_MAY_99p
+  rcm_MAY_99p_rmse = sqrt((rcm_hist_MAY_99p - obs_MAY_99p)^2)
+  rcm_MAY_01p_rmse = rcm_hist_MAY_01p
+  rcm_MAY_01p_rmse = sqrt((rcm_hist_MAY_01p - obs_MAY_01p)^2)
+
+  gdd_MAY_avg_rmse = gdd_hist_MAY_avg
+  gdd_MAY_avg_rmse = sqrt((gdd_hist_MAY_avg - obs_MAY_avg)^2)
+  gdd_MAY_var_rmse = gdd_hist_MAY_var
+  gdd_MAY_var_rmse = sqrt((gdd_hist_MAY_var - obs_MAY_var)^2)
+  gdd_MAY_99p_rmse = gdd_hist_MAY_99p
+  gdd_MAY_99p_rmse = sqrt((gdd_hist_MAY_99p - obs_MAY_99p)^2)
+  gdd_MAY_01p_rmse = gdd_hist_MAY_01p
+  gdd_MAY_01p_rmse = sqrt((gdd_hist_MAY_01p - obs_MAY_01p)^2)
+
+  av_MAY_avg = gdd_MAY_avg_rmse
+  av_MAY_avg = gdd_MAY_avg_rmse - rcm_MAY_avg_rmse
+  av_MAY_var = gdd_MAY_var_rmse
+  av_MAY_var = gdd_MAY_var_rmse - rcm_MAY_var_rmse
+  av_MAY_99p = gdd_MAY_99p_rmse
+  av_MAY_99p = gdd_MAY_99p_rmse - rcm_MAY_99p_rmse
+  av_MAY_01p = gdd_MAY_01p_rmse
+  av_MAY_01p = gdd_MAY_01p_rmse - rcm_MAY_01p_rmse
+
+  rcm_MAY_avg_cc = rcm_fut_MAY_avg
+  rcm_MAY_avg_cc = rcm_fut_MAY_avg - rcm_hist_MAY_avg
+  rcm_MAY_var_cc = rcm_fut_MAY_var
+  rcm_MAY_var_cc = rcm_fut_MAY_var - rcm_hist_MAY_var
+  rcm_MAY_99p_cc = rcm_fut_MAY_99p
+  rcm_MAY_99p_cc = rcm_fut_MAY_99p - rcm_hist_MAY_99p
+  rcm_MAY_01p_cc = rcm_fut_MAY_01p
+  rcm_MAY_01p_cc = rcm_fut_MAY_01p - rcm_hist_MAY_01p
+
+  gdd_MAY_avg_cc = gdd_fut_MAY_avg
+  gdd_MAY_avg_cc = gdd_fut_MAY_avg - gdd_hist_MAY_avg
+  gdd_MAY_var_cc = gdd_fut_MAY_var
+  gdd_MAY_var_cc = gdd_fut_MAY_var - gdd_hist_MAY_var
+  gdd_MAY_99p_cc = gdd_fut_MAY_99p
+  gdd_MAY_99p_cc = gdd_fut_MAY_99p - gdd_hist_MAY_99p
+  gdd_MAY_01p_cc = gdd_fut_MAY_01p
+  gdd_MAY_01p_cc = gdd_fut_MAY_01p - gdd_hist_MAY_01p
+
+  pav_MAY_avg = rcm_MAY_avg_cc
+  pav_MAY_avg = rcm_MAY_avg_cc - gdd_MAY_avg_cc
+  pav_MAY_var = rcm_MAY_var_cc
+  pav_MAY_var = rcm_MAY_var_cc - gdd_MAY_var_cc
+  pav_MAY_99p = rcm_MAY_99p_cc
+  pav_MAY_99p = rcm_MAY_99p_cc - gdd_MAY_99p_cc
+  pav_MAY_01p = rcm_MAY_01p_cc
+  pav_MAY_01p = rcm_MAY_01p_cc - gdd_MAY_01p_cc
+
+  obs_MAY_avg_variance = dim_variance_n_Wrap(obs_MAY_avg_yearly, 0)
+  obs_MAY_var_variance = dim_variance_n_Wrap(obs_MAY_var_yearly, 0)
+  obs_MAY_99p_variance = dim_variance_n_Wrap(obs_MAY_99p_yearly, 0)
+  obs_MAY_01p_variance = dim_variance_n_Wrap(obs_MAY_01p_yearly, 0)
+
+  delete([/obs_MAY_avg_yearly, obs_MAY_var_yearly, obs_MAY_99p_yearly, obs_MAY_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_MAY_avg_variance_mask = obs_MAY_avg_variance
+  obs_MAY_avg_variance_mask = where(obs_MAY_avg_variance_mask.eq.0, obs_MAY_avg_variance_mask@_FillValue, obs_MAY_avg_variance_mask)
+  delete(obs_MAY_avg_variance)
+  obs_MAY_avg_variance = obs_MAY_avg_variance_mask
+  delete(obs_MAY_avg_variance_mask)
+  obs_MAY_var_variance_mask = obs_MAY_var_variance
+  obs_MAY_var_variance_mask = where(obs_MAY_var_variance_mask.eq.0, obs_MAY_var_variance_mask@_FillValue, obs_MAY_var_variance_mask)
+  delete(obs_MAY_var_variance)
+  obs_MAY_var_variance = obs_MAY_var_variance_mask
+  delete(obs_MAY_var_variance_mask)
+  obs_MAY_99p_variance_mask = obs_MAY_99p_variance
+  obs_MAY_99p_variance_mask = where(obs_MAY_99p_variance_mask.eq.0, obs_MAY_99p_variance_mask@_FillValue, obs_MAY_99p_variance_mask)
+  delete(obs_MAY_99p_variance)
+  obs_MAY_99p_variance = obs_MAY_99p_variance_mask
+  delete(obs_MAY_99p_variance_mask)
+  obs_MAY_01p_variance_mask = obs_MAY_01p_variance
+  obs_MAY_01p_variance_mask = where(obs_MAY_01p_variance_mask.eq.0, obs_MAY_01p_variance_mask@_FillValue, obs_MAY_01p_variance_mask)
+  delete(obs_MAY_01p_variance)
+  obs_MAY_01p_variance = obs_MAY_01p_variance_mask
+  delete(obs_MAY_01p_variance_mask)
+
+  rav_MAY_avg = av_MAY_avg
+  rav_MAY_avg = (av_MAY_avg * abs(pav_MAY_avg))/obs_MAY_avg_variance
+  rav_MAY_var = av_MAY_var
+  rav_MAY_var = (av_MAY_var * abs(pav_MAY_var))/obs_MAY_var_variance
+  rav_MAY_99p = av_MAY_99p
+  rav_MAY_99p = (av_MAY_99p * abs(pav_MAY_99p))/obs_MAY_99p_variance
+  rav_MAY_01p = av_MAY_01p
+  rav_MAY_01p = (av_MAY_01p * abs(pav_MAY_01p))/obs_MAY_01p_variance
+
+  fout_MAY = addfile(fout_name_MAY, "c")
+  fout_MAY->av_MAY_avg = av_MAY_avg
+  fout_MAY->gdd_MAY_avg_rmse = gdd_MAY_avg_rmse
+  fout_MAY->rcm_MAY_avg_rmse = rcm_MAY_avg_rmse
+  fout_MAY->pav_MAY_avg = pav_MAY_avg
+  fout_MAY->rav_MAY_avg = rav_MAY_avg
+  fout_MAY->obs_MAY_avg_variance = obs_MAY_avg_variance
+  fout_MAY->gdd_MAY_avg_cc = gdd_MAY_avg_cc
+  fout_MAY->rcm_MAY_avg_cc = rcm_MAY_avg_cc
+  fout_MAY->obs_MAY_avg = obs_MAY_avg
+  fout_MAY->gdd_hist_MAY_avg = gdd_hist_MAY_avg
+  fout_MAY->gdd_fut_MAY_avg = gdd_fut_MAY_avg
+  fout_MAY->rcm_hist_MAY_avg = rcm_hist_MAY_avg
+  fout_MAY->rcm_fut_MAY_avg = rcm_fut_MAY_avg
+  fout_MAY->av_MAY_var = av_MAY_var
+  fout_MAY->gdd_MAY_var_rmse = gdd_MAY_var_rmse
+  fout_MAY->rcm_MAY_var_rmse = rcm_MAY_var_rmse
+  fout_MAY->pav_MAY_var = pav_MAY_var
+  fout_MAY->rav_MAY_var = rav_MAY_var
+  fout_MAY->obs_MAY_var_variance = obs_MAY_var_variance
+  fout_MAY->gdd_MAY_var_cc = gdd_MAY_var_cc
+  fout_MAY->rcm_MAY_var_cc = rcm_MAY_var_cc
+  fout_MAY->obs_MAY_var = obs_MAY_var
+  fout_MAY->gdd_hist_MAY_var = gdd_hist_MAY_var
+  fout_MAY->gdd_fut_MAY_var = gdd_fut_MAY_var
+  fout_MAY->rcm_hist_MAY_var = rcm_hist_MAY_var
+  fout_MAY->rcm_fut_MAY_var = rcm_fut_MAY_var
+  fout_MAY->av_MAY_99p = av_MAY_99p
+  fout_MAY->gdd_MAY_99p_rmse = gdd_MAY_99p_rmse
+  fout_MAY->rcm_MAY_99p_rmse = rcm_MAY_99p_rmse
+  fout_MAY->pav_MAY_99p = pav_MAY_99p
+  fout_MAY->rav_MAY_99p = rav_MAY_99p
+  fout_MAY->obs_MAY_99p_variance = obs_MAY_99p_variance
+  fout_MAY->gdd_MAY_99p_cc = gdd_MAY_99p_cc
+  fout_MAY->rcm_MAY_99p_cc = rcm_MAY_99p_cc
+  fout_MAY->obs_MAY_99p = obs_MAY_99p
+  fout_MAY->gdd_hist_MAY_99p = gdd_hist_MAY_99p
+  fout_MAY->gdd_fut_MAY_99p = gdd_fut_MAY_99p
+  fout_MAY->rcm_hist_MAY_99p = rcm_hist_MAY_99p
+  fout_MAY->rcm_fut_MAY_99p = rcm_fut_MAY_99p
+  fout_MAY->av_MAY_01p = av_MAY_01p
+  fout_MAY->gdd_MAY_01p_rmse = gdd_MAY_01p_rmse
+  fout_MAY->rcm_MAY_01p_rmse = rcm_MAY_01p_rmse
+  fout_MAY->pav_MAY_01p = pav_MAY_01p
+  fout_MAY->rav_MAY_01p = rav_MAY_01p
+  fout_MAY->obs_MAY_01p_variance = obs_MAY_01p_variance
+  fout_MAY->gdd_MAY_01p_cc = gdd_MAY_01p_cc
+  fout_MAY->rcm_MAY_01p_cc = rcm_MAY_01p_cc
+  fout_MAY->obs_MAY_01p = obs_MAY_01p
+  fout_MAY->gdd_hist_MAY_01p = gdd_hist_MAY_01p
+  fout_MAY->gdd_fut_MAY_01p = gdd_fut_MAY_01p
+  fout_MAY->rcm_hist_MAY_01p = rcm_hist_MAY_01p
+  fout_MAY->rcm_fut_MAY_01p = rcm_fut_MAY_01p
+
+  delete([/av_MAY_avg, gdd_MAY_avg_rmse, rcm_MAY_avg_rmse, pav_MAY_avg, rav_MAY_avg, obs_MAY_avg_variance, gdd_MAY_avg_cc, rcm_MAY_avg_cc, obs_MAY_avg, gdd_hist_MAY_avg, gdd_fut_MAY_avg, rcm_hist_MAY_avg, rcm_fut_MAY_avg, av_MAY_var, gdd_MAY_var_rmse, rcm_MAY_var_rmse, pav_MAY_var, rav_MAY_var, obs_MAY_var_variance, gdd_MAY_var_cc, rcm_MAY_var_cc, obs_MAY_var, gdd_hist_MAY_var, gdd_fut_MAY_var, rcm_hist_MAY_var, rcm_fut_MAY_var, av_MAY_99p, gdd_MAY_99p_rmse, rcm_MAY_99p_rmse, pav_MAY_99p, rav_MAY_99p, obs_MAY_99p_variance, gdd_MAY_99p_cc, rcm_MAY_99p_cc, obs_MAY_99p, gdd_hist_MAY_99p, gdd_fut_MAY_99p, rcm_hist_MAY_99p, rcm_fut_MAY_99p, av_MAY_01p, gdd_MAY_01p_rmse, rcm_MAY_01p_rmse, pav_MAY_01p, rav_MAY_01p, obs_MAY_01p_variance, gdd_MAY_01p_cc, rcm_MAY_01p_cc, obs_MAY_01p, gdd_hist_MAY_01p, gdd_fut_MAY_01p, rcm_hist_MAY_01p, rcm_fut_MAY_01p/])
+  delete(fout_MAY)
+
+; JUN
+  print(systemfunc("date"))
+  print("JUN")
+  rcm_JUN_avg_rmse = rcm_hist_JUN_avg
+  rcm_JUN_avg_rmse = sqrt((rcm_hist_JUN_avg - obs_JUN_avg)^2)
+  rcm_JUN_var_rmse = rcm_hist_JUN_var
+  rcm_JUN_var_rmse = sqrt((rcm_hist_JUN_var - obs_JUN_var)^2)
+  rcm_JUN_99p_rmse = rcm_hist_JUN_99p
+  rcm_JUN_99p_rmse = sqrt((rcm_hist_JUN_99p - obs_JUN_99p)^2)
+  rcm_JUN_01p_rmse = rcm_hist_JUN_01p
+  rcm_JUN_01p_rmse = sqrt((rcm_hist_JUN_01p - obs_JUN_01p)^2)
+
+  gdd_JUN_avg_rmse = gdd_hist_JUN_avg
+  gdd_JUN_avg_rmse = sqrt((gdd_hist_JUN_avg - obs_JUN_avg)^2)
+  gdd_JUN_var_rmse = gdd_hist_JUN_var
+  gdd_JUN_var_rmse = sqrt((gdd_hist_JUN_var - obs_JUN_var)^2)
+  gdd_JUN_99p_rmse = gdd_hist_JUN_99p
+  gdd_JUN_99p_rmse = sqrt((gdd_hist_JUN_99p - obs_JUN_99p)^2)
+  gdd_JUN_01p_rmse = gdd_hist_JUN_01p
+  gdd_JUN_01p_rmse = sqrt((gdd_hist_JUN_01p - obs_JUN_01p)^2)
+
+  av_JUN_avg = gdd_JUN_avg_rmse
+  av_JUN_avg = gdd_JUN_avg_rmse - rcm_JUN_avg_rmse
+  av_JUN_var = gdd_JUN_var_rmse
+  av_JUN_var = gdd_JUN_var_rmse - rcm_JUN_var_rmse
+  av_JUN_99p = gdd_JUN_99p_rmse
+  av_JUN_99p = gdd_JUN_99p_rmse - rcm_JUN_99p_rmse
+  av_JUN_01p = gdd_JUN_01p_rmse
+  av_JUN_01p = gdd_JUN_01p_rmse - rcm_JUN_01p_rmse
+
+  rcm_JUN_avg_cc = rcm_fut_JUN_avg
+  rcm_JUN_avg_cc = rcm_fut_JUN_avg - rcm_hist_JUN_avg
+  rcm_JUN_var_cc = rcm_fut_JUN_var
+  rcm_JUN_var_cc = rcm_fut_JUN_var - rcm_hist_JUN_var
+  rcm_JUN_99p_cc = rcm_fut_JUN_99p
+  rcm_JUN_99p_cc = rcm_fut_JUN_99p - rcm_hist_JUN_99p
+  rcm_JUN_01p_cc = rcm_fut_JUN_01p
+  rcm_JUN_01p_cc = rcm_fut_JUN_01p - rcm_hist_JUN_01p
+
+  gdd_JUN_avg_cc = gdd_fut_JUN_avg
+  gdd_JUN_avg_cc = gdd_fut_JUN_avg - gdd_hist_JUN_avg
+  gdd_JUN_var_cc = gdd_fut_JUN_var
+  gdd_JUN_var_cc = gdd_fut_JUN_var - gdd_hist_JUN_var
+  gdd_JUN_99p_cc = gdd_fut_JUN_99p
+  gdd_JUN_99p_cc = gdd_fut_JUN_99p - gdd_hist_JUN_99p
+  gdd_JUN_01p_cc = gdd_fut_JUN_01p
+  gdd_JUN_01p_cc = gdd_fut_JUN_01p - gdd_hist_JUN_01p
+
+  pav_JUN_avg = rcm_JUN_avg_cc
+  pav_JUN_avg = rcm_JUN_avg_cc - gdd_JUN_avg_cc
+  pav_JUN_var = rcm_JUN_var_cc
+  pav_JUN_var = rcm_JUN_var_cc - gdd_JUN_var_cc
+  pav_JUN_99p = rcm_JUN_99p_cc
+  pav_JUN_99p = rcm_JUN_99p_cc - gdd_JUN_99p_cc
+  pav_JUN_01p = rcm_JUN_01p_cc
+  pav_JUN_01p = rcm_JUN_01p_cc - gdd_JUN_01p_cc
+
+  obs_JUN_avg_variance = dim_variance_n_Wrap(obs_JUN_avg_yearly, 0)
+  obs_JUN_var_variance = dim_variance_n_Wrap(obs_JUN_var_yearly, 0)
+  obs_JUN_99p_variance = dim_variance_n_Wrap(obs_JUN_99p_yearly, 0)
+  obs_JUN_01p_variance = dim_variance_n_Wrap(obs_JUN_01p_yearly, 0)
+
+  delete([/obs_JUN_avg_yearly, obs_JUN_var_yearly, obs_JUN_99p_yearly, obs_JUN_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_JUN_avg_variance_mask = obs_JUN_avg_variance
+  obs_JUN_avg_variance_mask = where(obs_JUN_avg_variance_mask.eq.0, obs_JUN_avg_variance_mask@_FillValue, obs_JUN_avg_variance_mask)
+  delete(obs_JUN_avg_variance)
+  obs_JUN_avg_variance = obs_JUN_avg_variance_mask
+  delete(obs_JUN_avg_variance_mask)
+  obs_JUN_var_variance_mask = obs_JUN_var_variance
+  obs_JUN_var_variance_mask = where(obs_JUN_var_variance_mask.eq.0, obs_JUN_var_variance_mask@_FillValue, obs_JUN_var_variance_mask)
+  delete(obs_JUN_var_variance)
+  obs_JUN_var_variance = obs_JUN_var_variance_mask
+  delete(obs_JUN_var_variance_mask)
+  obs_JUN_99p_variance_mask = obs_JUN_99p_variance
+  obs_JUN_99p_variance_mask = where(obs_JUN_99p_variance_mask.eq.0, obs_JUN_99p_variance_mask@_FillValue, obs_JUN_99p_variance_mask)
+  delete(obs_JUN_99p_variance)
+  obs_JUN_99p_variance = obs_JUN_99p_variance_mask
+  delete(obs_JUN_99p_variance_mask)
+  obs_JUN_01p_variance_mask = obs_JUN_01p_variance
+  obs_JUN_01p_variance_mask = where(obs_JUN_01p_variance_mask.eq.0, obs_JUN_01p_variance_mask@_FillValue, obs_JUN_01p_variance_mask)
+  delete(obs_JUN_01p_variance)
+  obs_JUN_01p_variance = obs_JUN_01p_variance_mask
+  delete(obs_JUN_01p_variance_mask)
+
+  rav_JUN_avg = av_JUN_avg
+  rav_JUN_avg = (av_JUN_avg * abs(pav_JUN_avg))/obs_JUN_avg_variance
+  rav_JUN_var = av_JUN_var
+  rav_JUN_var = (av_JUN_var * abs(pav_JUN_var))/obs_JUN_var_variance
+  rav_JUN_99p = av_JUN_99p
+  rav_JUN_99p = (av_JUN_99p * abs(pav_JUN_99p))/obs_JUN_99p_variance
+  rav_JUN_01p = av_JUN_01p
+  rav_JUN_01p = (av_JUN_01p * abs(pav_JUN_01p))/obs_JUN_01p_variance
+
+  fout_JUN = addfile(fout_name_JUN, "c")
+  fout_JUN->av_JUN_avg = av_JUN_avg
+  fout_JUN->gdd_JUN_avg_rmse = gdd_JUN_avg_rmse
+  fout_JUN->rcm_JUN_avg_rmse = rcm_JUN_avg_rmse
+  fout_JUN->pav_JUN_avg = pav_JUN_avg
+  fout_JUN->rav_JUN_avg = rav_JUN_avg
+  fout_JUN->obs_JUN_avg_variance = obs_JUN_avg_variance
+  fout_JUN->gdd_JUN_avg_cc = gdd_JUN_avg_cc
+  fout_JUN->rcm_JUN_avg_cc = rcm_JUN_avg_cc
+  fout_JUN->obs_JUN_avg = obs_JUN_avg
+  fout_JUN->gdd_hist_JUN_avg = gdd_hist_JUN_avg
+  fout_JUN->gdd_fut_JUN_avg = gdd_fut_JUN_avg
+  fout_JUN->rcm_hist_JUN_avg = rcm_hist_JUN_avg
+  fout_JUN->rcm_fut_JUN_avg = rcm_fut_JUN_avg
+  fout_JUN->av_JUN_var = av_JUN_var
+  fout_JUN->gdd_JUN_var_rmse = gdd_JUN_var_rmse
+  fout_JUN->rcm_JUN_var_rmse = rcm_JUN_var_rmse
+  fout_JUN->pav_JUN_var = pav_JUN_var
+  fout_JUN->rav_JUN_var = rav_JUN_var
+  fout_JUN->obs_JUN_var_variance = obs_JUN_var_variance
+  fout_JUN->gdd_JUN_var_cc = gdd_JUN_var_cc
+  fout_JUN->rcm_JUN_var_cc = rcm_JUN_var_cc
+  fout_JUN->obs_JUN_var = obs_JUN_var
+  fout_JUN->gdd_hist_JUN_var = gdd_hist_JUN_var
+  fout_JUN->gdd_fut_JUN_var = gdd_fut_JUN_var
+  fout_JUN->rcm_hist_JUN_var = rcm_hist_JUN_var
+  fout_JUN->rcm_fut_JUN_var = rcm_fut_JUN_var
+  fout_JUN->av_JUN_99p = av_JUN_99p
+  fout_JUN->gdd_JUN_99p_rmse = gdd_JUN_99p_rmse
+  fout_JUN->rcm_JUN_99p_rmse = rcm_JUN_99p_rmse
+  fout_JUN->pav_JUN_99p = pav_JUN_99p
+  fout_JUN->rav_JUN_99p = rav_JUN_99p
+  fout_JUN->obs_JUN_99p_variance = obs_JUN_99p_variance
+  fout_JUN->gdd_JUN_99p_cc = gdd_JUN_99p_cc
+  fout_JUN->rcm_JUN_99p_cc = rcm_JUN_99p_cc
+  fout_JUN->obs_JUN_99p = obs_JUN_99p
+  fout_JUN->gdd_hist_JUN_99p = gdd_hist_JUN_99p
+  fout_JUN->gdd_fut_JUN_99p = gdd_fut_JUN_99p
+  fout_JUN->rcm_hist_JUN_99p = rcm_hist_JUN_99p
+  fout_JUN->rcm_fut_JUN_99p = rcm_fut_JUN_99p
+  fout_JUN->av_JUN_01p = av_JUN_01p
+  fout_JUN->gdd_JUN_01p_rmse = gdd_JUN_01p_rmse
+  fout_JUN->rcm_JUN_01p_rmse = rcm_JUN_01p_rmse
+  fout_JUN->pav_JUN_01p = pav_JUN_01p
+  fout_JUN->rav_JUN_01p = rav_JUN_01p
+  fout_JUN->obs_JUN_01p_variance = obs_JUN_01p_variance
+  fout_JUN->gdd_JUN_01p_cc = gdd_JUN_01p_cc
+  fout_JUN->rcm_JUN_01p_cc = rcm_JUN_01p_cc
+  fout_JUN->obs_JUN_01p = obs_JUN_01p
+  fout_JUN->gdd_hist_JUN_01p = gdd_hist_JUN_01p
+  fout_JUN->gdd_fut_JUN_01p = gdd_fut_JUN_01p
+  fout_JUN->rcm_hist_JUN_01p = rcm_hist_JUN_01p
+  fout_JUN->rcm_fut_JUN_01p = rcm_fut_JUN_01p
+
+  delete([/av_JUN_avg, gdd_JUN_avg_rmse, rcm_JUN_avg_rmse, pav_JUN_avg, rav_JUN_avg, obs_JUN_avg_variance, gdd_JUN_avg_cc, rcm_JUN_avg_cc, obs_JUN_avg, gdd_hist_JUN_avg, gdd_fut_JUN_avg, rcm_hist_JUN_avg, rcm_fut_JUN_avg, av_JUN_var, gdd_JUN_var_rmse, rcm_JUN_var_rmse, pav_JUN_var, rav_JUN_var, obs_JUN_var_variance, gdd_JUN_var_cc, rcm_JUN_var_cc, obs_JUN_var, gdd_hist_JUN_var, gdd_fut_JUN_var, rcm_hist_JUN_var, rcm_fut_JUN_var, av_JUN_99p, gdd_JUN_99p_rmse, rcm_JUN_99p_rmse, pav_JUN_99p, rav_JUN_99p, obs_JUN_99p_variance, gdd_JUN_99p_cc, rcm_JUN_99p_cc, obs_JUN_99p, gdd_hist_JUN_99p, gdd_fut_JUN_99p, rcm_hist_JUN_99p, rcm_fut_JUN_99p, av_JUN_01p, gdd_JUN_01p_rmse, rcm_JUN_01p_rmse, pav_JUN_01p, rav_JUN_01p, obs_JUN_01p_variance, gdd_JUN_01p_cc, rcm_JUN_01p_cc, obs_JUN_01p, gdd_hist_JUN_01p, gdd_fut_JUN_01p, rcm_hist_JUN_01p, rcm_fut_JUN_01p/])
+  delete(fout_JUN)
+
+; JUL
+  print(systemfunc("date"))
+  print("JUL")
+  rcm_JUL_avg_rmse = rcm_hist_JUL_avg
+  rcm_JUL_avg_rmse = sqrt((rcm_hist_JUL_avg - obs_JUL_avg)^2)
+  rcm_JUL_var_rmse = rcm_hist_JUL_var
+  rcm_JUL_var_rmse = sqrt((rcm_hist_JUL_var - obs_JUL_var)^2)
+  rcm_JUL_99p_rmse = rcm_hist_JUL_99p
+  rcm_JUL_99p_rmse = sqrt((rcm_hist_JUL_99p - obs_JUL_99p)^2)
+  rcm_JUL_01p_rmse = rcm_hist_JUL_01p
+  rcm_JUL_01p_rmse = sqrt((rcm_hist_JUL_01p - obs_JUL_01p)^2)
+
+  gdd_JUL_avg_rmse = gdd_hist_JUL_avg
+  gdd_JUL_avg_rmse = sqrt((gdd_hist_JUL_avg - obs_JUL_avg)^2)
+  gdd_JUL_var_rmse = gdd_hist_JUL_var
+  gdd_JUL_var_rmse = sqrt((gdd_hist_JUL_var - obs_JUL_var)^2)
+  gdd_JUL_99p_rmse = gdd_hist_JUL_99p
+  gdd_JUL_99p_rmse = sqrt((gdd_hist_JUL_99p - obs_JUL_99p)^2)
+  gdd_JUL_01p_rmse = gdd_hist_JUL_01p
+  gdd_JUL_01p_rmse = sqrt((gdd_hist_JUL_01p - obs_JUL_01p)^2)
+
+  av_JUL_avg = gdd_JUL_avg_rmse
+  av_JUL_avg = gdd_JUL_avg_rmse - rcm_JUL_avg_rmse
+  av_JUL_var = gdd_JUL_var_rmse
+  av_JUL_var = gdd_JUL_var_rmse - rcm_JUL_var_rmse
+  av_JUL_99p = gdd_JUL_99p_rmse
+  av_JUL_99p = gdd_JUL_99p_rmse - rcm_JUL_99p_rmse
+  av_JUL_01p = gdd_JUL_01p_rmse
+  av_JUL_01p = gdd_JUL_01p_rmse - rcm_JUL_01p_rmse
+
+  rcm_JUL_avg_cc = rcm_fut_JUL_avg
+  rcm_JUL_avg_cc = rcm_fut_JUL_avg - rcm_hist_JUL_avg
+  rcm_JUL_var_cc = rcm_fut_JUL_var
+  rcm_JUL_var_cc = rcm_fut_JUL_var - rcm_hist_JUL_var
+  rcm_JUL_99p_cc = rcm_fut_JUL_99p
+  rcm_JUL_99p_cc = rcm_fut_JUL_99p - rcm_hist_JUL_99p
+  rcm_JUL_01p_cc = rcm_fut_JUL_01p
+  rcm_JUL_01p_cc = rcm_fut_JUL_01p - rcm_hist_JUL_01p
+
+  gdd_JUL_avg_cc = gdd_fut_JUL_avg
+  gdd_JUL_avg_cc = gdd_fut_JUL_avg - gdd_hist_JUL_avg
+  gdd_JUL_var_cc = gdd_fut_JUL_var
+  gdd_JUL_var_cc = gdd_fut_JUL_var - gdd_hist_JUL_var
+  gdd_JUL_99p_cc = gdd_fut_JUL_99p
+  gdd_JUL_99p_cc = gdd_fut_JUL_99p - gdd_hist_JUL_99p
+  gdd_JUL_01p_cc = gdd_fut_JUL_01p
+  gdd_JUL_01p_cc = gdd_fut_JUL_01p - gdd_hist_JUL_01p
+
+  pav_JUL_avg = rcm_JUL_avg_cc
+  pav_JUL_avg = rcm_JUL_avg_cc - gdd_JUL_avg_cc
+  pav_JUL_var = rcm_JUL_var_cc
+  pav_JUL_var = rcm_JUL_var_cc - gdd_JUL_var_cc
+  pav_JUL_99p = rcm_JUL_99p_cc
+  pav_JUL_99p = rcm_JUL_99p_cc - gdd_JUL_99p_cc
+  pav_JUL_01p = rcm_JUL_01p_cc
+  pav_JUL_01p = rcm_JUL_01p_cc - gdd_JUL_01p_cc
+
+  obs_JUL_avg_variance = dim_variance_n_Wrap(obs_JUL_avg_yearly, 0)
+  obs_JUL_var_variance = dim_variance_n_Wrap(obs_JUL_var_yearly, 0)
+  obs_JUL_99p_variance = dim_variance_n_Wrap(obs_JUL_99p_yearly, 0)
+  obs_JUL_01p_variance = dim_variance_n_Wrap(obs_JUL_01p_yearly, 0)
+
+  delete([/obs_JUL_avg_yearly, obs_JUL_var_yearly, obs_JUL_99p_yearly, obs_JUL_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_JUL_avg_variance_mask = obs_JUL_avg_variance
+  obs_JUL_avg_variance_mask = where(obs_JUL_avg_variance_mask.eq.0, obs_JUL_avg_variance_mask@_FillValue, obs_JUL_avg_variance_mask)
+  delete(obs_JUL_avg_variance)
+  obs_JUL_avg_variance = obs_JUL_avg_variance_mask
+  delete(obs_JUL_avg_variance_mask)
+  obs_JUL_var_variance_mask = obs_JUL_var_variance
+  obs_JUL_var_variance_mask = where(obs_JUL_var_variance_mask.eq.0, obs_JUL_var_variance_mask@_FillValue, obs_JUL_var_variance_mask)
+  delete(obs_JUL_var_variance)
+  obs_JUL_var_variance = obs_JUL_var_variance_mask
+  delete(obs_JUL_var_variance_mask)
+  obs_JUL_99p_variance_mask = obs_JUL_99p_variance
+  obs_JUL_99p_variance_mask = where(obs_JUL_99p_variance_mask.eq.0, obs_JUL_99p_variance_mask@_FillValue, obs_JUL_99p_variance_mask)
+  delete(obs_JUL_99p_variance)
+  obs_JUL_99p_variance = obs_JUL_99p_variance_mask
+  delete(obs_JUL_99p_variance_mask)
+  obs_JUL_01p_variance_mask = obs_JUL_01p_variance
+  obs_JUL_01p_variance_mask = where(obs_JUL_01p_variance_mask.eq.0, obs_JUL_01p_variance_mask@_FillValue, obs_JUL_01p_variance_mask)
+  delete(obs_JUL_01p_variance)
+  obs_JUL_01p_variance = obs_JUL_01p_variance_mask
+  delete(obs_JUL_01p_variance_mask)
+
+  rav_JUL_avg = av_JUL_avg
+  rav_JUL_avg = (av_JUL_avg * abs(pav_JUL_avg))/obs_JUL_avg_variance
+  rav_JUL_var = av_JUL_var
+  rav_JUL_var = (av_JUL_var * abs(pav_JUL_var))/obs_JUL_var_variance
+  rav_JUL_99p = av_JUL_99p
+  rav_JUL_99p = (av_JUL_99p * abs(pav_JUL_99p))/obs_JUL_99p_variance
+  rav_JUL_01p = av_JUL_01p
+  rav_JUL_01p = (av_JUL_01p * abs(pav_JUL_01p))/obs_JUL_01p_variance
+
+  fout_JUL = addfile(fout_name_JUL, "c")
+  fout_JUL->av_JUL_avg = av_JUL_avg
+  fout_JUL->gdd_JUL_avg_rmse = gdd_JUL_avg_rmse
+  fout_JUL->rcm_JUL_avg_rmse = rcm_JUL_avg_rmse
+  fout_JUL->pav_JUL_avg = pav_JUL_avg
+  fout_JUL->rav_JUL_avg = rav_JUL_avg
+  fout_JUL->obs_JUL_avg_variance = obs_JUL_avg_variance
+  fout_JUL->gdd_JUL_avg_cc = gdd_JUL_avg_cc
+  fout_JUL->rcm_JUL_avg_cc = rcm_JUL_avg_cc
+  fout_JUL->obs_JUL_avg = obs_JUL_avg
+  fout_JUL->gdd_hist_JUL_avg = gdd_hist_JUL_avg
+  fout_JUL->gdd_fut_JUL_avg = gdd_fut_JUL_avg
+  fout_JUL->rcm_hist_JUL_avg = rcm_hist_JUL_avg
+  fout_JUL->rcm_fut_JUL_avg = rcm_fut_JUL_avg
+  fout_JUL->av_JUL_var = av_JUL_var
+  fout_JUL->gdd_JUL_var_rmse = gdd_JUL_var_rmse
+  fout_JUL->rcm_JUL_var_rmse = rcm_JUL_var_rmse
+  fout_JUL->pav_JUL_var = pav_JUL_var
+  fout_JUL->rav_JUL_var = rav_JUL_var
+  fout_JUL->obs_JUL_var_variance = obs_JUL_var_variance
+  fout_JUL->gdd_JUL_var_cc = gdd_JUL_var_cc
+  fout_JUL->rcm_JUL_var_cc = rcm_JUL_var_cc
+  fout_JUL->obs_JUL_var = obs_JUL_var
+  fout_JUL->gdd_hist_JUL_var = gdd_hist_JUL_var
+  fout_JUL->gdd_fut_JUL_var = gdd_fut_JUL_var
+  fout_JUL->rcm_hist_JUL_var = rcm_hist_JUL_var
+  fout_JUL->rcm_fut_JUL_var = rcm_fut_JUL_var
+  fout_JUL->av_JUL_99p = av_JUL_99p
+  fout_JUL->gdd_JUL_99p_rmse = gdd_JUL_99p_rmse
+  fout_JUL->rcm_JUL_99p_rmse = rcm_JUL_99p_rmse
+  fout_JUL->pav_JUL_99p = pav_JUL_99p
+  fout_JUL->rav_JUL_99p = rav_JUL_99p
+  fout_JUL->obs_JUL_99p_variance = obs_JUL_99p_variance
+  fout_JUL->gdd_JUL_99p_cc = gdd_JUL_99p_cc
+  fout_JUL->rcm_JUL_99p_cc = rcm_JUL_99p_cc
+  fout_JUL->obs_JUL_99p = obs_JUL_99p
+  fout_JUL->gdd_hist_JUL_99p = gdd_hist_JUL_99p
+  fout_JUL->gdd_fut_JUL_99p = gdd_fut_JUL_99p
+  fout_JUL->rcm_hist_JUL_99p = rcm_hist_JUL_99p
+  fout_JUL->rcm_fut_JUL_99p = rcm_fut_JUL_99p
+  fout_JUL->av_JUL_01p = av_JUL_01p
+  fout_JUL->gdd_JUL_01p_rmse = gdd_JUL_01p_rmse
+  fout_JUL->rcm_JUL_01p_rmse = rcm_JUL_01p_rmse
+  fout_JUL->pav_JUL_01p = pav_JUL_01p
+  fout_JUL->rav_JUL_01p = rav_JUL_01p
+  fout_JUL->obs_JUL_01p_variance = obs_JUL_01p_variance
+  fout_JUL->gdd_JUL_01p_cc = gdd_JUL_01p_cc
+  fout_JUL->rcm_JUL_01p_cc = rcm_JUL_01p_cc
+  fout_JUL->obs_JUL_01p = obs_JUL_01p
+  fout_JUL->gdd_hist_JUL_01p = gdd_hist_JUL_01p
+  fout_JUL->gdd_fut_JUL_01p = gdd_fut_JUL_01p
+  fout_JUL->rcm_hist_JUL_01p = rcm_hist_JUL_01p
+  fout_JUL->rcm_fut_JUL_01p = rcm_fut_JUL_01p
+
+  delete([/av_JUL_avg, gdd_JUL_avg_rmse, rcm_JUL_avg_rmse, pav_JUL_avg, rav_JUL_avg, obs_JUL_avg_variance, gdd_JUL_avg_cc, rcm_JUL_avg_cc, obs_JUL_avg, gdd_hist_JUL_avg, gdd_fut_JUL_avg, rcm_hist_JUL_avg, rcm_fut_JUL_avg, av_JUL_var, gdd_JUL_var_rmse, rcm_JUL_var_rmse, pav_JUL_var, rav_JUL_var, obs_JUL_var_variance, gdd_JUL_var_cc, rcm_JUL_var_cc, obs_JUL_var, gdd_hist_JUL_var, gdd_fut_JUL_var, rcm_hist_JUL_var, rcm_fut_JUL_var, av_JUL_99p, gdd_JUL_99p_rmse, rcm_JUL_99p_rmse, pav_JUL_99p, rav_JUL_99p, obs_JUL_99p_variance, gdd_JUL_99p_cc, rcm_JUL_99p_cc, obs_JUL_99p, gdd_hist_JUL_99p, gdd_fut_JUL_99p, rcm_hist_JUL_99p, rcm_fut_JUL_99p, av_JUL_01p, gdd_JUL_01p_rmse, rcm_JUL_01p_rmse, pav_JUL_01p, rav_JUL_01p, obs_JUL_01p_variance, gdd_JUL_01p_cc, rcm_JUL_01p_cc, obs_JUL_01p, gdd_hist_JUL_01p, gdd_fut_JUL_01p, rcm_hist_JUL_01p, rcm_fut_JUL_01p/])
+  delete(fout_JUL)
+
+; AUG
+  print(systemfunc("date"))
+  print("AUG")
+  rcm_AUG_avg_rmse = rcm_hist_AUG_avg
+  rcm_AUG_avg_rmse = sqrt((rcm_hist_AUG_avg - obs_AUG_avg)^2)
+  rcm_AUG_var_rmse = rcm_hist_AUG_var
+  rcm_AUG_var_rmse = sqrt((rcm_hist_AUG_var - obs_AUG_var)^2)
+  rcm_AUG_99p_rmse = rcm_hist_AUG_99p
+  rcm_AUG_99p_rmse = sqrt((rcm_hist_AUG_99p - obs_AUG_99p)^2)
+  rcm_AUG_01p_rmse = rcm_hist_AUG_01p
+  rcm_AUG_01p_rmse = sqrt((rcm_hist_AUG_01p - obs_AUG_01p)^2)
+
+  gdd_AUG_avg_rmse = gdd_hist_AUG_avg
+  gdd_AUG_avg_rmse = sqrt((gdd_hist_AUG_avg - obs_AUG_avg)^2)
+  gdd_AUG_var_rmse = gdd_hist_AUG_var
+  gdd_AUG_var_rmse = sqrt((gdd_hist_AUG_var - obs_AUG_var)^2)
+  gdd_AUG_99p_rmse = gdd_hist_AUG_99p
+  gdd_AUG_99p_rmse = sqrt((gdd_hist_AUG_99p - obs_AUG_99p)^2)
+  gdd_AUG_01p_rmse = gdd_hist_AUG_01p
+  gdd_AUG_01p_rmse = sqrt((gdd_hist_AUG_01p - obs_AUG_01p)^2)
+
+  av_AUG_avg = gdd_AUG_avg_rmse
+  av_AUG_avg = gdd_AUG_avg_rmse - rcm_AUG_avg_rmse
+  av_AUG_var = gdd_AUG_var_rmse
+  av_AUG_var = gdd_AUG_var_rmse - rcm_AUG_var_rmse
+  av_AUG_99p = gdd_AUG_99p_rmse
+  av_AUG_99p = gdd_AUG_99p_rmse - rcm_AUG_99p_rmse
+  av_AUG_01p = gdd_AUG_01p_rmse
+  av_AUG_01p = gdd_AUG_01p_rmse - rcm_AUG_01p_rmse
+
+  rcm_AUG_avg_cc = rcm_fut_AUG_avg
+  rcm_AUG_avg_cc = rcm_fut_AUG_avg - rcm_hist_AUG_avg
+  rcm_AUG_var_cc = rcm_fut_AUG_var
+  rcm_AUG_var_cc = rcm_fut_AUG_var - rcm_hist_AUG_var
+  rcm_AUG_99p_cc = rcm_fut_AUG_99p
+  rcm_AUG_99p_cc = rcm_fut_AUG_99p - rcm_hist_AUG_99p
+  rcm_AUG_01p_cc = rcm_fut_AUG_01p
+  rcm_AUG_01p_cc = rcm_fut_AUG_01p - rcm_hist_AUG_01p
+
+  gdd_AUG_avg_cc = gdd_fut_AUG_avg
+  gdd_AUG_avg_cc = gdd_fut_AUG_avg - gdd_hist_AUG_avg
+  gdd_AUG_var_cc = gdd_fut_AUG_var
+  gdd_AUG_var_cc = gdd_fut_AUG_var - gdd_hist_AUG_var
+  gdd_AUG_99p_cc = gdd_fut_AUG_99p
+  gdd_AUG_99p_cc = gdd_fut_AUG_99p - gdd_hist_AUG_99p
+  gdd_AUG_01p_cc = gdd_fut_AUG_01p
+  gdd_AUG_01p_cc = gdd_fut_AUG_01p - gdd_hist_AUG_01p
+
+  pav_AUG_avg = rcm_AUG_avg_cc
+  pav_AUG_avg = rcm_AUG_avg_cc - gdd_AUG_avg_cc
+  pav_AUG_var = rcm_AUG_var_cc
+  pav_AUG_var = rcm_AUG_var_cc - gdd_AUG_var_cc
+  pav_AUG_99p = rcm_AUG_99p_cc
+  pav_AUG_99p = rcm_AUG_99p_cc - gdd_AUG_99p_cc
+  pav_AUG_01p = rcm_AUG_01p_cc
+  pav_AUG_01p = rcm_AUG_01p_cc - gdd_AUG_01p_cc
+
+  obs_AUG_avg_variance = dim_variance_n_Wrap(obs_AUG_avg_yearly, 0)
+  obs_AUG_var_variance = dim_variance_n_Wrap(obs_AUG_var_yearly, 0)
+  obs_AUG_99p_variance = dim_variance_n_Wrap(obs_AUG_99p_yearly, 0)
+  obs_AUG_01p_variance = dim_variance_n_Wrap(obs_AUG_01p_yearly, 0)
+
+  delete([/obs_AUG_avg_yearly, obs_AUG_var_yearly, obs_AUG_99p_yearly, obs_AUG_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_AUG_avg_variance_mask = obs_AUG_avg_variance
+  obs_AUG_avg_variance_mask = where(obs_AUG_avg_variance_mask.eq.0, obs_AUG_avg_variance_mask@_FillValue, obs_AUG_avg_variance_mask)
+  delete(obs_AUG_avg_variance)
+  obs_AUG_avg_variance = obs_AUG_avg_variance_mask
+  delete(obs_AUG_avg_variance_mask)
+  obs_AUG_var_variance_mask = obs_AUG_var_variance
+  obs_AUG_var_variance_mask = where(obs_AUG_var_variance_mask.eq.0, obs_AUG_var_variance_mask@_FillValue, obs_AUG_var_variance_mask)
+  delete(obs_AUG_var_variance)
+  obs_AUG_var_variance = obs_AUG_var_variance_mask
+  delete(obs_AUG_var_variance_mask)
+  obs_AUG_99p_variance_mask = obs_AUG_99p_variance
+  obs_AUG_99p_variance_mask = where(obs_AUG_99p_variance_mask.eq.0, obs_AUG_99p_variance_mask@_FillValue, obs_AUG_99p_variance_mask)
+  delete(obs_AUG_99p_variance)
+  obs_AUG_99p_variance = obs_AUG_99p_variance_mask
+  delete(obs_AUG_99p_variance_mask)
+  obs_AUG_01p_variance_mask = obs_AUG_01p_variance
+  obs_AUG_01p_variance_mask = where(obs_AUG_01p_variance_mask.eq.0, obs_AUG_01p_variance_mask@_FillValue, obs_AUG_01p_variance_mask)
+  delete(obs_AUG_01p_variance)
+  obs_AUG_01p_variance = obs_AUG_01p_variance_mask
+  delete(obs_AUG_01p_variance_mask)
+
+  rav_AUG_avg = av_AUG_avg
+  rav_AUG_avg = (av_AUG_avg * abs(pav_AUG_avg))/obs_AUG_avg_variance
+  rav_AUG_var = av_AUG_var
+  rav_AUG_var = (av_AUG_var * abs(pav_AUG_var))/obs_AUG_var_variance
+  rav_AUG_99p = av_AUG_99p
+  rav_AUG_99p = (av_AUG_99p * abs(pav_AUG_99p))/obs_AUG_99p_variance
+  rav_AUG_01p = av_AUG_01p
+  rav_AUG_01p = (av_AUG_01p * abs(pav_AUG_01p))/obs_AUG_01p_variance
+
+  fout_AUG = addfile(fout_name_AUG, "c")
+  fout_AUG->av_AUG_avg = av_AUG_avg
+  fout_AUG->gdd_AUG_avg_rmse = gdd_AUG_avg_rmse
+  fout_AUG->rcm_AUG_avg_rmse = rcm_AUG_avg_rmse
+  fout_AUG->pav_AUG_avg = pav_AUG_avg
+  fout_AUG->rav_AUG_avg = rav_AUG_avg
+  fout_AUG->obs_AUG_avg_variance = obs_AUG_avg_variance
+  fout_AUG->gdd_AUG_avg_cc = gdd_AUG_avg_cc
+  fout_AUG->rcm_AUG_avg_cc = rcm_AUG_avg_cc
+  fout_AUG->obs_AUG_avg = obs_AUG_avg
+  fout_AUG->gdd_hist_AUG_avg = gdd_hist_AUG_avg
+  fout_AUG->gdd_fut_AUG_avg = gdd_fut_AUG_avg
+  fout_AUG->rcm_hist_AUG_avg = rcm_hist_AUG_avg
+  fout_AUG->rcm_fut_AUG_avg = rcm_fut_AUG_avg
+  fout_AUG->av_AUG_var = av_AUG_var
+  fout_AUG->gdd_AUG_var_rmse = gdd_AUG_var_rmse
+  fout_AUG->rcm_AUG_var_rmse = rcm_AUG_var_rmse
+  fout_AUG->pav_AUG_var = pav_AUG_var
+  fout_AUG->rav_AUG_var = rav_AUG_var
+  fout_AUG->obs_AUG_var_variance = obs_AUG_var_variance
+  fout_AUG->gdd_AUG_var_cc = gdd_AUG_var_cc
+  fout_AUG->rcm_AUG_var_cc = rcm_AUG_var_cc
+  fout_AUG->obs_AUG_var = obs_AUG_var
+  fout_AUG->gdd_hist_AUG_var = gdd_hist_AUG_var
+  fout_AUG->gdd_fut_AUG_var = gdd_fut_AUG_var
+  fout_AUG->rcm_hist_AUG_var = rcm_hist_AUG_var
+  fout_AUG->rcm_fut_AUG_var = rcm_fut_AUG_var
+  fout_AUG->av_AUG_99p = av_AUG_99p
+  fout_AUG->gdd_AUG_99p_rmse = gdd_AUG_99p_rmse
+  fout_AUG->rcm_AUG_99p_rmse = rcm_AUG_99p_rmse
+  fout_AUG->pav_AUG_99p = pav_AUG_99p
+  fout_AUG->rav_AUG_99p = rav_AUG_99p
+  fout_AUG->obs_AUG_99p_variance = obs_AUG_99p_variance
+  fout_AUG->gdd_AUG_99p_cc = gdd_AUG_99p_cc
+  fout_AUG->rcm_AUG_99p_cc = rcm_AUG_99p_cc
+  fout_AUG->obs_AUG_99p = obs_AUG_99p
+  fout_AUG->gdd_hist_AUG_99p = gdd_hist_AUG_99p
+  fout_AUG->gdd_fut_AUG_99p = gdd_fut_AUG_99p
+  fout_AUG->rcm_hist_AUG_99p = rcm_hist_AUG_99p
+  fout_AUG->rcm_fut_AUG_99p = rcm_fut_AUG_99p
+  fout_AUG->av_AUG_01p = av_AUG_01p
+  fout_AUG->gdd_AUG_01p_rmse = gdd_AUG_01p_rmse
+  fout_AUG->rcm_AUG_01p_rmse = rcm_AUG_01p_rmse
+  fout_AUG->pav_AUG_01p = pav_AUG_01p
+  fout_AUG->rav_AUG_01p = rav_AUG_01p
+  fout_AUG->obs_AUG_01p_variance = obs_AUG_01p_variance
+  fout_AUG->gdd_AUG_01p_cc = gdd_AUG_01p_cc
+  fout_AUG->rcm_AUG_01p_cc = rcm_AUG_01p_cc
+  fout_AUG->obs_AUG_01p = obs_AUG_01p
+  fout_AUG->gdd_hist_AUG_01p = gdd_hist_AUG_01p
+  fout_AUG->gdd_fut_AUG_01p = gdd_fut_AUG_01p
+  fout_AUG->rcm_hist_AUG_01p = rcm_hist_AUG_01p
+  fout_AUG->rcm_fut_AUG_01p = rcm_fut_AUG_01p
+
+  delete([/av_AUG_avg, gdd_AUG_avg_rmse, rcm_AUG_avg_rmse, pav_AUG_avg, rav_AUG_avg, obs_AUG_avg_variance, gdd_AUG_avg_cc, rcm_AUG_avg_cc, obs_AUG_avg, gdd_hist_AUG_avg, gdd_fut_AUG_avg, rcm_hist_AUG_avg, rcm_fut_AUG_avg, av_AUG_var, gdd_AUG_var_rmse, rcm_AUG_var_rmse, pav_AUG_var, rav_AUG_var, obs_AUG_var_variance, gdd_AUG_var_cc, rcm_AUG_var_cc, obs_AUG_var, gdd_hist_AUG_var, gdd_fut_AUG_var, rcm_hist_AUG_var, rcm_fut_AUG_var, av_AUG_99p, gdd_AUG_99p_rmse, rcm_AUG_99p_rmse, pav_AUG_99p, rav_AUG_99p, obs_AUG_99p_variance, gdd_AUG_99p_cc, rcm_AUG_99p_cc, obs_AUG_99p, gdd_hist_AUG_99p, gdd_fut_AUG_99p, rcm_hist_AUG_99p, rcm_fut_AUG_99p, av_AUG_01p, gdd_AUG_01p_rmse, rcm_AUG_01p_rmse, pav_AUG_01p, rav_AUG_01p, obs_AUG_01p_variance, gdd_AUG_01p_cc, rcm_AUG_01p_cc, obs_AUG_01p, gdd_hist_AUG_01p, gdd_fut_AUG_01p, rcm_hist_AUG_01p, rcm_fut_AUG_01p/])
+  delete(fout_AUG)
+
+; SEP
+  print(systemfunc("date"))
+  print("SEP")
+  rcm_SEP_avg_rmse = rcm_hist_SEP_avg
+  rcm_SEP_avg_rmse = sqrt((rcm_hist_SEP_avg - obs_SEP_avg)^2)
+  rcm_SEP_var_rmse = rcm_hist_SEP_var
+  rcm_SEP_var_rmse = sqrt((rcm_hist_SEP_var - obs_SEP_var)^2)
+  rcm_SEP_99p_rmse = rcm_hist_SEP_99p
+  rcm_SEP_99p_rmse = sqrt((rcm_hist_SEP_99p - obs_SEP_99p)^2)
+  rcm_SEP_01p_rmse = rcm_hist_SEP_01p
+  rcm_SEP_01p_rmse = sqrt((rcm_hist_SEP_01p - obs_SEP_01p)^2)
+
+  gdd_SEP_avg_rmse = gdd_hist_SEP_avg
+  gdd_SEP_avg_rmse = sqrt((gdd_hist_SEP_avg - obs_SEP_avg)^2)
+  gdd_SEP_var_rmse = gdd_hist_SEP_var
+  gdd_SEP_var_rmse = sqrt((gdd_hist_SEP_var - obs_SEP_var)^2)
+  gdd_SEP_99p_rmse = gdd_hist_SEP_99p
+  gdd_SEP_99p_rmse = sqrt((gdd_hist_SEP_99p - obs_SEP_99p)^2)
+  gdd_SEP_01p_rmse = gdd_hist_SEP_01p
+  gdd_SEP_01p_rmse = sqrt((gdd_hist_SEP_01p - obs_SEP_01p)^2)
+
+  av_SEP_avg = gdd_SEP_avg_rmse
+  av_SEP_avg = gdd_SEP_avg_rmse - rcm_SEP_avg_rmse
+  av_SEP_var = gdd_SEP_var_rmse
+  av_SEP_var = gdd_SEP_var_rmse - rcm_SEP_var_rmse
+  av_SEP_99p = gdd_SEP_99p_rmse
+  av_SEP_99p = gdd_SEP_99p_rmse - rcm_SEP_99p_rmse
+  av_SEP_01p = gdd_SEP_01p_rmse
+  av_SEP_01p = gdd_SEP_01p_rmse - rcm_SEP_01p_rmse
+
+  rcm_SEP_avg_cc = rcm_fut_SEP_avg
+  rcm_SEP_avg_cc = rcm_fut_SEP_avg - rcm_hist_SEP_avg
+  rcm_SEP_var_cc = rcm_fut_SEP_var
+  rcm_SEP_var_cc = rcm_fut_SEP_var - rcm_hist_SEP_var
+  rcm_SEP_99p_cc = rcm_fut_SEP_99p
+  rcm_SEP_99p_cc = rcm_fut_SEP_99p - rcm_hist_SEP_99p
+  rcm_SEP_01p_cc = rcm_fut_SEP_01p
+  rcm_SEP_01p_cc = rcm_fut_SEP_01p - rcm_hist_SEP_01p
+
+  gdd_SEP_avg_cc = gdd_fut_SEP_avg
+  gdd_SEP_avg_cc = gdd_fut_SEP_avg - gdd_hist_SEP_avg
+  gdd_SEP_var_cc = gdd_fut_SEP_var
+  gdd_SEP_var_cc = gdd_fut_SEP_var - gdd_hist_SEP_var
+  gdd_SEP_99p_cc = gdd_fut_SEP_99p
+  gdd_SEP_99p_cc = gdd_fut_SEP_99p - gdd_hist_SEP_99p
+  gdd_SEP_01p_cc = gdd_fut_SEP_01p
+  gdd_SEP_01p_cc = gdd_fut_SEP_01p - gdd_hist_SEP_01p
+
+  pav_SEP_avg = rcm_SEP_avg_cc
+  pav_SEP_avg = rcm_SEP_avg_cc - gdd_SEP_avg_cc
+  pav_SEP_var = rcm_SEP_var_cc
+  pav_SEP_var = rcm_SEP_var_cc - gdd_SEP_var_cc
+  pav_SEP_99p = rcm_SEP_99p_cc
+  pav_SEP_99p = rcm_SEP_99p_cc - gdd_SEP_99p_cc
+  pav_SEP_01p = rcm_SEP_01p_cc
+  pav_SEP_01p = rcm_SEP_01p_cc - gdd_SEP_01p_cc
+
+  obs_SEP_avg_variance = dim_variance_n_Wrap(obs_SEP_avg_yearly, 0)
+  obs_SEP_var_variance = dim_variance_n_Wrap(obs_SEP_var_yearly, 0)
+  obs_SEP_99p_variance = dim_variance_n_Wrap(obs_SEP_99p_yearly, 0)
+  obs_SEP_01p_variance = dim_variance_n_Wrap(obs_SEP_01p_yearly, 0)
+
+  delete([/obs_SEP_avg_yearly, obs_SEP_var_yearly, obs_SEP_99p_yearly, obs_SEP_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_SEP_avg_variance_mask = obs_SEP_avg_variance
+  obs_SEP_avg_variance_mask = where(obs_SEP_avg_variance_mask.eq.0, obs_SEP_avg_variance_mask@_FillValue, obs_SEP_avg_variance_mask)
+  delete(obs_SEP_avg_variance)
+  obs_SEP_avg_variance = obs_SEP_avg_variance_mask
+  delete(obs_SEP_avg_variance_mask)
+  obs_SEP_var_variance_mask = obs_SEP_var_variance
+  obs_SEP_var_variance_mask = where(obs_SEP_var_variance_mask.eq.0, obs_SEP_var_variance_mask@_FillValue, obs_SEP_var_variance_mask)
+  delete(obs_SEP_var_variance)
+  obs_SEP_var_variance = obs_SEP_var_variance_mask
+  delete(obs_SEP_var_variance_mask)
+  obs_SEP_99p_variance_mask = obs_SEP_99p_variance
+  obs_SEP_99p_variance_mask = where(obs_SEP_99p_variance_mask.eq.0, obs_SEP_99p_variance_mask@_FillValue, obs_SEP_99p_variance_mask)
+  delete(obs_SEP_99p_variance)
+  obs_SEP_99p_variance = obs_SEP_99p_variance_mask
+  delete(obs_SEP_99p_variance_mask)
+  obs_SEP_01p_variance_mask = obs_SEP_01p_variance
+  obs_SEP_01p_variance_mask = where(obs_SEP_01p_variance_mask.eq.0, obs_SEP_01p_variance_mask@_FillValue, obs_SEP_01p_variance_mask)
+  delete(obs_SEP_01p_variance)
+  obs_SEP_01p_variance = obs_SEP_01p_variance_mask
+  delete(obs_SEP_01p_variance_mask)
+
+  rav_SEP_avg = av_SEP_avg
+  rav_SEP_avg = (av_SEP_avg * abs(pav_SEP_avg))/obs_SEP_avg_variance
+  rav_SEP_var = av_SEP_var
+  rav_SEP_var = (av_SEP_var * abs(pav_SEP_var))/obs_SEP_var_variance
+  rav_SEP_99p = av_SEP_99p
+  rav_SEP_99p = (av_SEP_99p * abs(pav_SEP_99p))/obs_SEP_99p_variance
+  rav_SEP_01p = av_SEP_01p
+  rav_SEP_01p = (av_SEP_01p * abs(pav_SEP_01p))/obs_SEP_01p_variance
+
+  fout_SEP = addfile(fout_name_SEP, "c")
+  fout_SEP->av_SEP_avg = av_SEP_avg
+  fout_SEP->gdd_SEP_avg_rmse = gdd_SEP_avg_rmse
+  fout_SEP->rcm_SEP_avg_rmse = rcm_SEP_avg_rmse
+  fout_SEP->pav_SEP_avg = pav_SEP_avg
+  fout_SEP->rav_SEP_avg = rav_SEP_avg
+  fout_SEP->obs_SEP_avg_variance = obs_SEP_avg_variance
+  fout_SEP->gdd_SEP_avg_cc = gdd_SEP_avg_cc
+  fout_SEP->rcm_SEP_avg_cc = rcm_SEP_avg_cc
+  fout_SEP->obs_SEP_avg = obs_SEP_avg
+  fout_SEP->gdd_hist_SEP_avg = gdd_hist_SEP_avg
+  fout_SEP->gdd_fut_SEP_avg = gdd_fut_SEP_avg
+  fout_SEP->rcm_hist_SEP_avg = rcm_hist_SEP_avg
+  fout_SEP->rcm_fut_SEP_avg = rcm_fut_SEP_avg
+  fout_SEP->av_SEP_var = av_SEP_var
+  fout_SEP->gdd_SEP_var_rmse = gdd_SEP_var_rmse
+  fout_SEP->rcm_SEP_var_rmse = rcm_SEP_var_rmse
+  fout_SEP->pav_SEP_var = pav_SEP_var
+  fout_SEP->rav_SEP_var = rav_SEP_var
+  fout_SEP->obs_SEP_var_variance = obs_SEP_var_variance
+  fout_SEP->gdd_SEP_var_cc = gdd_SEP_var_cc
+  fout_SEP->rcm_SEP_var_cc = rcm_SEP_var_cc
+  fout_SEP->obs_SEP_var = obs_SEP_var
+  fout_SEP->gdd_hist_SEP_var = gdd_hist_SEP_var
+  fout_SEP->gdd_fut_SEP_var = gdd_fut_SEP_var
+  fout_SEP->rcm_hist_SEP_var = rcm_hist_SEP_var
+  fout_SEP->rcm_fut_SEP_var = rcm_fut_SEP_var
+  fout_SEP->av_SEP_99p = av_SEP_99p
+  fout_SEP->gdd_SEP_99p_rmse = gdd_SEP_99p_rmse
+  fout_SEP->rcm_SEP_99p_rmse = rcm_SEP_99p_rmse
+  fout_SEP->pav_SEP_99p = pav_SEP_99p
+  fout_SEP->rav_SEP_99p = rav_SEP_99p
+  fout_SEP->obs_SEP_99p_variance = obs_SEP_99p_variance
+  fout_SEP->gdd_SEP_99p_cc = gdd_SEP_99p_cc
+  fout_SEP->rcm_SEP_99p_cc = rcm_SEP_99p_cc
+  fout_SEP->obs_SEP_99p = obs_SEP_99p
+  fout_SEP->gdd_hist_SEP_99p = gdd_hist_SEP_99p
+  fout_SEP->gdd_fut_SEP_99p = gdd_fut_SEP_99p
+  fout_SEP->rcm_hist_SEP_99p = rcm_hist_SEP_99p
+  fout_SEP->rcm_fut_SEP_99p = rcm_fut_SEP_99p
+  fout_SEP->av_SEP_01p = av_SEP_01p
+  fout_SEP->gdd_SEP_01p_rmse = gdd_SEP_01p_rmse
+  fout_SEP->rcm_SEP_01p_rmse = rcm_SEP_01p_rmse
+  fout_SEP->pav_SEP_01p = pav_SEP_01p
+  fout_SEP->rav_SEP_01p = rav_SEP_01p
+  fout_SEP->obs_SEP_01p_variance = obs_SEP_01p_variance
+  fout_SEP->gdd_SEP_01p_cc = gdd_SEP_01p_cc
+  fout_SEP->rcm_SEP_01p_cc = rcm_SEP_01p_cc
+  fout_SEP->obs_SEP_01p = obs_SEP_01p
+  fout_SEP->gdd_hist_SEP_01p = gdd_hist_SEP_01p
+  fout_SEP->gdd_fut_SEP_01p = gdd_fut_SEP_01p
+  fout_SEP->rcm_hist_SEP_01p = rcm_hist_SEP_01p
+  fout_SEP->rcm_fut_SEP_01p = rcm_fut_SEP_01p
+
+  delete([/av_SEP_avg, gdd_SEP_avg_rmse, rcm_SEP_avg_rmse, pav_SEP_avg, rav_SEP_avg, obs_SEP_avg_variance, gdd_SEP_avg_cc, rcm_SEP_avg_cc, obs_SEP_avg, gdd_hist_SEP_avg, gdd_fut_SEP_avg, rcm_hist_SEP_avg, rcm_fut_SEP_avg, av_SEP_var, gdd_SEP_var_rmse, rcm_SEP_var_rmse, pav_SEP_var, rav_SEP_var, obs_SEP_var_variance, gdd_SEP_var_cc, rcm_SEP_var_cc, obs_SEP_var, gdd_hist_SEP_var, gdd_fut_SEP_var, rcm_hist_SEP_var, rcm_fut_SEP_var, av_SEP_99p, gdd_SEP_99p_rmse, rcm_SEP_99p_rmse, pav_SEP_99p, rav_SEP_99p, obs_SEP_99p_variance, gdd_SEP_99p_cc, rcm_SEP_99p_cc, obs_SEP_99p, gdd_hist_SEP_99p, gdd_fut_SEP_99p, rcm_hist_SEP_99p, rcm_fut_SEP_99p, av_SEP_01p, gdd_SEP_01p_rmse, rcm_SEP_01p_rmse, pav_SEP_01p, rav_SEP_01p, obs_SEP_01p_variance, gdd_SEP_01p_cc, rcm_SEP_01p_cc, obs_SEP_01p, gdd_hist_SEP_01p, gdd_fut_SEP_01p, rcm_hist_SEP_01p, rcm_fut_SEP_01p/])
+  delete(fout_SEP)
+
+; OCT
+  print(systemfunc("date"))
+  print("OCT")
+  rcm_OCT_avg_rmse = rcm_hist_OCT_avg
+  rcm_OCT_avg_rmse = sqrt((rcm_hist_OCT_avg - obs_OCT_avg)^2)
+  rcm_OCT_var_rmse = rcm_hist_OCT_var
+  rcm_OCT_var_rmse = sqrt((rcm_hist_OCT_var - obs_OCT_var)^2)
+  rcm_OCT_99p_rmse = rcm_hist_OCT_99p
+  rcm_OCT_99p_rmse = sqrt((rcm_hist_OCT_99p - obs_OCT_99p)^2)
+  rcm_OCT_01p_rmse = rcm_hist_OCT_01p
+  rcm_OCT_01p_rmse = sqrt((rcm_hist_OCT_01p - obs_OCT_01p)^2)
+
+  gdd_OCT_avg_rmse = gdd_hist_OCT_avg
+  gdd_OCT_avg_rmse = sqrt((gdd_hist_OCT_avg - obs_OCT_avg)^2)
+  gdd_OCT_var_rmse = gdd_hist_OCT_var
+  gdd_OCT_var_rmse = sqrt((gdd_hist_OCT_var - obs_OCT_var)^2)
+  gdd_OCT_99p_rmse = gdd_hist_OCT_99p
+  gdd_OCT_99p_rmse = sqrt((gdd_hist_OCT_99p - obs_OCT_99p)^2)
+  gdd_OCT_01p_rmse = gdd_hist_OCT_01p
+  gdd_OCT_01p_rmse = sqrt((gdd_hist_OCT_01p - obs_OCT_01p)^2)
+
+  av_OCT_avg = gdd_OCT_avg_rmse
+  av_OCT_avg = gdd_OCT_avg_rmse - rcm_OCT_avg_rmse
+  av_OCT_var = gdd_OCT_var_rmse
+  av_OCT_var = gdd_OCT_var_rmse - rcm_OCT_var_rmse
+  av_OCT_99p = gdd_OCT_99p_rmse
+  av_OCT_99p = gdd_OCT_99p_rmse - rcm_OCT_99p_rmse
+  av_OCT_01p = gdd_OCT_01p_rmse
+  av_OCT_01p = gdd_OCT_01p_rmse - rcm_OCT_01p_rmse
+
+  rcm_OCT_avg_cc = rcm_fut_OCT_avg
+  rcm_OCT_avg_cc = rcm_fut_OCT_avg - rcm_hist_OCT_avg
+  rcm_OCT_var_cc = rcm_fut_OCT_var
+  rcm_OCT_var_cc = rcm_fut_OCT_var - rcm_hist_OCT_var
+  rcm_OCT_99p_cc = rcm_fut_OCT_99p
+  rcm_OCT_99p_cc = rcm_fut_OCT_99p - rcm_hist_OCT_99p
+  rcm_OCT_01p_cc = rcm_fut_OCT_01p
+  rcm_OCT_01p_cc = rcm_fut_OCT_01p - rcm_hist_OCT_01p
+
+  gdd_OCT_avg_cc = gdd_fut_OCT_avg
+  gdd_OCT_avg_cc = gdd_fut_OCT_avg - gdd_hist_OCT_avg
+  gdd_OCT_var_cc = gdd_fut_OCT_var
+  gdd_OCT_var_cc = gdd_fut_OCT_var - gdd_hist_OCT_var
+  gdd_OCT_99p_cc = gdd_fut_OCT_99p
+  gdd_OCT_99p_cc = gdd_fut_OCT_99p - gdd_hist_OCT_99p
+  gdd_OCT_01p_cc = gdd_fut_OCT_01p
+  gdd_OCT_01p_cc = gdd_fut_OCT_01p - gdd_hist_OCT_01p
+
+  pav_OCT_avg = rcm_OCT_avg_cc
+  pav_OCT_avg = rcm_OCT_avg_cc - gdd_OCT_avg_cc
+  pav_OCT_var = rcm_OCT_var_cc
+  pav_OCT_var = rcm_OCT_var_cc - gdd_OCT_var_cc
+  pav_OCT_99p = rcm_OCT_99p_cc
+  pav_OCT_99p = rcm_OCT_99p_cc - gdd_OCT_99p_cc
+  pav_OCT_01p = rcm_OCT_01p_cc
+  pav_OCT_01p = rcm_OCT_01p_cc - gdd_OCT_01p_cc
+
+  obs_OCT_avg_variance = dim_variance_n_Wrap(obs_OCT_avg_yearly, 0)
+  obs_OCT_var_variance = dim_variance_n_Wrap(obs_OCT_var_yearly, 0)
+  obs_OCT_99p_variance = dim_variance_n_Wrap(obs_OCT_99p_yearly, 0)
+  obs_OCT_01p_variance = dim_variance_n_Wrap(obs_OCT_01p_yearly, 0)
+
+  delete([/obs_OCT_avg_yearly, obs_OCT_var_yearly, obs_OCT_99p_yearly, obs_OCT_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_OCT_avg_variance_mask = obs_OCT_avg_variance
+  obs_OCT_avg_variance_mask = where(obs_OCT_avg_variance_mask.eq.0, obs_OCT_avg_variance_mask@_FillValue, obs_OCT_avg_variance_mask)
+  delete(obs_OCT_avg_variance)
+  obs_OCT_avg_variance = obs_OCT_avg_variance_mask
+  delete(obs_OCT_avg_variance_mask)
+  obs_OCT_var_variance_mask = obs_OCT_var_variance
+  obs_OCT_var_variance_mask = where(obs_OCT_var_variance_mask.eq.0, obs_OCT_var_variance_mask@_FillValue, obs_OCT_var_variance_mask)
+  delete(obs_OCT_var_variance)
+  obs_OCT_var_variance = obs_OCT_var_variance_mask
+  delete(obs_OCT_var_variance_mask)
+  obs_OCT_99p_variance_mask = obs_OCT_99p_variance
+  obs_OCT_99p_variance_mask = where(obs_OCT_99p_variance_mask.eq.0, obs_OCT_99p_variance_mask@_FillValue, obs_OCT_99p_variance_mask)
+  delete(obs_OCT_99p_variance)
+  obs_OCT_99p_variance = obs_OCT_99p_variance_mask
+  delete(obs_OCT_99p_variance_mask)
+  obs_OCT_01p_variance_mask = obs_OCT_01p_variance
+  obs_OCT_01p_variance_mask = where(obs_OCT_01p_variance_mask.eq.0, obs_OCT_01p_variance_mask@_FillValue, obs_OCT_01p_variance_mask)
+  delete(obs_OCT_01p_variance)
+  obs_OCT_01p_variance = obs_OCT_01p_variance_mask
+  delete(obs_OCT_01p_variance_mask)
+
+  rav_OCT_avg = av_OCT_avg
+  rav_OCT_avg = (av_OCT_avg * abs(pav_OCT_avg))/obs_OCT_avg_variance
+  rav_OCT_var = av_OCT_var
+  rav_OCT_var = (av_OCT_var * abs(pav_OCT_var))/obs_OCT_var_variance
+  rav_OCT_99p = av_OCT_99p
+  rav_OCT_99p = (av_OCT_99p * abs(pav_OCT_99p))/obs_OCT_99p_variance
+  rav_OCT_01p = av_OCT_01p
+  rav_OCT_01p = (av_OCT_01p * abs(pav_OCT_01p))/obs_OCT_01p_variance
+
+  fout_OCT = addfile(fout_name_OCT, "c")
+  fout_OCT->av_OCT_avg = av_OCT_avg
+  fout_OCT->gdd_OCT_avg_rmse = gdd_OCT_avg_rmse
+  fout_OCT->rcm_OCT_avg_rmse = rcm_OCT_avg_rmse
+  fout_OCT->pav_OCT_avg = pav_OCT_avg
+  fout_OCT->rav_OCT_avg = rav_OCT_avg
+  fout_OCT->obs_OCT_avg_variance = obs_OCT_avg_variance
+  fout_OCT->gdd_OCT_avg_cc = gdd_OCT_avg_cc
+  fout_OCT->rcm_OCT_avg_cc = rcm_OCT_avg_cc
+  fout_OCT->obs_OCT_avg = obs_OCT_avg
+  fout_OCT->gdd_hist_OCT_avg = gdd_hist_OCT_avg
+  fout_OCT->gdd_fut_OCT_avg = gdd_fut_OCT_avg
+  fout_OCT->rcm_hist_OCT_avg = rcm_hist_OCT_avg
+  fout_OCT->rcm_fut_OCT_avg = rcm_fut_OCT_avg
+  fout_OCT->av_OCT_var = av_OCT_var
+  fout_OCT->gdd_OCT_var_rmse = gdd_OCT_var_rmse
+  fout_OCT->rcm_OCT_var_rmse = rcm_OCT_var_rmse
+  fout_OCT->pav_OCT_var = pav_OCT_var
+  fout_OCT->rav_OCT_var = rav_OCT_var
+  fout_OCT->obs_OCT_var_variance = obs_OCT_var_variance
+  fout_OCT->gdd_OCT_var_cc = gdd_OCT_var_cc
+  fout_OCT->rcm_OCT_var_cc = rcm_OCT_var_cc
+  fout_OCT->obs_OCT_var = obs_OCT_var
+  fout_OCT->gdd_hist_OCT_var = gdd_hist_OCT_var
+  fout_OCT->gdd_fut_OCT_var = gdd_fut_OCT_var
+  fout_OCT->rcm_hist_OCT_var = rcm_hist_OCT_var
+  fout_OCT->rcm_fut_OCT_var = rcm_fut_OCT_var
+  fout_OCT->av_OCT_99p = av_OCT_99p
+  fout_OCT->gdd_OCT_99p_rmse = gdd_OCT_99p_rmse
+  fout_OCT->rcm_OCT_99p_rmse = rcm_OCT_99p_rmse
+  fout_OCT->pav_OCT_99p = pav_OCT_99p
+  fout_OCT->rav_OCT_99p = rav_OCT_99p
+  fout_OCT->obs_OCT_99p_variance = obs_OCT_99p_variance
+  fout_OCT->gdd_OCT_99p_cc = gdd_OCT_99p_cc
+  fout_OCT->rcm_OCT_99p_cc = rcm_OCT_99p_cc
+  fout_OCT->obs_OCT_99p = obs_OCT_99p
+  fout_OCT->gdd_hist_OCT_99p = gdd_hist_OCT_99p
+  fout_OCT->gdd_fut_OCT_99p = gdd_fut_OCT_99p
+  fout_OCT->rcm_hist_OCT_99p = rcm_hist_OCT_99p
+  fout_OCT->rcm_fut_OCT_99p = rcm_fut_OCT_99p
+  fout_OCT->av_OCT_01p = av_OCT_01p
+  fout_OCT->gdd_OCT_01p_rmse = gdd_OCT_01p_rmse
+  fout_OCT->rcm_OCT_01p_rmse = rcm_OCT_01p_rmse
+  fout_OCT->pav_OCT_01p = pav_OCT_01p
+  fout_OCT->rav_OCT_01p = rav_OCT_01p
+  fout_OCT->obs_OCT_01p_variance = obs_OCT_01p_variance
+  fout_OCT->gdd_OCT_01p_cc = gdd_OCT_01p_cc
+  fout_OCT->rcm_OCT_01p_cc = rcm_OCT_01p_cc
+  fout_OCT->obs_OCT_01p = obs_OCT_01p
+  fout_OCT->gdd_hist_OCT_01p = gdd_hist_OCT_01p
+  fout_OCT->gdd_fut_OCT_01p = gdd_fut_OCT_01p
+  fout_OCT->rcm_hist_OCT_01p = rcm_hist_OCT_01p
+  fout_OCT->rcm_fut_OCT_01p = rcm_fut_OCT_01p
+
+  delete([/av_OCT_avg, gdd_OCT_avg_rmse, rcm_OCT_avg_rmse, pav_OCT_avg, rav_OCT_avg, obs_OCT_avg_variance, gdd_OCT_avg_cc, rcm_OCT_avg_cc, obs_OCT_avg, gdd_hist_OCT_avg, gdd_fut_OCT_avg, rcm_hist_OCT_avg, rcm_fut_OCT_avg, av_OCT_var, gdd_OCT_var_rmse, rcm_OCT_var_rmse, pav_OCT_var, rav_OCT_var, obs_OCT_var_variance, gdd_OCT_var_cc, rcm_OCT_var_cc, obs_OCT_var, gdd_hist_OCT_var, gdd_fut_OCT_var, rcm_hist_OCT_var, rcm_fut_OCT_var, av_OCT_99p, gdd_OCT_99p_rmse, rcm_OCT_99p_rmse, pav_OCT_99p, rav_OCT_99p, obs_OCT_99p_variance, gdd_OCT_99p_cc, rcm_OCT_99p_cc, obs_OCT_99p, gdd_hist_OCT_99p, gdd_fut_OCT_99p, rcm_hist_OCT_99p, rcm_fut_OCT_99p, av_OCT_01p, gdd_OCT_01p_rmse, rcm_OCT_01p_rmse, pav_OCT_01p, rav_OCT_01p, obs_OCT_01p_variance, gdd_OCT_01p_cc, rcm_OCT_01p_cc, obs_OCT_01p, gdd_hist_OCT_01p, gdd_fut_OCT_01p, rcm_hist_OCT_01p, rcm_fut_OCT_01p/])
+  delete(fout_OCT)
+
+; NOV
+  print(systemfunc("date"))
+  print("NOV")
+  rcm_NOV_avg_rmse = rcm_hist_NOV_avg
+  rcm_NOV_avg_rmse = sqrt((rcm_hist_NOV_avg - obs_NOV_avg)^2)
+  rcm_NOV_var_rmse = rcm_hist_NOV_var
+  rcm_NOV_var_rmse = sqrt((rcm_hist_NOV_var - obs_NOV_var)^2)
+  rcm_NOV_99p_rmse = rcm_hist_NOV_99p
+  rcm_NOV_99p_rmse = sqrt((rcm_hist_NOV_99p - obs_NOV_99p)^2)
+  rcm_NOV_01p_rmse = rcm_hist_NOV_01p
+  rcm_NOV_01p_rmse = sqrt((rcm_hist_NOV_01p - obs_NOV_01p)^2)
+
+  gdd_NOV_avg_rmse = gdd_hist_NOV_avg
+  gdd_NOV_avg_rmse = sqrt((gdd_hist_NOV_avg - obs_NOV_avg)^2)
+  gdd_NOV_var_rmse = gdd_hist_NOV_var
+  gdd_NOV_var_rmse = sqrt((gdd_hist_NOV_var - obs_NOV_var)^2)
+  gdd_NOV_99p_rmse = gdd_hist_NOV_99p
+  gdd_NOV_99p_rmse = sqrt((gdd_hist_NOV_99p - obs_NOV_99p)^2)
+  gdd_NOV_01p_rmse = gdd_hist_NOV_01p
+  gdd_NOV_01p_rmse = sqrt((gdd_hist_NOV_01p - obs_NOV_01p)^2)
+
+  av_NOV_avg = gdd_NOV_avg_rmse
+  av_NOV_avg = gdd_NOV_avg_rmse - rcm_NOV_avg_rmse
+  av_NOV_var = gdd_NOV_var_rmse
+  av_NOV_var = gdd_NOV_var_rmse - rcm_NOV_var_rmse
+  av_NOV_99p = gdd_NOV_99p_rmse
+  av_NOV_99p = gdd_NOV_99p_rmse - rcm_NOV_99p_rmse
+  av_NOV_01p = gdd_NOV_01p_rmse
+  av_NOV_01p = gdd_NOV_01p_rmse - rcm_NOV_01p_rmse
+
+  rcm_NOV_avg_cc = rcm_fut_NOV_avg
+  rcm_NOV_avg_cc = rcm_fut_NOV_avg - rcm_hist_NOV_avg
+  rcm_NOV_var_cc = rcm_fut_NOV_var
+  rcm_NOV_var_cc = rcm_fut_NOV_var - rcm_hist_NOV_var
+  rcm_NOV_99p_cc = rcm_fut_NOV_99p
+  rcm_NOV_99p_cc = rcm_fut_NOV_99p - rcm_hist_NOV_99p
+  rcm_NOV_01p_cc = rcm_fut_NOV_01p
+  rcm_NOV_01p_cc = rcm_fut_NOV_01p - rcm_hist_NOV_01p
+
+  gdd_NOV_avg_cc = gdd_fut_NOV_avg
+  gdd_NOV_avg_cc = gdd_fut_NOV_avg - gdd_hist_NOV_avg
+  gdd_NOV_var_cc = gdd_fut_NOV_var
+  gdd_NOV_var_cc = gdd_fut_NOV_var - gdd_hist_NOV_var
+  gdd_NOV_99p_cc = gdd_fut_NOV_99p
+  gdd_NOV_99p_cc = gdd_fut_NOV_99p - gdd_hist_NOV_99p
+  gdd_NOV_01p_cc = gdd_fut_NOV_01p
+  gdd_NOV_01p_cc = gdd_fut_NOV_01p - gdd_hist_NOV_01p
+
+  pav_NOV_avg = rcm_NOV_avg_cc
+  pav_NOV_avg = rcm_NOV_avg_cc - gdd_NOV_avg_cc
+  pav_NOV_var = rcm_NOV_var_cc
+  pav_NOV_var = rcm_NOV_var_cc - gdd_NOV_var_cc
+  pav_NOV_99p = rcm_NOV_99p_cc
+  pav_NOV_99p = rcm_NOV_99p_cc - gdd_NOV_99p_cc
+  pav_NOV_01p = rcm_NOV_01p_cc
+  pav_NOV_01p = rcm_NOV_01p_cc - gdd_NOV_01p_cc
+
+  obs_NOV_avg_variance = dim_variance_n_Wrap(obs_NOV_avg_yearly, 0)
+  obs_NOV_var_variance = dim_variance_n_Wrap(obs_NOV_var_yearly, 0)
+  obs_NOV_99p_variance = dim_variance_n_Wrap(obs_NOV_99p_yearly, 0)
+  obs_NOV_01p_variance = dim_variance_n_Wrap(obs_NOV_01p_yearly, 0)
+
+  delete([/obs_NOV_avg_yearly, obs_NOV_var_yearly, obs_NOV_99p_yearly, obs_NOV_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_NOV_avg_variance_mask = obs_NOV_avg_variance
+  obs_NOV_avg_variance_mask = where(obs_NOV_avg_variance_mask.eq.0, obs_NOV_avg_variance_mask@_FillValue, obs_NOV_avg_variance_mask)
+  delete(obs_NOV_avg_variance)
+  obs_NOV_avg_variance = obs_NOV_avg_variance_mask
+  delete(obs_NOV_avg_variance_mask)
+  obs_NOV_var_variance_mask = obs_NOV_var_variance
+  obs_NOV_var_variance_mask = where(obs_NOV_var_variance_mask.eq.0, obs_NOV_var_variance_mask@_FillValue, obs_NOV_var_variance_mask)
+  delete(obs_NOV_var_variance)
+  obs_NOV_var_variance = obs_NOV_var_variance_mask
+  delete(obs_NOV_var_variance_mask)
+  obs_NOV_99p_variance_mask = obs_NOV_99p_variance
+  obs_NOV_99p_variance_mask = where(obs_NOV_99p_variance_mask.eq.0, obs_NOV_99p_variance_mask@_FillValue, obs_NOV_99p_variance_mask)
+  delete(obs_NOV_99p_variance)
+  obs_NOV_99p_variance = obs_NOV_99p_variance_mask
+  delete(obs_NOV_99p_variance_mask)
+  obs_NOV_01p_variance_mask = obs_NOV_01p_variance
+  obs_NOV_01p_variance_mask = where(obs_NOV_01p_variance_mask.eq.0, obs_NOV_01p_variance_mask@_FillValue, obs_NOV_01p_variance_mask)
+  delete(obs_NOV_01p_variance)
+  obs_NOV_01p_variance = obs_NOV_01p_variance_mask
+  delete(obs_NOV_01p_variance_mask)
+
+  rav_NOV_avg = av_NOV_avg
+  rav_NOV_avg = (av_NOV_avg * abs(pav_NOV_avg))/obs_NOV_avg_variance
+  rav_NOV_var = av_NOV_var
+  rav_NOV_var = (av_NOV_var * abs(pav_NOV_var))/obs_NOV_var_variance
+  rav_NOV_99p = av_NOV_99p
+  rav_NOV_99p = (av_NOV_99p * abs(pav_NOV_99p))/obs_NOV_99p_variance
+  rav_NOV_01p = av_NOV_01p
+  rav_NOV_01p = (av_NOV_01p * abs(pav_NOV_01p))/obs_NOV_01p_variance
+
+  fout_NOV = addfile(fout_name_NOV, "c")
+  fout_NOV->av_NOV_avg = av_NOV_avg
+  fout_NOV->gdd_NOV_avg_rmse = gdd_NOV_avg_rmse
+  fout_NOV->rcm_NOV_avg_rmse = rcm_NOV_avg_rmse
+  fout_NOV->pav_NOV_avg = pav_NOV_avg
+  fout_NOV->rav_NOV_avg = rav_NOV_avg
+  fout_NOV->obs_NOV_avg_variance = obs_NOV_avg_variance
+  fout_NOV->gdd_NOV_avg_cc = gdd_NOV_avg_cc
+  fout_NOV->rcm_NOV_avg_cc = rcm_NOV_avg_cc
+  fout_NOV->obs_NOV_avg = obs_NOV_avg
+  fout_NOV->gdd_hist_NOV_avg = gdd_hist_NOV_avg
+  fout_NOV->gdd_fut_NOV_avg = gdd_fut_NOV_avg
+  fout_NOV->rcm_hist_NOV_avg = rcm_hist_NOV_avg
+  fout_NOV->rcm_fut_NOV_avg = rcm_fut_NOV_avg
+  fout_NOV->av_NOV_var = av_NOV_var
+  fout_NOV->gdd_NOV_var_rmse = gdd_NOV_var_rmse
+  fout_NOV->rcm_NOV_var_rmse = rcm_NOV_var_rmse
+  fout_NOV->pav_NOV_var = pav_NOV_var
+  fout_NOV->rav_NOV_var = rav_NOV_var
+  fout_NOV->obs_NOV_var_variance = obs_NOV_var_variance
+  fout_NOV->gdd_NOV_var_cc = gdd_NOV_var_cc
+  fout_NOV->rcm_NOV_var_cc = rcm_NOV_var_cc
+  fout_NOV->obs_NOV_var = obs_NOV_var
+  fout_NOV->gdd_hist_NOV_var = gdd_hist_NOV_var
+  fout_NOV->gdd_fut_NOV_var = gdd_fut_NOV_var
+  fout_NOV->rcm_hist_NOV_var = rcm_hist_NOV_var
+  fout_NOV->rcm_fut_NOV_var = rcm_fut_NOV_var
+  fout_NOV->av_NOV_99p = av_NOV_99p
+  fout_NOV->gdd_NOV_99p_rmse = gdd_NOV_99p_rmse
+  fout_NOV->rcm_NOV_99p_rmse = rcm_NOV_99p_rmse
+  fout_NOV->pav_NOV_99p = pav_NOV_99p
+  fout_NOV->rav_NOV_99p = rav_NOV_99p
+  fout_NOV->obs_NOV_99p_variance = obs_NOV_99p_variance
+  fout_NOV->gdd_NOV_99p_cc = gdd_NOV_99p_cc
+  fout_NOV->rcm_NOV_99p_cc = rcm_NOV_99p_cc
+  fout_NOV->obs_NOV_99p = obs_NOV_99p
+  fout_NOV->gdd_hist_NOV_99p = gdd_hist_NOV_99p
+  fout_NOV->gdd_fut_NOV_99p = gdd_fut_NOV_99p
+  fout_NOV->rcm_hist_NOV_99p = rcm_hist_NOV_99p
+  fout_NOV->rcm_fut_NOV_99p = rcm_fut_NOV_99p
+  fout_NOV->av_NOV_01p = av_NOV_01p
+  fout_NOV->gdd_NOV_01p_rmse = gdd_NOV_01p_rmse
+  fout_NOV->rcm_NOV_01p_rmse = rcm_NOV_01p_rmse
+  fout_NOV->pav_NOV_01p = pav_NOV_01p
+  fout_NOV->rav_NOV_01p = rav_NOV_01p
+  fout_NOV->obs_NOV_01p_variance = obs_NOV_01p_variance
+  fout_NOV->gdd_NOV_01p_cc = gdd_NOV_01p_cc
+  fout_NOV->rcm_NOV_01p_cc = rcm_NOV_01p_cc
+  fout_NOV->obs_NOV_01p = obs_NOV_01p
+  fout_NOV->gdd_hist_NOV_01p = gdd_hist_NOV_01p
+  fout_NOV->gdd_fut_NOV_01p = gdd_fut_NOV_01p
+  fout_NOV->rcm_hist_NOV_01p = rcm_hist_NOV_01p
+  fout_NOV->rcm_fut_NOV_01p = rcm_fut_NOV_01p
+
+  delete([/av_NOV_avg, gdd_NOV_avg_rmse, rcm_NOV_avg_rmse, pav_NOV_avg, rav_NOV_avg, obs_NOV_avg_variance, gdd_NOV_avg_cc, rcm_NOV_avg_cc, obs_NOV_avg, gdd_hist_NOV_avg, gdd_fut_NOV_avg, rcm_hist_NOV_avg, rcm_fut_NOV_avg, av_NOV_var, gdd_NOV_var_rmse, rcm_NOV_var_rmse, pav_NOV_var, rav_NOV_var, obs_NOV_var_variance, gdd_NOV_var_cc, rcm_NOV_var_cc, obs_NOV_var, gdd_hist_NOV_var, gdd_fut_NOV_var, rcm_hist_NOV_var, rcm_fut_NOV_var, av_NOV_99p, gdd_NOV_99p_rmse, rcm_NOV_99p_rmse, pav_NOV_99p, rav_NOV_99p, obs_NOV_99p_variance, gdd_NOV_99p_cc, rcm_NOV_99p_cc, obs_NOV_99p, gdd_hist_NOV_99p, gdd_fut_NOV_99p, rcm_hist_NOV_99p, rcm_fut_NOV_99p, av_NOV_01p, gdd_NOV_01p_rmse, rcm_NOV_01p_rmse, pav_NOV_01p, rav_NOV_01p, obs_NOV_01p_variance, gdd_NOV_01p_cc, rcm_NOV_01p_cc, obs_NOV_01p, gdd_hist_NOV_01p, gdd_fut_NOV_01p, rcm_hist_NOV_01p, rcm_fut_NOV_01p/])
+  delete(fout_NOV)
+
+; DEC
+  print(systemfunc("date"))
+  print("DEC")
+  rcm_DEC_avg_rmse = rcm_hist_DEC_avg
+  rcm_DEC_avg_rmse = sqrt((rcm_hist_DEC_avg - obs_DEC_avg)^2)
+  rcm_DEC_var_rmse = rcm_hist_DEC_var
+  rcm_DEC_var_rmse = sqrt((rcm_hist_DEC_var - obs_DEC_var)^2)
+  rcm_DEC_99p_rmse = rcm_hist_DEC_99p
+  rcm_DEC_99p_rmse = sqrt((rcm_hist_DEC_99p - obs_DEC_99p)^2)
+  rcm_DEC_01p_rmse = rcm_hist_DEC_01p
+  rcm_DEC_01p_rmse = sqrt((rcm_hist_DEC_01p - obs_DEC_01p)^2)
+
+  gdd_DEC_avg_rmse = gdd_hist_DEC_avg
+  gdd_DEC_avg_rmse = sqrt((gdd_hist_DEC_avg - obs_DEC_avg)^2)
+  gdd_DEC_var_rmse = gdd_hist_DEC_var
+  gdd_DEC_var_rmse = sqrt((gdd_hist_DEC_var - obs_DEC_var)^2)
+  gdd_DEC_99p_rmse = gdd_hist_DEC_99p
+  gdd_DEC_99p_rmse = sqrt((gdd_hist_DEC_99p - obs_DEC_99p)^2)
+  gdd_DEC_01p_rmse = gdd_hist_DEC_01p
+  gdd_DEC_01p_rmse = sqrt((gdd_hist_DEC_01p - obs_DEC_01p)^2)
+
+  av_DEC_avg = gdd_DEC_avg_rmse
+  av_DEC_avg = gdd_DEC_avg_rmse - rcm_DEC_avg_rmse
+  av_DEC_var = gdd_DEC_var_rmse
+  av_DEC_var = gdd_DEC_var_rmse - rcm_DEC_var_rmse
+  av_DEC_99p = gdd_DEC_99p_rmse
+  av_DEC_99p = gdd_DEC_99p_rmse - rcm_DEC_99p_rmse
+  av_DEC_01p = gdd_DEC_01p_rmse
+  av_DEC_01p = gdd_DEC_01p_rmse - rcm_DEC_01p_rmse
+
+  rcm_DEC_avg_cc = rcm_fut_DEC_avg
+  rcm_DEC_avg_cc = rcm_fut_DEC_avg - rcm_hist_DEC_avg
+  rcm_DEC_var_cc = rcm_fut_DEC_var
+  rcm_DEC_var_cc = rcm_fut_DEC_var - rcm_hist_DEC_var
+  rcm_DEC_99p_cc = rcm_fut_DEC_99p
+  rcm_DEC_99p_cc = rcm_fut_DEC_99p - rcm_hist_DEC_99p
+  rcm_DEC_01p_cc = rcm_fut_DEC_01p
+  rcm_DEC_01p_cc = rcm_fut_DEC_01p - rcm_hist_DEC_01p
+
+  gdd_DEC_avg_cc = gdd_fut_DEC_avg
+  gdd_DEC_avg_cc = gdd_fut_DEC_avg - gdd_hist_DEC_avg
+  gdd_DEC_var_cc = gdd_fut_DEC_var
+  gdd_DEC_var_cc = gdd_fut_DEC_var - gdd_hist_DEC_var
+  gdd_DEC_99p_cc = gdd_fut_DEC_99p
+  gdd_DEC_99p_cc = gdd_fut_DEC_99p - gdd_hist_DEC_99p
+  gdd_DEC_01p_cc = gdd_fut_DEC_01p
+  gdd_DEC_01p_cc = gdd_fut_DEC_01p - gdd_hist_DEC_01p
+
+  pav_DEC_avg = rcm_DEC_avg_cc
+  pav_DEC_avg = rcm_DEC_avg_cc - gdd_DEC_avg_cc
+  pav_DEC_var = rcm_DEC_var_cc
+  pav_DEC_var = rcm_DEC_var_cc - gdd_DEC_var_cc
+  pav_DEC_99p = rcm_DEC_99p_cc
+  pav_DEC_99p = rcm_DEC_99p_cc - gdd_DEC_99p_cc
+  pav_DEC_01p = rcm_DEC_01p_cc
+  pav_DEC_01p = rcm_DEC_01p_cc - gdd_DEC_01p_cc
+
+  obs_DEC_avg_variance = dim_variance_n_Wrap(obs_DEC_avg_yearly, 0)
+  obs_DEC_var_variance = dim_variance_n_Wrap(obs_DEC_var_yearly, 0)
+  obs_DEC_99p_variance = dim_variance_n_Wrap(obs_DEC_99p_yearly, 0)
+  obs_DEC_01p_variance = dim_variance_n_Wrap(obs_DEC_01p_yearly, 0)
+
+  delete([/obs_DEC_avg_yearly, obs_DEC_var_yearly, obs_DEC_99p_yearly, obs_DEC_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_DEC_avg_variance_mask = obs_DEC_avg_variance
+  obs_DEC_avg_variance_mask = where(obs_DEC_avg_variance_mask.eq.0, obs_DEC_avg_variance_mask@_FillValue, obs_DEC_avg_variance_mask)
+  delete(obs_DEC_avg_variance)
+  obs_DEC_avg_variance = obs_DEC_avg_variance_mask
+  delete(obs_DEC_avg_variance_mask)
+  obs_DEC_var_variance_mask = obs_DEC_var_variance
+  obs_DEC_var_variance_mask = where(obs_DEC_var_variance_mask.eq.0, obs_DEC_var_variance_mask@_FillValue, obs_DEC_var_variance_mask)
+  delete(obs_DEC_var_variance)
+  obs_DEC_var_variance = obs_DEC_var_variance_mask
+  delete(obs_DEC_var_variance_mask)
+  obs_DEC_99p_variance_mask = obs_DEC_99p_variance
+  obs_DEC_99p_variance_mask = where(obs_DEC_99p_variance_mask.eq.0, obs_DEC_99p_variance_mask@_FillValue, obs_DEC_99p_variance_mask)
+  delete(obs_DEC_99p_variance)
+  obs_DEC_99p_variance = obs_DEC_99p_variance_mask
+  delete(obs_DEC_99p_variance_mask)
+  obs_DEC_01p_variance_mask = obs_DEC_01p_variance
+  obs_DEC_01p_variance_mask = where(obs_DEC_01p_variance_mask.eq.0, obs_DEC_01p_variance_mask@_FillValue, obs_DEC_01p_variance_mask)
+  delete(obs_DEC_01p_variance)
+  obs_DEC_01p_variance = obs_DEC_01p_variance_mask
+  delete(obs_DEC_01p_variance_mask)
+
+  rav_DEC_avg = av_DEC_avg
+  rav_DEC_avg = (av_DEC_avg * abs(pav_DEC_avg))/obs_DEC_avg_variance
+  rav_DEC_var = av_DEC_var
+  rav_DEC_var = (av_DEC_var * abs(pav_DEC_var))/obs_DEC_var_variance
+  rav_DEC_99p = av_DEC_99p
+  rav_DEC_99p = (av_DEC_99p * abs(pav_DEC_99p))/obs_DEC_99p_variance
+  rav_DEC_01p = av_DEC_01p
+  rav_DEC_01p = (av_DEC_01p * abs(pav_DEC_01p))/obs_DEC_01p_variance
+
+  fout_DEC = addfile(fout_name_DEC, "c")
+  fout_DEC->av_DEC_avg = av_DEC_avg
+  fout_DEC->gdd_DEC_avg_rmse = gdd_DEC_avg_rmse
+  fout_DEC->rcm_DEC_avg_rmse = rcm_DEC_avg_rmse
+  fout_DEC->pav_DEC_avg = pav_DEC_avg
+  fout_DEC->rav_DEC_avg = rav_DEC_avg
+  fout_DEC->obs_DEC_avg_variance = obs_DEC_avg_variance
+  fout_DEC->gdd_DEC_avg_cc = gdd_DEC_avg_cc
+  fout_DEC->rcm_DEC_avg_cc = rcm_DEC_avg_cc
+  fout_DEC->obs_DEC_avg = obs_DEC_avg
+  fout_DEC->gdd_hist_DEC_avg = gdd_hist_DEC_avg
+  fout_DEC->gdd_fut_DEC_avg = gdd_fut_DEC_avg
+  fout_DEC->rcm_hist_DEC_avg = rcm_hist_DEC_avg
+  fout_DEC->rcm_fut_DEC_avg = rcm_fut_DEC_avg
+  fout_DEC->av_DEC_var = av_DEC_var
+  fout_DEC->gdd_DEC_var_rmse = gdd_DEC_var_rmse
+  fout_DEC->rcm_DEC_var_rmse = rcm_DEC_var_rmse
+  fout_DEC->pav_DEC_var = pav_DEC_var
+  fout_DEC->rav_DEC_var = rav_DEC_var
+  fout_DEC->obs_DEC_var_variance = obs_DEC_var_variance
+  fout_DEC->gdd_DEC_var_cc = gdd_DEC_var_cc
+  fout_DEC->rcm_DEC_var_cc = rcm_DEC_var_cc
+  fout_DEC->obs_DEC_var = obs_DEC_var
+  fout_DEC->gdd_hist_DEC_var = gdd_hist_DEC_var
+  fout_DEC->gdd_fut_DEC_var = gdd_fut_DEC_var
+  fout_DEC->rcm_hist_DEC_var = rcm_hist_DEC_var
+  fout_DEC->rcm_fut_DEC_var = rcm_fut_DEC_var
+  fout_DEC->av_DEC_99p = av_DEC_99p
+  fout_DEC->gdd_DEC_99p_rmse = gdd_DEC_99p_rmse
+  fout_DEC->rcm_DEC_99p_rmse = rcm_DEC_99p_rmse
+  fout_DEC->pav_DEC_99p = pav_DEC_99p
+  fout_DEC->rav_DEC_99p = rav_DEC_99p
+  fout_DEC->obs_DEC_99p_variance = obs_DEC_99p_variance
+  fout_DEC->gdd_DEC_99p_cc = gdd_DEC_99p_cc
+  fout_DEC->rcm_DEC_99p_cc = rcm_DEC_99p_cc
+  fout_DEC->obs_DEC_99p = obs_DEC_99p
+  fout_DEC->gdd_hist_DEC_99p = gdd_hist_DEC_99p
+  fout_DEC->gdd_fut_DEC_99p = gdd_fut_DEC_99p
+  fout_DEC->rcm_hist_DEC_99p = rcm_hist_DEC_99p
+  fout_DEC->rcm_fut_DEC_99p = rcm_fut_DEC_99p
+  fout_DEC->av_DEC_01p = av_DEC_01p
+  fout_DEC->gdd_DEC_01p_rmse = gdd_DEC_01p_rmse
+  fout_DEC->rcm_DEC_01p_rmse = rcm_DEC_01p_rmse
+  fout_DEC->pav_DEC_01p = pav_DEC_01p
+  fout_DEC->rav_DEC_01p = rav_DEC_01p
+  fout_DEC->obs_DEC_01p_variance = obs_DEC_01p_variance
+  fout_DEC->gdd_DEC_01p_cc = gdd_DEC_01p_cc
+  fout_DEC->rcm_DEC_01p_cc = rcm_DEC_01p_cc
+  fout_DEC->obs_DEC_01p = obs_DEC_01p
+  fout_DEC->gdd_hist_DEC_01p = gdd_hist_DEC_01p
+  fout_DEC->gdd_fut_DEC_01p = gdd_fut_DEC_01p
+  fout_DEC->rcm_hist_DEC_01p = rcm_hist_DEC_01p
+  fout_DEC->rcm_fut_DEC_01p = rcm_fut_DEC_01p
+
+  delete([/av_DEC_avg, gdd_DEC_avg_rmse, rcm_DEC_avg_rmse, pav_DEC_avg, rav_DEC_avg, obs_DEC_avg_variance, gdd_DEC_avg_cc, rcm_DEC_avg_cc, obs_DEC_avg, gdd_hist_DEC_avg, gdd_fut_DEC_avg, rcm_hist_DEC_avg, rcm_fut_DEC_avg, av_DEC_var, gdd_DEC_var_rmse, rcm_DEC_var_rmse, pav_DEC_var, rav_DEC_var, obs_DEC_var_variance, gdd_DEC_var_cc, rcm_DEC_var_cc, obs_DEC_var, gdd_hist_DEC_var, gdd_fut_DEC_var, rcm_hist_DEC_var, rcm_fut_DEC_var, av_DEC_99p, gdd_DEC_99p_rmse, rcm_DEC_99p_rmse, pav_DEC_99p, rav_DEC_99p, obs_DEC_99p_variance, gdd_DEC_99p_cc, rcm_DEC_99p_cc, obs_DEC_99p, gdd_hist_DEC_99p, gdd_fut_DEC_99p, rcm_hist_DEC_99p, rcm_fut_DEC_99p, av_DEC_01p, gdd_DEC_01p_rmse, rcm_DEC_01p_rmse, pav_DEC_01p, rav_DEC_01p, obs_DEC_01p_variance, gdd_DEC_01p_cc, rcm_DEC_01p_cc, obs_DEC_01p, gdd_hist_DEC_01p, gdd_fut_DEC_01p, rcm_hist_DEC_01p, rcm_fut_DEC_01p/])
+  delete(fout_DEC)
+
+;end if
+
+;******************************
+; DEC Shifted data
+;******************************
+  print(systemfunc("date"))
+  print("Starting shifted data calculation")
+
+; data should already be masked and regridded
+;
+;  gdd_hist_dec_shifted_regrid = linint2_Wrap(gdd_hist_dec_shifted&lon, gdd_hist_dec_shifted&lat, gdd_hist_dec_shifted, False, newlon, newlat, 0)
+;  gdd_hist_dec_shifted_regrid!1   = "lat"
+;  gdd_hist_dec_shifted_regrid!2   = "lon"
+;  gdd_hist_dec_shifted_regrid&lat = newlat
+;  gdd_hist_dec_shifted_regrid&lon = newlon
+;  delete(gdd_hist_dec_shifted)
+;  gdd_hist_dec_shifted = gdd_hist_dec_shifted_regrid
+;  delete(gdd_hist_dec_shifted_regrid)
+;
+;  gdd_fut_dec_shifted_regrid = linint2_Wrap(gdd_fut_dec_shifted&lon, gdd_fut_dec_shifted&lat, gdd_fut_dec_shifted, False, newlon, newlat, 0)
+;  gdd_fut_dec_shifted_regrid!1   = "lat"
+;  gdd_fut_dec_shifted_regrid!2   = "lon"
+;  gdd_fut_dec_shifted_regrid&lat = newlat
+;  gdd_fut_dec_shifted_regrid&lon = newlon
+;  delete(gdd_fut_dec_shifted)
+;  gdd_fut_dec_shifted = gdd_fut_dec_shifted_regrid
+;  delete(gdd_fut_dec_shifted_regrid)
+;
+;  rcm_hist_dec_shifted_regrid = linint2_Wrap(rcm_hist_dec_shifted&lon, rcm_hist_dec_shifted&lat, rcm_hist_dec_shifted, False, newlon, newlat, 0)
+;  rcm_hist_dec_shifted_regrid!1   = "lat"
+;  rcm_hist_dec_shifted_regrid!2   = "lon"
+;  rcm_hist_dec_shifted_regrid&lat = newlat
+;  rcm_hist_dec_shifted_regrid&lon = newlon
+;  delete(rcm_hist_dec_shifted)
+;  rcm_hist_dec_shifted = rcm_hist_dec_shifted_regrid
+;  delete(rcm_hist_dec_shifted_regrid)
+;
+;  rcm_fut_dec_shifted_regrid = linint2_Wrap(rcm_fut_dec_shifted&lon, rcm_fut_dec_shifted&lat, rcm_fut_dec_shifted, False, newlon, newlat, 0)
+;  rcm_fut_dec_shifted_regrid!1   = "lat"
+;  rcm_fut_dec_shifted_regrid!2   = "lon"
+;  rcm_fut_dec_shifted_regrid&lat = newlat
+;  rcm_fut_dec_shifted_regrid&lon = newlon
+;  delete(rcm_fut_dec_shifted)
+;  rcm_fut_dec_shifted = rcm_fut_dec_shifted_regrid
+;  delete(rcm_fut_dec_shifted_regrid)
+;
+;  print("Masking shifted data")
+;
+;  rcm_hist_dec_shifted_mask = rcm_hist_dec_shifted
+;  rcm_hist_dec_shifted_mask = mask(rcm_hist_dec_shifted, conform(rcm_hist_dec_shifted, lsmask, (/1,2/)), 1)
+;  delete(rcm_hist_dec_shifted)
+;  rcm_hist_dec_shifted = rcm_hist_dec_shifted_mask
+;  delete(rcm_hist_dec_shifted_mask)
+;
+;  rcm_fut_dec_shifted_mask = rcm_fut_dec_shifted
+;  rcm_fut_dec_shifted_mask = mask(rcm_fut_dec_shifted, conform(rcm_fut_dec_shifted, lsmask, (/1,2/)), 1)
+;  delete(rcm_fut_dec_shifted)
+;  rcm_fut_dec_shifted = rcm_fut_dec_shifted_mask
+;  delete(rcm_fut_dec_shifted_mask)
+;
+;  gdd_hist_dec_shifted_mask = gdd_hist_dec_shifted
+;  gdd_hist_dec_shifted_mask = mask(gdd_hist_dec_shifted, conform(gdd_hist_dec_shifted, lsmask, (/1,2/)), 1)
+;  delete(gdd_hist_dec_shifted)
+;  gdd_hist_dec_shifted = gdd_hist_dec_shifted_mask
+;  delete(gdd_hist_dec_shifted_mask)
+;
+;  gdd_fut_dec_shifted_mask = gdd_fut_dec_shifted
+;  gdd_fut_dec_shifted_mask = mask(gdd_fut_dec_shifted, conform(gdd_fut_dec_shifted, lsmask, (/1,2/)), 1)
+;  delete(gdd_fut_dec_shifted)
+;  gdd_fut_dec_shifted = gdd_fut_dec_shifted_mask
+;  delete(gdd_fut_dec_shifted_mask)
+;
+;  obs_dec_shifted_mask = obs_dec_shifted
+;  obs_dec_shifted_mask = mask(obs_dec_shifted, conform(obs_dec_shifted, lsmask, (/1,2/)), 1)
+;  delete(obs_dec_shifted)
+;  obs_dec_shifted = obs_dec_shifted_mask
+;  delete(obs_dec_shifted_mask)
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Starting seasonal statistics calculation")
+
+; seasonal stats
+  hist_date_sel = cd_calendar(rcm_hist&time, 0)
+  hist_date_mth = hist_date_sel(:,1)
+  delete(hist_date_sel)
+  hist_date_DJF = ind(hist_date_mth.eq.1.or.hist_date_mth.eq.2.or.hist_date_mth.eq.12)
+  hist_date_MAM = ind(hist_date_mth.eq.3.or.hist_date_mth.eq.4.or.hist_date_mth.eq.5)
+  hist_date_JJA = ind(hist_date_mth.eq.6.or.hist_date_mth.eq.7.or.hist_date_mth.eq.8)
+  hist_date_SON = ind(hist_date_mth.eq.9.or.hist_date_mth.eq.10.or.hist_date_mth.eq.11)
+  delete(hist_date_mth)
+
+  fut_date_sel = cd_calendar(rcm_fut&time, 0)
+  fut_date_mth = fut_date_sel(:,1)
+  delete(fut_date_sel)
+  fut_date_DJF = ind(fut_date_mth.eq.1.or.fut_date_mth.eq.2.or.fut_date_mth.eq.12)
+  fut_date_MAM = ind(fut_date_mth.eq.3.or.fut_date_mth.eq.4.or.fut_date_mth.eq.5)
+  fut_date_JJA = ind(fut_date_mth.eq.6.or.fut_date_mth.eq.7.or.fut_date_mth.eq.8)
+  fut_date_SON = ind(fut_date_mth.eq.9.or.fut_date_mth.eq.10.or.fut_date_mth.eq.11)
+  delete(fut_date_mth)
+
+  rcm_hist_DJF = rcm_hist(hist_date_DJF,:,:) ; no need to use dec shifted data here because we're calculating over all DJF points
+  rcm_hist_DJF_avg = dim_avg_n_Wrap(rcm_hist_DJF, 0)
+  rcm_hist_DJF_var = dim_variance_n_Wrap(rcm_hist_DJF, 0)
+  rcm_hist_DJF_99p = percent_to_value_2d(rcm_hist_DJF, 99)
+  rcm_hist_DJF_01p = percent_to_value_2d(rcm_hist_DJF, 1)
+  delete(rcm_hist_DJF)
+
+  rcm_hist_MAM = rcm_hist(hist_date_MAM,:,:)
+  rcm_hist_MAM_avg = dim_avg_n_Wrap(rcm_hist_MAM, 0)
+  rcm_hist_MAM_var = dim_variance_n_Wrap(rcm_hist_MAM, 0)
+  rcm_hist_MAM_99p = percent_to_value_2d(rcm_hist_MAM, 99)
+  rcm_hist_MAM_01p = percent_to_value_2d(rcm_hist_MAM, 1)
+  delete(rcm_hist_MAM)
+
+  rcm_hist_JJA = rcm_hist(hist_date_JJA,:,:)
+  rcm_hist_JJA_avg = dim_avg_n_Wrap(rcm_hist_JJA, 0)
+  rcm_hist_JJA_var = dim_variance_n_Wrap(rcm_hist_JJA, 0)
+  rcm_hist_JJA_99p = percent_to_value_2d(rcm_hist_JJA, 99)
+  rcm_hist_JJA_01p = percent_to_value_2d(rcm_hist_JJA, 1)
+  delete(rcm_hist_JJA)
+
+  rcm_hist_SON = rcm_hist(hist_date_SON,:,:)
+  rcm_hist_SON_avg = dim_avg_n_Wrap(rcm_hist_SON, 0)
+  rcm_hist_SON_var = dim_variance_n_Wrap(rcm_hist_SON, 0)
+  rcm_hist_SON_99p = percent_to_value_2d(rcm_hist_SON, 99)
+  rcm_hist_SON_01p = percent_to_value_2d(rcm_hist_SON, 1)
+  delete(rcm_hist_SON)
+  delete(rcm_hist)
+
+  rcm_fut_DJF = rcm_fut(fut_date_DJF,:,:)
+  rcm_fut_DJF_avg = dim_avg_n_Wrap(rcm_fut_DJF, 0)
+  rcm_fut_DJF_var = dim_variance_n_Wrap(rcm_fut_DJF, 0)
+  rcm_fut_DJF_99p = percent_to_value_2d(rcm_fut_DJF, 99)
+  rcm_fut_DJF_01p = percent_to_value_2d(rcm_fut_DJF, 1)
+  delete(rcm_fut_DJF)
+
+  rcm_fut_MAM = rcm_fut(fut_date_MAM,:,:)
+  rcm_fut_MAM_avg = dim_avg_n_Wrap(rcm_fut_MAM, 0)
+  rcm_fut_MAM_var = dim_variance_n_Wrap(rcm_fut_MAM, 0)
+  rcm_fut_MAM_99p = percent_to_value_2d(rcm_fut_MAM, 99)
+  rcm_fut_MAM_01p = percent_to_value_2d(rcm_fut_MAM, 1)
+  delete(rcm_fut_MAM)
+
+  rcm_fut_JJA = rcm_fut(fut_date_JJA,:,:)
+  rcm_fut_JJA_avg = dim_avg_n_Wrap(rcm_fut_JJA, 0)
+  rcm_fut_JJA_var = dim_variance_n_Wrap(rcm_fut_JJA, 0)
+  rcm_fut_JJA_99p = percent_to_value_2d(rcm_fut_JJA, 99)
+  rcm_fut_JJA_01p = percent_to_value_2d(rcm_fut_JJA, 1)
+  delete(rcm_fut_JJA)
+
+  rcm_fut_SON = rcm_fut(fut_date_SON,:,:)
+  rcm_fut_SON_avg = dim_avg_n_Wrap(rcm_fut_SON, 0)
+  rcm_fut_SON_var = dim_variance_n_Wrap(rcm_fut_SON, 0)
+  rcm_fut_SON_99p = percent_to_value_2d(rcm_fut_SON, 99)
+  rcm_fut_SON_01p = percent_to_value_2d(rcm_fut_SON, 1)
+  delete(rcm_fut_SON)
+  delete(rcm_fut)
+
+  gdd_hist_DJF = gdd_hist(hist_date_DJF,:,:)
+  gdd_hist_DJF_avg = dim_avg_n_Wrap(gdd_hist_DJF, 0)
+  gdd_hist_DJF_var = dim_variance_n_Wrap(gdd_hist_DJF, 0)
+  gdd_hist_DJF_99p = percent_to_value_2d(gdd_hist_DJF, 99)
+  gdd_hist_DJF_01p = percent_to_value_2d(gdd_hist_DJF, 1)
+  delete(gdd_hist_DJF)
+
+  gdd_hist_MAM = gdd_hist(hist_date_MAM,:,:)
+  gdd_hist_MAM_avg = dim_avg_n_Wrap(gdd_hist_MAM, 0)
+  gdd_hist_MAM_var = dim_variance_n_Wrap(gdd_hist_MAM, 0)
+  gdd_hist_MAM_99p = percent_to_value_2d(gdd_hist_MAM, 99)
+  gdd_hist_MAM_01p = percent_to_value_2d(gdd_hist_MAM, 1)
+  delete(gdd_hist_MAM)
+  
+  gdd_hist_JJA = gdd_hist(hist_date_JJA,:,:)
+  gdd_hist_JJA_avg = dim_avg_n_Wrap(gdd_hist_JJA, 0)
+  gdd_hist_JJA_var = dim_variance_n_Wrap(gdd_hist_JJA, 0)
+  gdd_hist_JJA_99p = percent_to_value_2d(gdd_hist_JJA, 99)
+  gdd_hist_JJA_01p = percent_to_value_2d(gdd_hist_JJA, 1)
+  delete(gdd_hist_JJA)
+  
+  gdd_hist_SON = gdd_hist(hist_date_SON,:,:)
+  gdd_hist_SON_avg = dim_avg_n_Wrap(gdd_hist_SON, 0)
+  gdd_hist_SON_var = dim_variance_n_Wrap(gdd_hist_SON, 0)
+  gdd_hist_SON_99p = percent_to_value_2d(gdd_hist_SON, 99)
+  gdd_hist_SON_01p = percent_to_value_2d(gdd_hist_SON, 1)
+  delete(gdd_hist_SON)
+  delete(gdd_hist)
+
+  gdd_fut_DJF = gdd_fut(fut_date_DJF,:,:)
+  gdd_fut_DJF_avg = dim_avg_n_Wrap(gdd_fut_DJF, 0)
+  gdd_fut_DJF_var = dim_variance_n_Wrap(gdd_fut_DJF, 0)
+  gdd_fut_DJF_99p = percent_to_value_2d(gdd_fut_DJF, 99)
+  gdd_fut_DJF_01p = percent_to_value_2d(gdd_fut_DJF, 1)
+  delete(gdd_fut_DJF)
+
+  gdd_fut_MAM = gdd_fut(fut_date_MAM,:,:)
+  gdd_fut_MAM_avg = dim_avg_n_Wrap(gdd_fut_MAM, 0)
+  gdd_fut_MAM_var = dim_variance_n_Wrap(gdd_fut_MAM, 0)
+  gdd_fut_MAM_99p = percent_to_value_2d(gdd_fut_MAM, 99)
+  gdd_fut_MAM_01p = percent_to_value_2d(gdd_fut_MAM, 1)
+  delete(gdd_fut_MAM)
+
+  gdd_fut_JJA = gdd_fut(fut_date_JJA,:,:)
+  gdd_fut_JJA_avg = dim_avg_n_Wrap(gdd_fut_JJA, 0)
+  gdd_fut_JJA_var = dim_variance_n_Wrap(gdd_fut_JJA, 0)
+  gdd_fut_JJA_99p = percent_to_value_2d(gdd_fut_JJA, 99)
+  gdd_fut_JJA_01p = percent_to_value_2d(gdd_fut_JJA, 1)
+  delete(gdd_fut_JJA)
+
+  gdd_fut_SON = gdd_fut(fut_date_SON,:,:)
+  gdd_fut_SON_avg = dim_avg_n_Wrap(gdd_fut_SON, 0)
+  gdd_fut_SON_var = dim_variance_n_Wrap(gdd_fut_SON, 0)
+  gdd_fut_SON_99p = percent_to_value_2d(gdd_fut_SON, 99)
+  gdd_fut_SON_01p = percent_to_value_2d(gdd_fut_SON, 1)
+  delete(gdd_fut_SON)
+  delete(gdd_fut)
+
+  obs_DJF = obs(hist_date_DJF,:,:)
+  obs_DJF_avg = dim_avg_n_Wrap(obs_DJF, 0)
+  obs_DJF_var = dim_variance_n_Wrap(obs_DJF, 0)
+  obs_DJF_99p = percent_to_value_2d(obs_DJF, 99)
+  obs_DJF_01p = percent_to_value_2d(obs_DJF, 1)
+  delete(obs_DJF)
+
+  obs_MAM = obs(hist_date_MAM,:,:)
+  obs_MAM_avg = dim_avg_n_Wrap(obs_MAM, 0)
+  obs_MAM_var = dim_variance_n_Wrap(obs_MAM, 0)
+  obs_MAM_99p = percent_to_value_2d(obs_MAM, 99)
+  obs_MAM_01p = percent_to_value_2d(obs_MAM, 1)
+  delete(obs_MAM)
+
+  obs_JJA = obs(hist_date_JJA,:,:)
+  obs_JJA_avg = dim_avg_n_Wrap(obs_JJA, 0)
+  obs_JJA_var = dim_variance_n_Wrap(obs_JJA, 0)
+  obs_JJA_99p = percent_to_value_2d(obs_JJA, 99)
+  obs_JJA_01p = percent_to_value_2d(obs_JJA, 1)
+  delete(obs_JJA)
+
+  obs_SON = obs(hist_date_SON,:,:)
+  obs_SON_avg = dim_avg_n_Wrap(obs_SON, 0)
+  obs_SON_var = dim_variance_n_Wrap(obs_SON, 0)
+  obs_SON_99p = percent_to_value_2d(obs_SON, 99)
+  obs_SON_01p = percent_to_value_2d(obs_SON, 1)
+  delete(obs_SON)
+
+  delete([/hist_date_DJF, hist_date_MAM, hist_date_JJA, hist_date_SON/])
+  delete([/fut_date_DJF, fut_date_MAM, fut_date_JJA, fut_date_SON/])
+
+; shift December months a year forward for DJF calculation. e.g., Dec86 becomes Dec87 so DJF87 is actually Dec86, JF87
+  opt = 0
+  opt@return_type = "float"
+  hist_date_all = cd_calendar(obs&time, 0)
+  hist_date_new = hist_date_all
+  hist_date_new(:,0) = where(hist_date_all(:,1).eq.12, hist_date_new(:,0)+1, hist_date_new(:,0))
+  delete(hist_date_all)
+  hist_time_new = cd_inv_calendar(hist_date_new(:,0), hist_date_new(:,1), hist_date_new(:,2), hist_date_new(:,3), hist_date_new(:,4), hist_date_new(:,5), obs&time@units, opt)
+  delete(hist_date_new)
+
+  ; only need to shift obs for inter-annual calculation
+  obs_dec_shifted = obs
+  delete(obs)
+
+  obs_dec_shifted&time = hist_time_new
+  delete(hist_time_new)
+
+  asciiwrite("obs_all_months_new_time", obs_dec_shifted(:,{-37.5},{145}))
+
+  hist_date = cd_calendar(obs_dec_shifted&time, -2)
+  hist_year = hist_date/10000
+  hist_years = ispan(min(hist_year), max(hist_year)-1, 1) ; subract 1 from max because shifting last Dec moves it the year after
+  delete(hist_date)
+
+  lat = obs_dec_shifted&lat
+  lon = obs_dec_shifted&lon
+  nlat = dimsizes(lat)
+  nlon = dimsizes(lon)
+
+; create new arrays for statistics
+  obs_DJF_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_DJF_avg_yearly!0 = "year"
+  obs_DJF_avg_yearly!1 = "lat"
+  obs_DJF_avg_yearly!2 = "lon"
+  obs_DJF_avg_yearly&year = hist_years
+  obs_DJF_avg_yearly&lat = lat
+  obs_DJF_avg_yearly&lon = lon
+  obs_DJF_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_DJF_var_yearly!0 = "year"
+  obs_DJF_var_yearly!1 = "lat"
+  obs_DJF_var_yearly!2 = "lon"
+  obs_DJF_var_yearly&year = hist_years
+  obs_DJF_var_yearly&lat = lat
+  obs_DJF_var_yearly&lon = lon
+  obs_DJF_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_DJF_99p_yearly!0 = "year"
+  obs_DJF_99p_yearly!1 = "lat"
+  obs_DJF_99p_yearly!2 = "lon"
+  obs_DJF_99p_yearly&year = hist_years
+  obs_DJF_99p_yearly&lat = lat
+  obs_DJF_99p_yearly&lon = lon
+  obs_DJF_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_DJF_01p_yearly!0 = "year"
+  obs_DJF_01p_yearly!1 = "lat"
+  obs_DJF_01p_yearly!2 = "lon"
+  obs_DJF_01p_yearly&year = hist_years
+  obs_DJF_01p_yearly&lat = lat
+  obs_DJF_01p_yearly&lon = lon
+
+  obs_MAM_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_MAM_avg_yearly!0 = "year"
+  obs_MAM_avg_yearly!1 = "lat"
+  obs_MAM_avg_yearly!2 = "lon"
+  obs_MAM_avg_yearly&year = hist_years
+  obs_MAM_avg_yearly&lat = lat
+  obs_MAM_avg_yearly&lon = lon
+  obs_MAM_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_MAM_var_yearly!0 = "year"
+  obs_MAM_var_yearly!1 = "lat"
+  obs_MAM_var_yearly!2 = "lon"
+  obs_MAM_var_yearly&year = hist_years
+  obs_MAM_var_yearly&lat = lat
+  obs_MAM_var_yearly&lon = lon
+  obs_MAM_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_MAM_99p_yearly!0 = "year"
+  obs_MAM_99p_yearly!1 = "lat"
+  obs_MAM_99p_yearly!2 = "lon"
+  obs_MAM_99p_yearly&year = hist_years
+  obs_MAM_99p_yearly&lat = lat
+  obs_MAM_99p_yearly&lon = lon
+  obs_MAM_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_MAM_01p_yearly!0 = "year"
+  obs_MAM_01p_yearly!1 = "lat"
+  obs_MAM_01p_yearly!2 = "lon"
+  obs_MAM_01p_yearly&year = hist_years
+  obs_MAM_01p_yearly&lat = lat
+  obs_MAM_01p_yearly&lon = lon
+
+  obs_JJA_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_JJA_avg_yearly!0 = "year"
+  obs_JJA_avg_yearly!1 = "lat"
+  obs_JJA_avg_yearly!2 = "lon"
+  obs_JJA_avg_yearly&year = hist_years
+  obs_JJA_avg_yearly&lat = lat
+  obs_JJA_avg_yearly&lon = lon
+  obs_JJA_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_JJA_var_yearly!0 = "year"
+  obs_JJA_var_yearly!1 = "lat"
+  obs_JJA_var_yearly!2 = "lon"
+  obs_JJA_var_yearly&year = hist_years
+  obs_JJA_var_yearly&lat = lat
+  obs_JJA_var_yearly&lon = lon
+  obs_JJA_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_JJA_99p_yearly!0 = "year"
+  obs_JJA_99p_yearly!1 = "lat"
+  obs_JJA_99p_yearly!2 = "lon"
+  obs_JJA_99p_yearly&year = hist_years
+  obs_JJA_99p_yearly&lat = lat
+  obs_JJA_99p_yearly&lon = lon
+  obs_JJA_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_JJA_01p_yearly!0 = "year"
+  obs_JJA_01p_yearly!1 = "lat"
+  obs_JJA_01p_yearly!2 = "lon"
+  obs_JJA_01p_yearly&year = hist_years
+  obs_JJA_01p_yearly&lat = lat
+  obs_JJA_01p_yearly&lon = lon
+
+  obs_SON_avg_yearly = new((/window, nlat, nlon/), float) ; average
+  obs_SON_avg_yearly!0 = "year"
+  obs_SON_avg_yearly!1 = "lat"
+  obs_SON_avg_yearly!2 = "lon"
+  obs_SON_avg_yearly&year = hist_years
+  obs_SON_avg_yearly&lat = lat
+  obs_SON_avg_yearly&lon = lon
+  obs_SON_var_yearly = new((/window, nlat, nlon/), float) ; variance
+  obs_SON_var_yearly!0 = "year"
+  obs_SON_var_yearly!1 = "lat"
+  obs_SON_var_yearly!2 = "lon"
+  obs_SON_var_yearly&year = hist_years
+  obs_SON_var_yearly&lat = lat
+  obs_SON_var_yearly&lon = lon
+  obs_SON_99p_yearly = new((/window, nlat, nlon/), float) ; 99th percentile 
+  obs_SON_99p_yearly!0 = "year"
+  obs_SON_99p_yearly!1 = "lat"
+  obs_SON_99p_yearly!2 = "lon"
+  obs_SON_99p_yearly&year = hist_years
+  obs_SON_99p_yearly&lat = lat
+  obs_SON_99p_yearly&lon = lon
+  obs_SON_01p_yearly = new((/window, nlat, nlon/), float) ; 1th percentile
+  obs_SON_01p_yearly!0 = "year"
+  obs_SON_01p_yearly!1 = "lat"
+  obs_SON_01p_yearly!2 = "lon"
+  obs_SON_01p_yearly&year = hist_years
+  obs_SON_01p_yearly&lat = lat
+  obs_SON_01p_yearly&lon = lon
+
+  delete(nlat)
+  delete(nlon)
+  
+;******************************
+; loop over years using shifted data
+;******************************
+  print(systemfunc("date"))
+  print("Looping over years (shifted)")
+  do nyrc=0, window-1
+    print(nyrc)
+    print(systemfunc("date"))
+    ; hist_yrs is the individual year selected in the loop e.g., 1986, 1987, 1988 etc.
+    hist_yrs = min(hist_year)+nyrc ; hist_year is array of years (e.g., 1986*365, 1987*365 ... 2006*31).
+    hist_yr_sel = ind(hist_year.eq.hist_yrs)
+
+    obs_temp = obs_dec_shifted(hist_yr_sel,:,:)
+
+; select seasons. December has been shifted to be the same year as JF
+    hist_date_sel = cd_calendar(obs_temp&time, 0)
+    hist_date_mth = hist_date_sel(:,1)
+
+    hist_date_DJF = ind(hist_date_mth.eq.1.or.hist_date_mth.eq.2.or.hist_date_mth.eq.12)
+    hist_date_MAM = ind(hist_date_mth.eq.3.or.hist_date_mth.eq.4.or.hist_date_mth.eq.5)
+    hist_date_JJA = ind(hist_date_mth.eq.6.or.hist_date_mth.eq.7.or.hist_date_mth.eq.8)
+    hist_date_SON = ind(hist_date_mth.eq.9.or.hist_date_mth.eq.10.or.hist_date_mth.eq.11)
+
+    obs_temp_DJF = obs_temp(hist_date_DJF,:,:)
+    obs_temp_MAM = obs_temp(hist_date_MAM,:,:)
+    obs_temp_JJA = obs_temp(hist_date_JJA,:,:)
+    obs_temp_SON = obs_temp(hist_date_SON,:,:)
+    delete(obs_temp)
+
+    obs_temp_DJF_avg = dim_avg_n_Wrap(obs_temp_DJF, 0)
+    obs_temp_DJF_var = dim_variance_n_Wrap(obs_temp_DJF, 0)
+    obs_temp_DJF_99p = percent_to_value_2d(obs_temp_DJF, 99)
+    obs_temp_DJF_01p = percent_to_value_2d(obs_temp_DJF, 1)
+    obs_temp_MAM_avg = dim_avg_n_Wrap(obs_temp_MAM, 0)
+    obs_temp_MAM_var = dim_variance_n_Wrap(obs_temp_MAM, 0)
+    obs_temp_MAM_99p = percent_to_value_2d(obs_temp_MAM, 99)
+    obs_temp_MAM_01p = percent_to_value_2d(obs_temp_MAM, 1)
+    obs_temp_JJA_avg = dim_avg_n_Wrap(obs_temp_JJA, 0)
+    obs_temp_JJA_var = dim_variance_n_Wrap(obs_temp_JJA, 0)
+    obs_temp_JJA_99p = percent_to_value_2d(obs_temp_JJA, 99)
+    obs_temp_JJA_01p = percent_to_value_2d(obs_temp_JJA, 1)
+    obs_temp_SON_avg = dim_avg_n_Wrap(obs_temp_SON, 0)
+    obs_temp_SON_var = dim_variance_n_Wrap(obs_temp_SON, 0)
+    obs_temp_SON_99p = percent_to_value_2d(obs_temp_SON, 99)
+    obs_temp_SON_01p = percent_to_value_2d(obs_temp_SON, 1)
+
+    obs_DJF_avg_yearly(nyrc,:,:) = (/obs_temp_DJF_avg/)
+    obs_DJF_var_yearly(nyrc,:,:) = (/obs_temp_DJF_var/)
+    obs_DJF_99p_yearly(nyrc,:,:) = (/obs_temp_DJF_99p/)
+    obs_DJF_01p_yearly(nyrc,:,:) = (/obs_temp_DJF_01p/)
+    obs_MAM_avg_yearly(nyrc,:,:) = (/obs_temp_MAM_avg/)
+    obs_MAM_var_yearly(nyrc,:,:) = (/obs_temp_MAM_var/)
+    obs_MAM_99p_yearly(nyrc,:,:) = (/obs_temp_MAM_99p/)
+    obs_MAM_01p_yearly(nyrc,:,:) = (/obs_temp_MAM_01p/)
+    obs_JJA_avg_yearly(nyrc,:,:) = (/obs_temp_JJA_avg/)
+    obs_JJA_var_yearly(nyrc,:,:) = (/obs_temp_JJA_var/)
+    obs_JJA_99p_yearly(nyrc,:,:) = (/obs_temp_JJA_99p/)
+    obs_JJA_01p_yearly(nyrc,:,:) = (/obs_temp_JJA_01p/)
+    obs_SON_avg_yearly(nyrc,:,:) = (/obs_temp_SON_avg/)
+    obs_SON_var_yearly(nyrc,:,:) = (/obs_temp_SON_var/)
+    obs_SON_99p_yearly(nyrc,:,:) = (/obs_temp_SON_99p/)
+    obs_SON_01p_yearly(nyrc,:,:) = (/obs_temp_SON_01p/)
+
+; delete
+    delete([/hist_date_sel, hist_yr_sel, hist_date_mth, hist_date_DJF, hist_date_MAM, hist_date_JJA, hist_date_SON/])
+    delete([/obs_temp_DJF, obs_temp_DJF_avg, obs_temp_DJF_var, obs_temp_DJF_99p, obs_temp_DJF_01p/])
+    delete([/obs_temp_MAM, obs_temp_MAM_avg, obs_temp_MAM_var, obs_temp_MAM_99p, obs_temp_MAM_01p/])
+    delete([/obs_temp_JJA, obs_temp_JJA_avg, obs_temp_JJA_var, obs_temp_JJA_99p, obs_temp_JJA_01p/])
+    delete([/obs_temp_SON, obs_temp_SON_avg, obs_temp_SON_var, obs_temp_SON_99p, obs_temp_SON_01p/])
+  end do
+
+  delete(obs_dec_shifted)
+  delete(hist_year)
+
+;******************************
+;******************************
+  print(systemfunc("date"))
+  print("Calculating seasonal AV, PAV, RAV")
+
+; DJF
+  print(systemfunc("date"))
+  print("DJF")
+  rcm_DJF_avg_rmse = rcm_hist_DJF_avg
+  rcm_DJF_avg_rmse = sqrt((rcm_hist_DJF_avg - obs_DJF_avg)^2)
+  rcm_DJF_var_rmse = rcm_hist_DJF_var
+  rcm_DJF_var_rmse = sqrt((rcm_hist_DJF_var - obs_DJF_var)^2)
+  rcm_DJF_99p_rmse = rcm_hist_DJF_99p
+  rcm_DJF_99p_rmse = sqrt((rcm_hist_DJF_99p - obs_DJF_99p)^2)
+  rcm_DJF_01p_rmse = rcm_hist_DJF_01p
+  rcm_DJF_01p_rmse = sqrt((rcm_hist_DJF_01p - obs_DJF_01p)^2)
+
+  gdd_DJF_avg_rmse = gdd_hist_DJF_avg
+  gdd_DJF_avg_rmse = sqrt((gdd_hist_DJF_avg - obs_DJF_avg)^2)
+  gdd_DJF_var_rmse = gdd_hist_DJF_var
+  gdd_DJF_var_rmse = sqrt((gdd_hist_DJF_var - obs_DJF_var)^2)
+  gdd_DJF_99p_rmse = gdd_hist_DJF_99p
+  gdd_DJF_99p_rmse = sqrt((gdd_hist_DJF_99p - obs_DJF_99p)^2)
+  gdd_DJF_01p_rmse = gdd_hist_DJF_01p
+  gdd_DJF_01p_rmse = sqrt((gdd_hist_DJF_01p - obs_DJF_01p)^2)
+
+  av_DJF_avg = gdd_DJF_avg_rmse
+  av_DJF_avg = gdd_DJF_avg_rmse - rcm_DJF_avg_rmse
+  av_DJF_var = gdd_DJF_var_rmse
+  av_DJF_var = gdd_DJF_var_rmse - rcm_DJF_var_rmse
+  av_DJF_99p = gdd_DJF_99p_rmse
+  av_DJF_99p = gdd_DJF_99p_rmse - rcm_DJF_99p_rmse
+  av_DJF_01p = gdd_DJF_01p_rmse
+  av_DJF_01p = gdd_DJF_01p_rmse - rcm_DJF_01p_rmse
+
+  rcm_DJF_avg_cc = rcm_fut_DJF_avg
+  rcm_DJF_avg_cc = rcm_fut_DJF_avg - rcm_hist_DJF_avg
+  rcm_DJF_var_cc = rcm_fut_DJF_var
+  rcm_DJF_var_cc = rcm_fut_DJF_var - rcm_hist_DJF_var
+  rcm_DJF_99p_cc = rcm_fut_DJF_99p
+  rcm_DJF_99p_cc = rcm_fut_DJF_99p - rcm_hist_DJF_99p
+  rcm_DJF_01p_cc = rcm_fut_DJF_01p
+  rcm_DJF_01p_cc = rcm_fut_DJF_01p - rcm_hist_DJF_01p
+
+  gdd_DJF_avg_cc = gdd_fut_DJF_avg
+  gdd_DJF_avg_cc = gdd_fut_DJF_avg - gdd_hist_DJF_avg
+  gdd_DJF_var_cc = gdd_fut_DJF_var
+  gdd_DJF_var_cc = gdd_fut_DJF_var - gdd_hist_DJF_var
+  gdd_DJF_99p_cc = gdd_fut_DJF_99p
+  gdd_DJF_99p_cc = gdd_fut_DJF_99p - gdd_hist_DJF_99p
+  gdd_DJF_01p_cc = gdd_fut_DJF_01p
+  gdd_DJF_01p_cc = gdd_fut_DJF_01p - gdd_hist_DJF_01p
+
+  pav_DJF_avg = rcm_DJF_avg_cc
+  pav_DJF_avg = rcm_DJF_avg_cc - gdd_DJF_avg_cc
+  pav_DJF_var = rcm_DJF_var_cc
+  pav_DJF_var = rcm_DJF_var_cc - gdd_DJF_var_cc
+  pav_DJF_99p = rcm_DJF_99p_cc
+  pav_DJF_99p = rcm_DJF_99p_cc - gdd_DJF_99p_cc
+  pav_DJF_01p = rcm_DJF_01p_cc
+  pav_DJF_01p = rcm_DJF_01p_cc - gdd_DJF_01p_cc
+
+  obs_DJF_avg_variance = dim_variance_n_Wrap(obs_DJF_avg_yearly, 0)
+  obs_DJF_var_variance = dim_variance_n_Wrap(obs_DJF_var_yearly, 0)
+  obs_DJF_99p_variance = dim_variance_n_Wrap(obs_DJF_99p_yearly, 0)
+  obs_DJF_01p_variance = dim_variance_n_Wrap(obs_DJF_01p_yearly, 0)
+
+  delete([/obs_DJF_avg_yearly, obs_DJF_var_yearly, obs_DJF_99p_yearly, obs_DJF_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_DJF_avg_variance_mask = obs_DJF_avg_variance
+  obs_DJF_avg_variance_mask = where(obs_DJF_avg_variance_mask.eq.0, obs_DJF_avg_variance_mask@_FillValue, obs_DJF_avg_variance_mask)
+  delete(obs_DJF_avg_variance)
+  obs_DJF_avg_variance = obs_DJF_avg_variance_mask
+  delete(obs_DJF_avg_variance_mask)
+  obs_DJF_var_variance_mask = obs_DJF_var_variance
+  obs_DJF_var_variance_mask = where(obs_DJF_var_variance_mask.eq.0, obs_DJF_var_variance_mask@_FillValue, obs_DJF_var_variance_mask)
+  delete(obs_DJF_var_variance)
+  obs_DJF_var_variance = obs_DJF_var_variance_mask
+  delete(obs_DJF_var_variance_mask)
+  obs_DJF_99p_variance_mask = obs_DJF_99p_variance
+  obs_DJF_99p_variance_mask = where(obs_DJF_99p_variance_mask.eq.0, obs_DJF_99p_variance_mask@_FillValue, obs_DJF_99p_variance_mask)
+  delete(obs_DJF_99p_variance)
+  obs_DJF_99p_variance = obs_DJF_99p_variance_mask
+  delete(obs_DJF_99p_variance_mask)
+  obs_DJF_01p_variance_mask = obs_DJF_01p_variance
+  obs_DJF_01p_variance_mask = where(obs_DJF_01p_variance_mask.eq.0, obs_DJF_01p_variance_mask@_FillValue, obs_DJF_01p_variance_mask)
+  delete(obs_DJF_01p_variance)
+  obs_DJF_01p_variance = obs_DJF_01p_variance_mask
+  delete(obs_DJF_01p_variance_mask)
+
+  rav_DJF_avg = av_DJF_avg
+  rav_DJF_avg = (av_DJF_avg * abs(pav_DJF_avg))/obs_DJF_avg_variance
+  rav_DJF_var = av_DJF_var
+  rav_DJF_var = (av_DJF_var * abs(pav_DJF_var))/obs_DJF_var_variance
+  rav_DJF_99p = av_DJF_99p
+  rav_DJF_99p = (av_DJF_99p * abs(pav_DJF_99p))/obs_DJF_99p_variance
+  rav_DJF_01p = av_DJF_01p
+  rav_DJF_01p = (av_DJF_01p * abs(pav_DJF_01p))/obs_DJF_01p_variance
+
+  fout_DJF = addfile(fout_name_DJF, "c")
+  fout_DJF->av_DJF_avg = av_DJF_avg
+  fout_DJF->gdd_DJF_avg_rmse = gdd_DJF_avg_rmse
+  fout_DJF->rcm_DJF_avg_rmse = rcm_DJF_avg_rmse
+  fout_DJF->pav_DJF_avg = pav_DJF_avg
+  fout_DJF->rav_DJF_avg = rav_DJF_avg
+  fout_DJF->obs_DJF_avg_variance = obs_DJF_avg_variance
+  fout_DJF->gdd_DJF_avg_cc = gdd_DJF_avg_cc
+  fout_DJF->rcm_DJF_avg_cc = rcm_DJF_avg_cc
+  fout_DJF->obs_DJF_avg = obs_DJF_avg
+  fout_DJF->gdd_hist_DJF_avg = gdd_hist_DJF_avg
+  fout_DJF->gdd_fut_DJF_avg = gdd_fut_DJF_avg
+  fout_DJF->rcm_hist_DJF_avg = rcm_hist_DJF_avg
+  fout_DJF->rcm_fut_DJF_avg = rcm_fut_DJF_avg
+  fout_DJF->av_DJF_var = av_DJF_var
+  fout_DJF->gdd_DJF_var_rmse = gdd_DJF_var_rmse
+  fout_DJF->rcm_DJF_var_rmse = rcm_DJF_var_rmse
+  fout_DJF->pav_DJF_var = pav_DJF_var
+  fout_DJF->rav_DJF_var = rav_DJF_var
+  fout_DJF->obs_DJF_var_variance = obs_DJF_var_variance
+  fout_DJF->gdd_DJF_var_cc = gdd_DJF_var_cc
+  fout_DJF->rcm_DJF_var_cc = rcm_DJF_var_cc
+  fout_DJF->obs_DJF_var = obs_DJF_var
+  fout_DJF->gdd_hist_DJF_var = gdd_hist_DJF_var
+  fout_DJF->gdd_fut_DJF_var = gdd_fut_DJF_var
+  fout_DJF->rcm_hist_DJF_var = rcm_hist_DJF_var
+  fout_DJF->rcm_fut_DJF_var = rcm_fut_DJF_var
+  fout_DJF->av_DJF_99p = av_DJF_99p
+  fout_DJF->gdd_DJF_99p_rmse = gdd_DJF_99p_rmse
+  fout_DJF->rcm_DJF_99p_rmse = rcm_DJF_99p_rmse
+  fout_DJF->pav_DJF_99p = pav_DJF_99p
+  fout_DJF->rav_DJF_99p = rav_DJF_99p
+  fout_DJF->obs_DJF_99p_variance = obs_DJF_99p_variance
+  fout_DJF->gdd_DJF_99p_cc = gdd_DJF_99p_cc
+  fout_DJF->rcm_DJF_99p_cc = rcm_DJF_99p_cc
+  fout_DJF->obs_DJF_99p = obs_DJF_99p
+  fout_DJF->gdd_hist_DJF_99p = gdd_hist_DJF_99p
+  fout_DJF->gdd_fut_DJF_99p = gdd_fut_DJF_99p
+  fout_DJF->rcm_hist_DJF_99p = rcm_hist_DJF_99p
+  fout_DJF->rcm_fut_DJF_99p = rcm_fut_DJF_99p
+  fout_DJF->av_DJF_01p = av_DJF_01p
+  fout_DJF->gdd_DJF_01p_rmse = gdd_DJF_01p_rmse
+  fout_DJF->rcm_DJF_01p_rmse = rcm_DJF_01p_rmse
+  fout_DJF->pav_DJF_01p = pav_DJF_01p
+  fout_DJF->rav_DJF_01p = rav_DJF_01p
+  fout_DJF->obs_DJF_01p_variance = obs_DJF_01p_variance
+  fout_DJF->gdd_DJF_01p_cc = gdd_DJF_01p_cc
+  fout_DJF->rcm_DJF_01p_cc = rcm_DJF_01p_cc
+  fout_DJF->obs_DJF_01p = obs_DJF_01p
+  fout_DJF->gdd_hist_DJF_01p = gdd_hist_DJF_01p
+  fout_DJF->gdd_fut_DJF_01p = gdd_fut_DJF_01p
+  fout_DJF->rcm_hist_DJF_01p = rcm_hist_DJF_01p
+  fout_DJF->rcm_fut_DJF_01p = rcm_fut_DJF_01p
+
+  delete([/av_DJF_avg, gdd_DJF_avg_rmse, rcm_DJF_avg_rmse, pav_DJF_avg, rav_DJF_avg, obs_DJF_avg_variance, gdd_DJF_avg_cc, rcm_DJF_avg_cc, obs_DJF_avg, gdd_hist_DJF_avg, gdd_fut_DJF_avg, rcm_hist_DJF_avg, rcm_fut_DJF_avg, av_DJF_var, gdd_DJF_var_rmse, rcm_DJF_var_rmse, pav_DJF_var, rav_DJF_var, obs_DJF_var_variance, gdd_DJF_var_cc, rcm_DJF_var_cc, obs_DJF_var, gdd_hist_DJF_var, gdd_fut_DJF_var, rcm_hist_DJF_var, rcm_fut_DJF_var, av_DJF_99p, gdd_DJF_99p_rmse, rcm_DJF_99p_rmse, pav_DJF_99p, rav_DJF_99p, obs_DJF_99p_variance, gdd_DJF_99p_cc, rcm_DJF_99p_cc, obs_DJF_99p, gdd_hist_DJF_99p, gdd_fut_DJF_99p, rcm_hist_DJF_99p, rcm_fut_DJF_99p, av_DJF_01p, gdd_DJF_01p_rmse, rcm_DJF_01p_rmse, pav_DJF_01p, rav_DJF_01p, obs_DJF_01p_variance, gdd_DJF_01p_cc, rcm_DJF_01p_cc, obs_DJF_01p, gdd_hist_DJF_01p, gdd_fut_DJF_01p, rcm_hist_DJF_01p, rcm_fut_DJF_01p/])
+  delete(fout_DJF)
+
+; MAM
+  print(systemfunc("date"))
+  print("MAM")
+  rcm_MAM_avg_rmse = rcm_hist_MAM_avg
+  rcm_MAM_avg_rmse = sqrt((rcm_hist_MAM_avg - obs_MAM_avg)^2)
+  rcm_MAM_var_rmse = rcm_hist_MAM_var
+  rcm_MAM_var_rmse = sqrt((rcm_hist_MAM_var - obs_MAM_var)^2)
+  rcm_MAM_99p_rmse = rcm_hist_MAM_99p
+  rcm_MAM_99p_rmse = sqrt((rcm_hist_MAM_99p - obs_MAM_99p)^2)
+  rcm_MAM_01p_rmse = rcm_hist_MAM_01p
+  rcm_MAM_01p_rmse = sqrt((rcm_hist_MAM_01p - obs_MAM_01p)^2)
+
+  gdd_MAM_avg_rmse = gdd_hist_MAM_avg
+  gdd_MAM_avg_rmse = sqrt((gdd_hist_MAM_avg - obs_MAM_avg)^2)
+  gdd_MAM_var_rmse = gdd_hist_MAM_var
+  gdd_MAM_var_rmse = sqrt((gdd_hist_MAM_var - obs_MAM_var)^2)
+  gdd_MAM_99p_rmse = gdd_hist_MAM_99p
+  gdd_MAM_99p_rmse = sqrt((gdd_hist_MAM_99p - obs_MAM_99p)^2)
+  gdd_MAM_01p_rmse = gdd_hist_MAM_01p
+  gdd_MAM_01p_rmse = sqrt((gdd_hist_MAM_01p - obs_MAM_01p)^2)
+
+  av_MAM_avg = gdd_MAM_avg_rmse
+  av_MAM_avg = gdd_MAM_avg_rmse - rcm_MAM_avg_rmse
+  av_MAM_var = gdd_MAM_var_rmse
+  av_MAM_var = gdd_MAM_var_rmse - rcm_MAM_var_rmse
+  av_MAM_99p = gdd_MAM_99p_rmse
+  av_MAM_99p = gdd_MAM_99p_rmse - rcm_MAM_99p_rmse
+  av_MAM_01p = gdd_MAM_01p_rmse
+  av_MAM_01p = gdd_MAM_01p_rmse - rcm_MAM_01p_rmse
+
+  rcm_MAM_avg_cc = rcm_fut_MAM_avg
+  rcm_MAM_avg_cc = rcm_fut_MAM_avg - rcm_hist_MAM_avg
+  rcm_MAM_var_cc = rcm_fut_MAM_var
+  rcm_MAM_var_cc = rcm_fut_MAM_var - rcm_hist_MAM_var
+  rcm_MAM_99p_cc = rcm_fut_MAM_99p
+  rcm_MAM_99p_cc = rcm_fut_MAM_99p - rcm_hist_MAM_99p
+  rcm_MAM_01p_cc = rcm_fut_MAM_01p
+  rcm_MAM_01p_cc = rcm_fut_MAM_01p - rcm_hist_MAM_01p
+
+  gdd_MAM_avg_cc = gdd_fut_MAM_avg
+  gdd_MAM_avg_cc = gdd_fut_MAM_avg - gdd_hist_MAM_avg
+  gdd_MAM_var_cc = gdd_fut_MAM_var
+  gdd_MAM_var_cc = gdd_fut_MAM_var - gdd_hist_MAM_var
+  gdd_MAM_99p_cc = gdd_fut_MAM_99p
+  gdd_MAM_99p_cc = gdd_fut_MAM_99p - gdd_hist_MAM_99p
+  gdd_MAM_01p_cc = gdd_fut_MAM_01p
+  gdd_MAM_01p_cc = gdd_fut_MAM_01p - gdd_hist_MAM_01p
+
+  pav_MAM_avg = rcm_MAM_avg_cc
+  pav_MAM_avg = rcm_MAM_avg_cc - gdd_MAM_avg_cc
+  pav_MAM_var = rcm_MAM_var_cc
+  pav_MAM_var = rcm_MAM_var_cc - gdd_MAM_var_cc
+  pav_MAM_99p = rcm_MAM_99p_cc
+  pav_MAM_99p = rcm_MAM_99p_cc - gdd_MAM_99p_cc
+  pav_MAM_01p = rcm_MAM_01p_cc
+  pav_MAM_01p = rcm_MAM_01p_cc - gdd_MAM_01p_cc
+
+  obs_MAM_avg_variance = dim_variance_n_Wrap(obs_MAM_avg_yearly, 0)
+  obs_MAM_var_variance = dim_variance_n_Wrap(obs_MAM_var_yearly, 0)
+  obs_MAM_99p_variance = dim_variance_n_Wrap(obs_MAM_99p_yearly, 0)
+  obs_MAM_01p_variance = dim_variance_n_Wrap(obs_MAM_01p_yearly, 0)
+
+  delete([/obs_MAM_avg_yearly, obs_MAM_var_yearly, obs_MAM_99p_yearly, obs_MAM_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_MAM_avg_variance_mask = obs_MAM_avg_variance
+  obs_MAM_avg_variance_mask = where(obs_MAM_avg_variance_mask.eq.0, obs_MAM_avg_variance_mask@_FillValue, obs_MAM_avg_variance_mask)
+  delete(obs_MAM_avg_variance)
+  obs_MAM_avg_variance = obs_MAM_avg_variance_mask
+  delete(obs_MAM_avg_variance_mask)
+  obs_MAM_var_variance_mask = obs_MAM_var_variance
+  obs_MAM_var_variance_mask = where(obs_MAM_var_variance_mask.eq.0, obs_MAM_var_variance_mask@_FillValue, obs_MAM_var_variance_mask)
+  delete(obs_MAM_var_variance)
+  obs_MAM_var_variance = obs_MAM_var_variance_mask
+  delete(obs_MAM_var_variance_mask)
+  obs_MAM_99p_variance_mask = obs_MAM_99p_variance
+  obs_MAM_99p_variance_mask = where(obs_MAM_99p_variance_mask.eq.0, obs_MAM_99p_variance_mask@_FillValue, obs_MAM_99p_variance_mask)
+  delete(obs_MAM_99p_variance)
+  obs_MAM_99p_variance = obs_MAM_99p_variance_mask
+  delete(obs_MAM_99p_variance_mask)
+  obs_MAM_01p_variance_mask = obs_MAM_01p_variance
+  obs_MAM_01p_variance_mask = where(obs_MAM_01p_variance_mask.eq.0, obs_MAM_01p_variance_mask@_FillValue, obs_MAM_01p_variance_mask)
+  delete(obs_MAM_01p_variance)
+  obs_MAM_01p_variance = obs_MAM_01p_variance_mask
+  delete(obs_MAM_01p_variance_mask)
+
+  rav_MAM_avg = av_MAM_avg
+  rav_MAM_avg = (av_MAM_avg * abs(pav_MAM_avg))/obs_MAM_avg_variance
+  rav_MAM_var = av_MAM_var
+  rav_MAM_var = (av_MAM_var * abs(pav_MAM_var))/obs_MAM_var_variance
+  rav_MAM_99p = av_MAM_99p
+  rav_MAM_99p = (av_MAM_99p * abs(pav_MAM_99p))/obs_MAM_99p_variance
+  rav_MAM_01p = av_MAM_01p
+  rav_MAM_01p = (av_MAM_01p * abs(pav_MAM_01p))/obs_MAM_01p_variance
+
+  fout_MAM = addfile(fout_name_MAM, "c")
+  fout_MAM->av_MAM_avg = av_MAM_avg
+  fout_MAM->gdd_MAM_avg_rmse = gdd_MAM_avg_rmse
+  fout_MAM->rcm_MAM_avg_rmse = rcm_MAM_avg_rmse
+  fout_MAM->pav_MAM_avg = pav_MAM_avg
+  fout_MAM->rav_MAM_avg = rav_MAM_avg
+  fout_MAM->obs_MAM_avg_variance = obs_MAM_avg_variance
+  fout_MAM->gdd_MAM_avg_cc = gdd_MAM_avg_cc
+  fout_MAM->rcm_MAM_avg_cc = rcm_MAM_avg_cc
+  fout_MAM->obs_MAM_avg = obs_MAM_avg
+  fout_MAM->gdd_hist_MAM_avg = gdd_hist_MAM_avg
+  fout_MAM->gdd_fut_MAM_avg = gdd_fut_MAM_avg
+  fout_MAM->rcm_hist_MAM_avg = rcm_hist_MAM_avg
+  fout_MAM->rcm_fut_MAM_avg = rcm_fut_MAM_avg
+  fout_MAM->av_MAM_var = av_MAM_var
+  fout_MAM->gdd_MAM_var_rmse = gdd_MAM_var_rmse
+  fout_MAM->rcm_MAM_var_rmse = rcm_MAM_var_rmse
+  fout_MAM->pav_MAM_var = pav_MAM_var
+  fout_MAM->rav_MAM_var = rav_MAM_var
+  fout_MAM->obs_MAM_var_variance = obs_MAM_var_variance
+  fout_MAM->gdd_MAM_var_cc = gdd_MAM_var_cc
+  fout_MAM->rcm_MAM_var_cc = rcm_MAM_var_cc
+  fout_MAM->obs_MAM_var = obs_MAM_var
+  fout_MAM->gdd_hist_MAM_var = gdd_hist_MAM_var
+  fout_MAM->gdd_fut_MAM_var = gdd_fut_MAM_var
+  fout_MAM->rcm_hist_MAM_var = rcm_hist_MAM_var
+  fout_MAM->rcm_fut_MAM_var = rcm_fut_MAM_var
+  fout_MAM->av_MAM_99p = av_MAM_99p
+  fout_MAM->gdd_MAM_99p_rmse = gdd_MAM_99p_rmse
+  fout_MAM->rcm_MAM_99p_rmse = rcm_MAM_99p_rmse
+  fout_MAM->pav_MAM_99p = pav_MAM_99p
+  fout_MAM->rav_MAM_99p = rav_MAM_99p
+  fout_MAM->obs_MAM_99p_variance = obs_MAM_99p_variance
+  fout_MAM->gdd_MAM_99p_cc = gdd_MAM_99p_cc
+  fout_MAM->rcm_MAM_99p_cc = rcm_MAM_99p_cc
+  fout_MAM->obs_MAM_99p = obs_MAM_99p
+  fout_MAM->gdd_hist_MAM_99p = gdd_hist_MAM_99p
+  fout_MAM->gdd_fut_MAM_99p = gdd_fut_MAM_99p
+  fout_MAM->rcm_hist_MAM_99p = rcm_hist_MAM_99p
+  fout_MAM->rcm_fut_MAM_99p = rcm_fut_MAM_99p
+  fout_MAM->av_MAM_01p = av_MAM_01p
+  fout_MAM->gdd_MAM_01p_rmse = gdd_MAM_01p_rmse
+  fout_MAM->rcm_MAM_01p_rmse = rcm_MAM_01p_rmse
+  fout_MAM->pav_MAM_01p = pav_MAM_01p
+  fout_MAM->rav_MAM_01p = rav_MAM_01p
+  fout_MAM->obs_MAM_01p_variance = obs_MAM_01p_variance
+  fout_MAM->gdd_MAM_01p_cc = gdd_MAM_01p_cc
+  fout_MAM->rcm_MAM_01p_cc = rcm_MAM_01p_cc
+  fout_MAM->obs_MAM_01p = obs_MAM_01p
+  fout_MAM->gdd_hist_MAM_01p = gdd_hist_MAM_01p
+  fout_MAM->gdd_fut_MAM_01p = gdd_fut_MAM_01p
+  fout_MAM->rcm_hist_MAM_01p = rcm_hist_MAM_01p
+  fout_MAM->rcm_fut_MAM_01p = rcm_fut_MAM_01p
+
+  delete([/av_MAM_avg, gdd_MAM_avg_rmse, rcm_MAM_avg_rmse, pav_MAM_avg, rav_MAM_avg, obs_MAM_avg_variance, gdd_MAM_avg_cc, rcm_MAM_avg_cc, obs_MAM_avg, gdd_hist_MAM_avg, gdd_fut_MAM_avg, rcm_hist_MAM_avg, rcm_fut_MAM_avg, av_MAM_var, gdd_MAM_var_rmse, rcm_MAM_var_rmse, pav_MAM_var, rav_MAM_var, obs_MAM_var_variance, gdd_MAM_var_cc, rcm_MAM_var_cc, obs_MAM_var, gdd_hist_MAM_var, gdd_fut_MAM_var, rcm_hist_MAM_var, rcm_fut_MAM_var, av_MAM_99p, gdd_MAM_99p_rmse, rcm_MAM_99p_rmse, pav_MAM_99p, rav_MAM_99p, obs_MAM_99p_variance, gdd_MAM_99p_cc, rcm_MAM_99p_cc, obs_MAM_99p, gdd_hist_MAM_99p, gdd_fut_MAM_99p, rcm_hist_MAM_99p, rcm_fut_MAM_99p, av_MAM_01p, gdd_MAM_01p_rmse, rcm_MAM_01p_rmse, pav_MAM_01p, rav_MAM_01p, obs_MAM_01p_variance, gdd_MAM_01p_cc, rcm_MAM_01p_cc, obs_MAM_01p, gdd_hist_MAM_01p, gdd_fut_MAM_01p, rcm_hist_MAM_01p, rcm_fut_MAM_01p/])
+  delete(fout_MAM)
+
+; JJA
+  print(systemfunc("date"))
+  print("JJA")
+  rcm_JJA_avg_rmse = rcm_hist_JJA_avg
+  rcm_JJA_avg_rmse = sqrt((rcm_hist_JJA_avg - obs_JJA_avg)^2)
+  rcm_JJA_var_rmse = rcm_hist_JJA_var
+  rcm_JJA_var_rmse = sqrt((rcm_hist_JJA_var - obs_JJA_var)^2)
+  rcm_JJA_99p_rmse = rcm_hist_JJA_99p
+  rcm_JJA_99p_rmse = sqrt((rcm_hist_JJA_99p - obs_JJA_99p)^2)
+  rcm_JJA_01p_rmse = rcm_hist_JJA_01p
+  rcm_JJA_01p_rmse = sqrt((rcm_hist_JJA_01p - obs_JJA_01p)^2)
+
+  gdd_JJA_avg_rmse = gdd_hist_JJA_avg
+  gdd_JJA_avg_rmse = sqrt((gdd_hist_JJA_avg - obs_JJA_avg)^2)
+  gdd_JJA_var_rmse = gdd_hist_JJA_var
+  gdd_JJA_var_rmse = sqrt((gdd_hist_JJA_var - obs_JJA_var)^2)
+  gdd_JJA_99p_rmse = gdd_hist_JJA_99p
+  gdd_JJA_99p_rmse = sqrt((gdd_hist_JJA_99p - obs_JJA_99p)^2)
+  gdd_JJA_01p_rmse = gdd_hist_JJA_01p
+  gdd_JJA_01p_rmse = sqrt((gdd_hist_JJA_01p - obs_JJA_01p)^2)
+
+  av_JJA_avg = gdd_JJA_avg_rmse
+  av_JJA_avg = gdd_JJA_avg_rmse - rcm_JJA_avg_rmse
+  av_JJA_var = gdd_JJA_var_rmse
+  av_JJA_var = gdd_JJA_var_rmse - rcm_JJA_var_rmse
+  av_JJA_99p = gdd_JJA_99p_rmse
+  av_JJA_99p = gdd_JJA_99p_rmse - rcm_JJA_99p_rmse
+  av_JJA_01p = gdd_JJA_01p_rmse
+  av_JJA_01p = gdd_JJA_01p_rmse - rcm_JJA_01p_rmse
+
+  rcm_JJA_avg_cc = rcm_fut_JJA_avg
+  rcm_JJA_avg_cc = rcm_fut_JJA_avg - rcm_hist_JJA_avg
+  rcm_JJA_var_cc = rcm_fut_JJA_var
+  rcm_JJA_var_cc = rcm_fut_JJA_var - rcm_hist_JJA_var
+  rcm_JJA_99p_cc = rcm_fut_JJA_99p
+  rcm_JJA_99p_cc = rcm_fut_JJA_99p - rcm_hist_JJA_99p
+  rcm_JJA_01p_cc = rcm_fut_JJA_01p
+  rcm_JJA_01p_cc = rcm_fut_JJA_01p - rcm_hist_JJA_01p
+
+  gdd_JJA_avg_cc = gdd_fut_JJA_avg
+  gdd_JJA_avg_cc = gdd_fut_JJA_avg - gdd_hist_JJA_avg
+  gdd_JJA_var_cc = gdd_fut_JJA_var
+  gdd_JJA_var_cc = gdd_fut_JJA_var - gdd_hist_JJA_var
+  gdd_JJA_99p_cc = gdd_fut_JJA_99p
+  gdd_JJA_99p_cc = gdd_fut_JJA_99p - gdd_hist_JJA_99p
+  gdd_JJA_01p_cc = gdd_fut_JJA_01p
+  gdd_JJA_01p_cc = gdd_fut_JJA_01p - gdd_hist_JJA_01p
+
+  pav_JJA_avg = rcm_JJA_avg_cc
+  pav_JJA_avg = rcm_JJA_avg_cc - gdd_JJA_avg_cc
+  pav_JJA_var = rcm_JJA_var_cc
+  pav_JJA_var = rcm_JJA_var_cc - gdd_JJA_var_cc
+  pav_JJA_99p = rcm_JJA_99p_cc
+  pav_JJA_99p = rcm_JJA_99p_cc - gdd_JJA_99p_cc
+  pav_JJA_01p = rcm_JJA_01p_cc
+  pav_JJA_01p = rcm_JJA_01p_cc - gdd_JJA_01p_cc
+
+  obs_JJA_avg_variance = dim_variance_n_Wrap(obs_JJA_avg_yearly, 0)
+  obs_JJA_var_variance = dim_variance_n_Wrap(obs_JJA_var_yearly, 0)
+  obs_JJA_99p_variance = dim_variance_n_Wrap(obs_JJA_99p_yearly, 0)
+  obs_JJA_01p_variance = dim_variance_n_Wrap(obs_JJA_01p_yearly, 0)
+
+  delete([/obs_JJA_avg_yearly, obs_JJA_var_yearly, obs_JJA_99p_yearly, obs_JJA_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_JJA_avg_variance_mask = obs_JJA_avg_variance
+  obs_JJA_avg_variance_mask = where(obs_JJA_avg_variance_mask.eq.0, obs_JJA_avg_variance_mask@_FillValue, obs_JJA_avg_variance_mask)
+  delete(obs_JJA_avg_variance)
+  obs_JJA_avg_variance = obs_JJA_avg_variance_mask
+  delete(obs_JJA_avg_variance_mask)
+  obs_JJA_var_variance_mask = obs_JJA_var_variance
+  obs_JJA_var_variance_mask = where(obs_JJA_var_variance_mask.eq.0, obs_JJA_var_variance_mask@_FillValue, obs_JJA_var_variance_mask)
+  delete(obs_JJA_var_variance)
+  obs_JJA_var_variance = obs_JJA_var_variance_mask
+  delete(obs_JJA_var_variance_mask)
+  obs_JJA_99p_variance_mask = obs_JJA_99p_variance
+  obs_JJA_99p_variance_mask = where(obs_JJA_99p_variance_mask.eq.0, obs_JJA_99p_variance_mask@_FillValue, obs_JJA_99p_variance_mask)
+  delete(obs_JJA_99p_variance)
+  obs_JJA_99p_variance = obs_JJA_99p_variance_mask
+  delete(obs_JJA_99p_variance_mask)
+  obs_JJA_01p_variance_mask = obs_JJA_01p_variance
+  obs_JJA_01p_variance_mask = where(obs_JJA_01p_variance_mask.eq.0, obs_JJA_01p_variance_mask@_FillValue, obs_JJA_01p_variance_mask)
+  delete(obs_JJA_01p_variance)
+  obs_JJA_01p_variance = obs_JJA_01p_variance_mask
+  delete(obs_JJA_01p_variance_mask)
+
+  rav_JJA_avg = av_JJA_avg
+  rav_JJA_avg = (av_JJA_avg * abs(pav_JJA_avg))/obs_JJA_avg_variance
+  rav_JJA_var = av_JJA_var
+  rav_JJA_var = (av_JJA_var * abs(pav_JJA_var))/obs_JJA_var_variance
+  rav_JJA_99p = av_JJA_99p
+  rav_JJA_99p = (av_JJA_99p * abs(pav_JJA_99p))/obs_JJA_99p_variance
+  rav_JJA_01p = av_JJA_01p
+  rav_JJA_01p = (av_JJA_01p * abs(pav_JJA_01p))/obs_JJA_01p_variance
+
+  fout_JJA = addfile(fout_name_JJA, "c")
+  fout_JJA->av_JJA_avg = av_JJA_avg
+  fout_JJA->gdd_JJA_avg_rmse = gdd_JJA_avg_rmse
+  fout_JJA->rcm_JJA_avg_rmse = rcm_JJA_avg_rmse
+  fout_JJA->pav_JJA_avg = pav_JJA_avg
+  fout_JJA->rav_JJA_avg = rav_JJA_avg
+  fout_JJA->obs_JJA_avg_variance = obs_JJA_avg_variance
+  fout_JJA->gdd_JJA_avg_cc = gdd_JJA_avg_cc
+  fout_JJA->rcm_JJA_avg_cc = rcm_JJA_avg_cc
+  fout_JJA->obs_JJA_avg = obs_JJA_avg
+  fout_JJA->gdd_hist_JJA_avg = gdd_hist_JJA_avg
+  fout_JJA->gdd_fut_JJA_avg = gdd_fut_JJA_avg
+  fout_JJA->rcm_hist_JJA_avg = rcm_hist_JJA_avg
+  fout_JJA->rcm_fut_JJA_avg = rcm_fut_JJA_avg
+  fout_JJA->av_JJA_var = av_JJA_var
+  fout_JJA->gdd_JJA_var_rmse = gdd_JJA_var_rmse
+  fout_JJA->rcm_JJA_var_rmse = rcm_JJA_var_rmse
+  fout_JJA->pav_JJA_var = pav_JJA_var
+  fout_JJA->rav_JJA_var = rav_JJA_var
+  fout_JJA->obs_JJA_var_variance = obs_JJA_var_variance
+  fout_JJA->gdd_JJA_var_cc = gdd_JJA_var_cc
+  fout_JJA->rcm_JJA_var_cc = rcm_JJA_var_cc
+  fout_JJA->obs_JJA_var = obs_JJA_var
+  fout_JJA->gdd_hist_JJA_var = gdd_hist_JJA_var
+  fout_JJA->gdd_fut_JJA_var = gdd_fut_JJA_var
+  fout_JJA->rcm_hist_JJA_var = rcm_hist_JJA_var
+  fout_JJA->rcm_fut_JJA_var = rcm_fut_JJA_var
+  fout_JJA->av_JJA_99p = av_JJA_99p
+  fout_JJA->gdd_JJA_99p_rmse = gdd_JJA_99p_rmse
+  fout_JJA->rcm_JJA_99p_rmse = rcm_JJA_99p_rmse
+  fout_JJA->pav_JJA_99p = pav_JJA_99p
+  fout_JJA->rav_JJA_99p = rav_JJA_99p
+  fout_JJA->obs_JJA_99p_variance = obs_JJA_99p_variance
+  fout_JJA->gdd_JJA_99p_cc = gdd_JJA_99p_cc
+  fout_JJA->rcm_JJA_99p_cc = rcm_JJA_99p_cc
+  fout_JJA->obs_JJA_99p = obs_JJA_99p
+  fout_JJA->gdd_hist_JJA_99p = gdd_hist_JJA_99p
+  fout_JJA->gdd_fut_JJA_99p = gdd_fut_JJA_99p
+  fout_JJA->rcm_hist_JJA_99p = rcm_hist_JJA_99p
+  fout_JJA->rcm_fut_JJA_99p = rcm_fut_JJA_99p
+  fout_JJA->av_JJA_01p = av_JJA_01p
+  fout_JJA->gdd_JJA_01p_rmse = gdd_JJA_01p_rmse
+  fout_JJA->rcm_JJA_01p_rmse = rcm_JJA_01p_rmse
+  fout_JJA->pav_JJA_01p = pav_JJA_01p
+  fout_JJA->rav_JJA_01p = rav_JJA_01p
+  fout_JJA->obs_JJA_01p_variance = obs_JJA_01p_variance
+  fout_JJA->gdd_JJA_01p_cc = gdd_JJA_01p_cc
+  fout_JJA->rcm_JJA_01p_cc = rcm_JJA_01p_cc
+  fout_JJA->obs_JJA_01p = obs_JJA_01p
+  fout_JJA->gdd_hist_JJA_01p = gdd_hist_JJA_01p
+  fout_JJA->gdd_fut_JJA_01p = gdd_fut_JJA_01p
+  fout_JJA->rcm_hist_JJA_01p = rcm_hist_JJA_01p
+  fout_JJA->rcm_fut_JJA_01p = rcm_fut_JJA_01p
+
+  delete([/av_JJA_avg, gdd_JJA_avg_rmse, rcm_JJA_avg_rmse, pav_JJA_avg, rav_JJA_avg, obs_JJA_avg_variance, gdd_JJA_avg_cc, rcm_JJA_avg_cc, obs_JJA_avg, gdd_hist_JJA_avg, gdd_fut_JJA_avg, rcm_hist_JJA_avg, rcm_fut_JJA_avg, av_JJA_var, gdd_JJA_var_rmse, rcm_JJA_var_rmse, pav_JJA_var, rav_JJA_var, obs_JJA_var_variance, gdd_JJA_var_cc, rcm_JJA_var_cc, obs_JJA_var, gdd_hist_JJA_var, gdd_fut_JJA_var, rcm_hist_JJA_var, rcm_fut_JJA_var, av_JJA_99p, gdd_JJA_99p_rmse, rcm_JJA_99p_rmse, pav_JJA_99p, rav_JJA_99p, obs_JJA_99p_variance, gdd_JJA_99p_cc, rcm_JJA_99p_cc, obs_JJA_99p, gdd_hist_JJA_99p, gdd_fut_JJA_99p, rcm_hist_JJA_99p, rcm_fut_JJA_99p, av_JJA_01p, gdd_JJA_01p_rmse, rcm_JJA_01p_rmse, pav_JJA_01p, rav_JJA_01p, obs_JJA_01p_variance, gdd_JJA_01p_cc, rcm_JJA_01p_cc, obs_JJA_01p, gdd_hist_JJA_01p, gdd_fut_JJA_01p, rcm_hist_JJA_01p, rcm_fut_JJA_01p/])
+  delete(fout_JJA)
+
+; SON
+  print(systemfunc("date"))
+  print("SON")
+  rcm_SON_avg_rmse = rcm_hist_SON_avg
+  rcm_SON_avg_rmse = sqrt((rcm_hist_SON_avg - obs_SON_avg)^2)
+  rcm_SON_var_rmse = rcm_hist_SON_var
+  rcm_SON_var_rmse = sqrt((rcm_hist_SON_var - obs_SON_var)^2)
+  rcm_SON_99p_rmse = rcm_hist_SON_99p
+  rcm_SON_99p_rmse = sqrt((rcm_hist_SON_99p - obs_SON_99p)^2)
+  rcm_SON_01p_rmse = rcm_hist_SON_01p
+  rcm_SON_01p_rmse = sqrt((rcm_hist_SON_01p - obs_SON_01p)^2)
+
+  gdd_SON_avg_rmse = gdd_hist_SON_avg
+  gdd_SON_avg_rmse = sqrt((gdd_hist_SON_avg - obs_SON_avg)^2)
+  gdd_SON_var_rmse = gdd_hist_SON_var
+  gdd_SON_var_rmse = sqrt((gdd_hist_SON_var - obs_SON_var)^2)
+  gdd_SON_99p_rmse = gdd_hist_SON_99p
+  gdd_SON_99p_rmse = sqrt((gdd_hist_SON_99p - obs_SON_99p)^2)
+  gdd_SON_01p_rmse = gdd_hist_SON_01p
+  gdd_SON_01p_rmse = sqrt((gdd_hist_SON_01p - obs_SON_01p)^2)
+
+  av_SON_avg = gdd_SON_avg_rmse
+  av_SON_avg = gdd_SON_avg_rmse - rcm_SON_avg_rmse
+  av_SON_var = gdd_SON_var_rmse
+  av_SON_var = gdd_SON_var_rmse - rcm_SON_var_rmse
+  av_SON_99p = gdd_SON_99p_rmse
+  av_SON_99p = gdd_SON_99p_rmse - rcm_SON_99p_rmse
+  av_SON_01p = gdd_SON_01p_rmse
+  av_SON_01p = gdd_SON_01p_rmse - rcm_SON_01p_rmse
+
+  rcm_SON_avg_cc = rcm_fut_SON_avg
+  rcm_SON_avg_cc = rcm_fut_SON_avg - rcm_hist_SON_avg
+  rcm_SON_var_cc = rcm_fut_SON_var
+  rcm_SON_var_cc = rcm_fut_SON_var - rcm_hist_SON_var
+  rcm_SON_99p_cc = rcm_fut_SON_99p
+  rcm_SON_99p_cc = rcm_fut_SON_99p - rcm_hist_SON_99p
+  rcm_SON_01p_cc = rcm_fut_SON_01p
+  rcm_SON_01p_cc = rcm_fut_SON_01p - rcm_hist_SON_01p
+
+  gdd_SON_avg_cc = gdd_fut_SON_avg
+  gdd_SON_avg_cc = gdd_fut_SON_avg - gdd_hist_SON_avg
+  gdd_SON_var_cc = gdd_fut_SON_var
+  gdd_SON_var_cc = gdd_fut_SON_var - gdd_hist_SON_var
+  gdd_SON_99p_cc = gdd_fut_SON_99p
+  gdd_SON_99p_cc = gdd_fut_SON_99p - gdd_hist_SON_99p
+  gdd_SON_01p_cc = gdd_fut_SON_01p
+  gdd_SON_01p_cc = gdd_fut_SON_01p - gdd_hist_SON_01p
+
+  pav_SON_avg = rcm_SON_avg_cc
+  pav_SON_avg = rcm_SON_avg_cc - gdd_SON_avg_cc
+  pav_SON_var = rcm_SON_var_cc
+  pav_SON_var = rcm_SON_var_cc - gdd_SON_var_cc
+  pav_SON_99p = rcm_SON_99p_cc
+  pav_SON_99p = rcm_SON_99p_cc - gdd_SON_99p_cc
+  pav_SON_01p = rcm_SON_01p_cc
+  pav_SON_01p = rcm_SON_01p_cc - gdd_SON_01p_cc
+
+  obs_SON_avg_variance = dim_variance_n_Wrap(obs_SON_avg_yearly, 0)
+  obs_SON_var_variance = dim_variance_n_Wrap(obs_SON_var_yearly, 0)
+  obs_SON_99p_variance = dim_variance_n_Wrap(obs_SON_99p_yearly, 0)
+  obs_SON_01p_variance = dim_variance_n_Wrap(obs_SON_01p_yearly, 0)
+
+  delete([/obs_SON_avg_yearly, obs_SON_var_yearly, obs_SON_99p_yearly, obs_SON_01p_yearly/])
+
+; mask obs variance where it equals zero to avoid divide by zero errors
+  obs_SON_avg_variance_mask = obs_SON_avg_variance
+  obs_SON_avg_variance_mask = where(obs_SON_avg_variance_mask.eq.0, obs_SON_avg_variance_mask@_FillValue, obs_SON_avg_variance_mask)
+  delete(obs_SON_avg_variance)
+  obs_SON_avg_variance = obs_SON_avg_variance_mask
+  delete(obs_SON_avg_variance_mask)
+  obs_SON_var_variance_mask = obs_SON_var_variance
+  obs_SON_var_variance_mask = where(obs_SON_var_variance_mask.eq.0, obs_SON_var_variance_mask@_FillValue, obs_SON_var_variance_mask)
+  delete(obs_SON_var_variance)
+  obs_SON_var_variance = obs_SON_var_variance_mask
+  delete(obs_SON_var_variance_mask)
+  obs_SON_99p_variance_mask = obs_SON_99p_variance
+  obs_SON_99p_variance_mask = where(obs_SON_99p_variance_mask.eq.0, obs_SON_99p_variance_mask@_FillValue, obs_SON_99p_variance_mask)
+  delete(obs_SON_99p_variance)
+  obs_SON_99p_variance = obs_SON_99p_variance_mask
+  delete(obs_SON_99p_variance_mask)
+  obs_SON_01p_variance_mask = obs_SON_01p_variance
+  obs_SON_01p_variance_mask = where(obs_SON_01p_variance_mask.eq.0, obs_SON_01p_variance_mask@_FillValue, obs_SON_01p_variance_mask)
+  delete(obs_SON_01p_variance)
+  obs_SON_01p_variance = obs_SON_01p_variance_mask
+  delete(obs_SON_01p_variance_mask)
+
+  rav_SON_avg = av_SON_avg
+  rav_SON_avg = (av_SON_avg * abs(pav_SON_avg))/obs_SON_avg_variance
+  rav_SON_var = av_SON_var
+  rav_SON_var = (av_SON_var * abs(pav_SON_var))/obs_SON_var_variance
+  rav_SON_99p = av_SON_99p
+  rav_SON_99p = (av_SON_99p * abs(pav_SON_99p))/obs_SON_99p_variance
+  rav_SON_01p = av_SON_01p
+  rav_SON_01p = (av_SON_01p * abs(pav_SON_01p))/obs_SON_01p_variance
+
+  fout_SON = addfile(fout_name_SON, "c")
+  fout_SON->av_SON_avg = av_SON_avg
+  fout_SON->gdd_SON_avg_rmse = gdd_SON_avg_rmse
+  fout_SON->rcm_SON_avg_rmse = rcm_SON_avg_rmse
+  fout_SON->pav_SON_avg = pav_SON_avg
+  fout_SON->rav_SON_avg = rav_SON_avg
+  fout_SON->obs_SON_avg_variance = obs_SON_avg_variance
+  fout_SON->gdd_SON_avg_cc = gdd_SON_avg_cc
+  fout_SON->rcm_SON_avg_cc = rcm_SON_avg_cc
+  fout_SON->obs_SON_avg = obs_SON_avg
+  fout_SON->gdd_hist_SON_avg = gdd_hist_SON_avg
+  fout_SON->gdd_fut_SON_avg = gdd_fut_SON_avg
+  fout_SON->rcm_hist_SON_avg = rcm_hist_SON_avg
+  fout_SON->rcm_fut_SON_avg = rcm_fut_SON_avg
+  fout_SON->av_SON_var = av_SON_var
+  fout_SON->gdd_SON_var_rmse = gdd_SON_var_rmse
+  fout_SON->rcm_SON_var_rmse = rcm_SON_var_rmse
+  fout_SON->pav_SON_var = pav_SON_var
+  fout_SON->rav_SON_var = rav_SON_var
+  fout_SON->obs_SON_var_variance = obs_SON_var_variance
+  fout_SON->gdd_SON_var_cc = gdd_SON_var_cc
+  fout_SON->rcm_SON_var_cc = rcm_SON_var_cc
+  fout_SON->obs_SON_var = obs_SON_var
+  fout_SON->gdd_hist_SON_var = gdd_hist_SON_var
+  fout_SON->gdd_fut_SON_var = gdd_fut_SON_var
+  fout_SON->rcm_hist_SON_var = rcm_hist_SON_var
+  fout_SON->rcm_fut_SON_var = rcm_fut_SON_var
+  fout_SON->av_SON_99p = av_SON_99p
+  fout_SON->gdd_SON_99p_rmse = gdd_SON_99p_rmse
+  fout_SON->rcm_SON_99p_rmse = rcm_SON_99p_rmse
+  fout_SON->pav_SON_99p = pav_SON_99p
+  fout_SON->rav_SON_99p = rav_SON_99p
+  fout_SON->obs_SON_99p_variance = obs_SON_99p_variance
+  fout_SON->gdd_SON_99p_cc = gdd_SON_99p_cc
+  fout_SON->rcm_SON_99p_cc = rcm_SON_99p_cc
+  fout_SON->obs_SON_99p = obs_SON_99p
+  fout_SON->gdd_hist_SON_99p = gdd_hist_SON_99p
+  fout_SON->gdd_fut_SON_99p = gdd_fut_SON_99p
+  fout_SON->rcm_hist_SON_99p = rcm_hist_SON_99p
+  fout_SON->rcm_fut_SON_99p = rcm_fut_SON_99p
+  fout_SON->av_SON_01p = av_SON_01p
+  fout_SON->gdd_SON_01p_rmse = gdd_SON_01p_rmse
+  fout_SON->rcm_SON_01p_rmse = rcm_SON_01p_rmse
+  fout_SON->pav_SON_01p = pav_SON_01p
+  fout_SON->rav_SON_01p = rav_SON_01p
+  fout_SON->obs_SON_01p_variance = obs_SON_01p_variance
+  fout_SON->gdd_SON_01p_cc = gdd_SON_01p_cc
+  fout_SON->rcm_SON_01p_cc = rcm_SON_01p_cc
+  fout_SON->obs_SON_01p = obs_SON_01p
+  fout_SON->gdd_hist_SON_01p = gdd_hist_SON_01p
+  fout_SON->gdd_fut_SON_01p = gdd_fut_SON_01p
+  fout_SON->rcm_hist_SON_01p = rcm_hist_SON_01p
+  fout_SON->rcm_fut_SON_01p = rcm_fut_SON_01p
+
+  delete([/av_SON_avg, gdd_SON_avg_rmse, rcm_SON_avg_rmse, pav_SON_avg, rav_SON_avg, obs_SON_avg_variance, gdd_SON_avg_cc, rcm_SON_avg_cc, obs_SON_avg, gdd_hist_SON_avg, gdd_fut_SON_avg, rcm_hist_SON_avg, rcm_fut_SON_avg, av_SON_var, gdd_SON_var_rmse, rcm_SON_var_rmse, pav_SON_var, rav_SON_var, obs_SON_var_variance, gdd_SON_var_cc, rcm_SON_var_cc, obs_SON_var, gdd_hist_SON_var, gdd_fut_SON_var, rcm_hist_SON_var, rcm_fut_SON_var, av_SON_99p, gdd_SON_99p_rmse, rcm_SON_99p_rmse, pav_SON_99p, rav_SON_99p, obs_SON_99p_variance, gdd_SON_99p_cc, rcm_SON_99p_cc, obs_SON_99p, gdd_hist_SON_99p, gdd_fut_SON_99p, rcm_hist_SON_99p, rcm_fut_SON_99p, av_SON_01p, gdd_SON_01p_rmse, rcm_SON_01p_rmse, pav_SON_01p, rav_SON_01p, obs_SON_01p_variance, gdd_SON_01p_cc, rcm_SON_01p_cc, obs_SON_01p, gdd_hist_SON_01p, gdd_fut_SON_01p, rcm_hist_SON_01p, rcm_fut_SON_01p/])
+  delete(fout_SON)
+  print(systemfunc("date"))
+
+end
