@@ -260,8 +260,8 @@ else
 end if
 
 ; area weights
-  lat = rcm_obs_mon_bias&lat
-  lon = rcm_obs_mon_bias&lon
+  lat = obs_mon_avg&lat
+  lon = obs_mon_avg&lon
   nlat = dimsizes(lat)
 
   dlon   = abs(lon(2)-lon(1))*rr
@@ -771,8 +771,6 @@ end if
   plot2(17) = gsn_csm_contour_map_ce(wks1, gdd_ann_avg, res)
   delete(aavg)
   delete(sd)
-  delete(aavg)
-  delete(sd)
   
   ; variance
   do n=0,11
@@ -947,11 +945,6 @@ end if
   resP@gsnPanelLabelBar = False
   resP@gsnPanelMainString = "GDD "+var+" variance "+yrStrt+"-"+yrLast+"~C~"+info
   gsn_panel(wks1, plot3, (/5, 4/), resP)
-
-
-
-
-
 
 ; rcm avg
   do n=0,11

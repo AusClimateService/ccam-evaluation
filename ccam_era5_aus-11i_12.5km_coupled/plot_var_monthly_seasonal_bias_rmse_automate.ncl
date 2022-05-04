@@ -794,8 +794,6 @@ end if
   plot2(17) = gsn_csm_contour_map_ce(wks1, rcm_gdd_ann_bias, res)
   delete(aavg)
   delete(sd)
-  delete(aavg)
-  delete(sd)
   
   do n=0,11
     aavg = wgt_areaave_Wrap(rcm_gdd_mon_rmse(n,:,:), data_wgt, 1.0, 0)

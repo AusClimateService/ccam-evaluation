@@ -3,7 +3,7 @@
 #PBS -P xv83
 #PBS -q normalbw
 #PBS -l walltime=7:00:00
-#PBS -l mem=190GB
+#PBS -l mem=10GB
 #PBS -l ncpus=14
 #PBS -l storage=gdata/hh5+gdata/q49+scratch/oi10+gdata/zv2+gdata/rr3+gdata/ma05+gdata/r87+gdata/ub4+gdata/tp28+scratch/e53+scratch/q49+gdata/rt52+gdata/al33+gdata/oi10+gdata/xv83
 #PBS -l jobfs=100GB

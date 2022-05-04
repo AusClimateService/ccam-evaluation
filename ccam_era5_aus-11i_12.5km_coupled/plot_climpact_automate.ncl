@@ -89,6 +89,7 @@ begin
   data_wgt = dx*dy
 
   data_area_avg = wgt_areaave_Wrap(data, data_wgt, 1.0, 0)
+  data_area_avg_std = stddev(data_area_avg)
   data_time_avg = dim_avg_n_Wrap(data, 0)
 
   data_dims = dimsizes(data(0::12,:,:))
