@@ -6,7 +6,7 @@
 
 library(climdex.pcic.ncdf)
 # list of one to three input files. e.g. c("a.nc","b.nc","c.nc")
-infiles=c("../concatenated_data/pr_day_surf.ccam_12.5km.198601-201512_no_bnds_attr.nc","../concatenated_data/tasmax_surf.ccam_12.5km.198601-201512_no_bnds_attr.nc","../concatenated_data/tasmin_surf.ccam_12.5km.198601-201512_no_bnds_attr.nc")
+infiles=c("../concatenated_data/pr_day_surf.ccam_12.5km.198601-201512.nc","../concatenated_data/tasmax_surf.ccam_12.5km.198601-201512.nc","../concatenated_data/tasmin_surf.ccam_12.5km.198601-201512.nc")
 #infiles="./era5_v5/pr_day_surf.ccam_25.km.198601-201512.nc"
 
 # list of variable names according to above file(s)

@@ -1,4 +1,4 @@
-; plot Added Value (AV)
+; plot climpact difference with agcd
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
@@ -109,7 +109,7 @@ begin
 
   data_wgt = dx*dy
 
-  data_area_avg = wgt_areaave_Wrap(data, data_wgt, 1.0, 0)
+  data_area_avg = wgt_areaave_Wrap(data, data_wgt, 1.0, 0) ; output has time dimension
   data_area_avg_std = stddev(data_area_avg)
   data_time_avg = dim_avg_n_Wrap(data, 0)
   data_time_std = stddev(data_time_avg)
@@ -226,7 +226,7 @@ begin
   rc_MON@units = data_area_avg@units+"/year"
 
 ; plot
-  fin_name = "../plots/"+run_name+"_"+var+"_diff"
+  plot_name = "../plots/"+run_name+"_climpact_"+var+"_diff"
 
   print(systemfunc("date"))
   print("Plotting")
@@ -282,7 +282,7 @@ begin
   res@lbLabelsOn = True
    res@cnFillMode = "CellFill" ; for faster plotting
 
-  wks = gsn_open_wks("pdf", fin_name)
+  wks = gsn_open_wks("pdf", plot_name)
   plot0 = new(18, graphic)
   plot1 = new(18, graphic)
   regl = new(dimsizes(plot1), graphic)
@@ -296,7 +296,8 @@ else
 end if
   
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" avg, SD="+sprintf("%5.4f", data_mon_std(n))
+    aavg = avg(data_mon_area_avg(n,:))
+    res@gsnLeftString = var+" "+mon(n)+" avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_mon_std(n))
     ;symMinMaxPlt(data_mon_avg(n,:,:), 18, True, res)
     stats = stat_dispersion(data_mon_avg(n,:,:), False)
     dmin = stats(3)
@@ -335,6 +336,7 @@ end if
     res@cnMaxLevelValF = mnmxint(1)
     res@cnLevelSpacingF = mnmxint(2)
     plot0(n) = gsn_csm_contour_map_ce(wks, data_mon_avg(n,:,:), res)
+    delete(aavg)
   end do
 
   ; append seasons into 1 large array
@@ -368,19 +370,28 @@ end if
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" DJF avg, SD="+sprintf("%5.4f", data_DJF_std)
+  aavg = avg(data_DJF_area_avg)
+  res@gsnLeftString = var+" DJF avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_DJF_std)
   plot0(12) = gsn_csm_contour_map_ce(wks, data_DJF_avg, res)
+  delete(aavg)
 
-  res@gsnLeftString = var+" MAM avg, SD="+sprintf("%5.4f", data_MAM_std)
+  aavg = avg(data_MAM_area_avg)
+  res@gsnLeftString = var+" MAM avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_MAM_std)
   plot0(13) = gsn_csm_contour_map_ce(wks, data_MAM_avg, res)
+  delete(aavg)
 
-  res@gsnLeftString = var+" JJA avg, SD="+sprintf("%5.4f", data_JJA_std)
+  aavg = avg(data_JJA_area_avg)
+  res@gsnLeftString = var+" JJA avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_JJA_std)
   plot0(14) = gsn_csm_contour_map_ce(wks, data_JJA_avg, res)
+  delete(aavg)
 
-  res@gsnLeftString = var+" SON avg, SD="+sprintf("%5.4f", data_SON_std)
+  aavg = avg(data_SON_area_avg)
+  res@gsnLeftString = var+" SON avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_SON_std)
   plot0(15) = gsn_csm_contour_map_ce(wks, data_SON_avg, res)
+  delete(aavg)
 
-  res@gsnLeftString = var+" MON avg, SD="+sprintf("%5.4f", data_time_std)
+  aavg = avg(data_area_avg)
+  res@gsnLeftString = var+" MON avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_time_std)
   ;symMinMaxPlt(data_time_avg, 18, True, res)
   stats = stat_dispersion(data_time_avg, False)
   dmin = stats(3)
@@ -407,8 +418,10 @@ end if
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
   plot0(16) = gsn_csm_contour_map_ce(wks, data_time_avg, res)
+  delete(aavg)
 
-  res@gsnLeftString = var+" ANN avg, SD="+sprintf("%5.4f", data_ann_time_std)
+  aavg = avg(data_ann_area_avg)
+  res@gsnLeftString = var+" ANN avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", data_ann_time_std)
   ;symMinMaxPlt(data_ann_time_avg, 18, True, res)
   stats = stat_dispersion(data_ann_time_avg, False)
   dmin = stats(3)
@@ -435,6 +448,7 @@ end if
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
   plot0(17) = gsn_csm_contour_map_ce(wks, data_ann_time_avg, res)
+  delete(aavg)
 
 ; time series
   resxy                      = True

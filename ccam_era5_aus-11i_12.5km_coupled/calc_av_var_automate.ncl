@@ -161,8 +161,8 @@ begin
   print(systemfunc("date"))
   print("Finished reading files, starting interpolation")
   ; interpolate to common grid
-  lat = lsmask&lat
-  lon = lsmask&lon
+  lat = tofloat(lsmask&lat)
+  lon = tofloat(lsmask&lon)
   nlat = dimsizes(lat)
   nlon = dimsizes(lon)
 
@@ -212,14 +212,14 @@ begin
   delete(obs_mask)
   delete(lsmask)
 
-;  obs_lat = obs&lat
-;  delete(obs&lat)
-;  obs&lat = tofloat(obs_lat)
-;  delete(obs_lat)
-;  obs_lon = obs&lon
-;  delete(obs&lon)
-;  obs&lon = tofloat(obs_lon)
-;  delete(obs_lon)
+  obs_lat = obs&lat
+  delete(obs&lat)
+  obs&lat = tofloat(obs_lat)
+  delete(obs_lat)
+  obs_lon = obs&lon
+  delete(obs&lon)
+  obs&lon = tofloat(obs_lon)
+  delete(obs_lon)
 
 ;******************************
 ;******************************
@@ -918,9 +918,6 @@ begin
     hist_yrs = min(hist_year)+nyrc
     hist_yr_sel = ind(hist_year.eq.hist_yrs)
     obs_temp = obs(hist_yr_sel,:,:)
-    printVarSummary(obs_temp&lat)
-    printVarSummary(obs_temp&lon)
-    exit
 
     hist_date_sel = cd_calendar(obs_temp&time, 0)
     hist_date_mth = hist_date_sel(:,1)
@@ -1173,13 +1170,6 @@ begin
   fout_ANN->obs_ANN_01p = obs_ANN_01p
   fout_ANN->gdd_hist_ANN_01p = gdd_hist_ANN_01p
   fout_ANN->rcm_hist_ANN_01p = rcm_hist_ANN_01p
-
-  printVarSummary(obs_ANN_avg_variance&lat)
-  printVarSummary(obs_ANN_avg_variance&lon)
-  printVarSummary(av_ANN_avg&lat)
-  printVarSummary(av_ANN_avg&lon)
-  printVarSummary(gdd_ANN_avg_rmse&lat)
-  printVarSummary(gdd_ANN_avg_rmse&lon)
 
   delete(fout_ANN)
 
@@ -2408,8 +2398,6 @@ begin
 
   obs_dec_shifted&time = hist_time_new
   delete(hist_time_new)
-
-  asciiwrite("obs_all_months_new_time", obs_dec_shifted(:,{-37.5},{145}))
 
   hist_date = cd_calendar(obs_dec_shifted&time, -2)
   hist_year = hist_date/10000

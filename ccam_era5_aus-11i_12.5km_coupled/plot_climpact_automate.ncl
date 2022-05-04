@@ -1,4 +1,4 @@
-; plot Added Value (AV)
+; plot climpact variables
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
@@ -123,23 +123,29 @@ begin
 
   data_mon_avg = dim_avg_n_Wrap(data_mon, 1)
   data_mon_area_avg = wgt_areaave_Wrap(data_mon, data_wgt, 1.0, 0)
+  data_mon_area_avg_std = dim_stddev_n_Wrap(data_mon_area_avg, 1)
 
   data_ann_area_avg = wgt_areaave_Wrap(data_ann, data_wgt, 1.0, 0)
+  data_ann_area_avg_std = stddev(data_ann_area_avg)
   data_ann_time_avg = dim_avg_n_Wrap(data_ann, 0)
 
 ; calculate seasonal
   data_DJF = month_to_season(data, "DJF")
   data_DJF_avg = dim_avg_n_Wrap(data_DJF, 0)
   data_DJF_area_avg = wgt_areaave_Wrap(data_DJF, data_wgt, 1.0, 0)
+  data_DJF_area_avg_std = stddev(data_DJF_area_avg)
   data_MAM = month_to_season(data, "MAM")
   data_MAM_avg = dim_avg_n_Wrap(data_MAM, 0)
   data_MAM_area_avg = wgt_areaave_Wrap(data_MAM, data_wgt, 1.0, 0)
+  data_MAM_area_avg_std = stddev(data_MAM_area_avg)
   data_JJA = month_to_season(data, "JJA")
   data_JJA_avg = dim_avg_n_Wrap(data_JJA, 0)
   data_JJA_area_avg = wgt_areaave_Wrap(data_JJA, data_wgt, 1.0, 0)
+  data_JJA_area_avg_std = stddev(data_JJA_area_avg)
   data_SON = month_to_season(data, "SON")
   data_SON_avg = dim_avg_n_Wrap(data_SON, 0)
   data_SON_area_avg = wgt_areaave_Wrap(data_SON, data_wgt, 1.0, 0)
+  data_SON_area_avg_std = stddev(data_SON_area_avg)
 
 ; generate x-axis for time series
   data_date = cd_calendar(data&time, -1)
@@ -147,8 +153,51 @@ begin
   xaxis = yyyymm_to_yyyyfrac(data_date, 0)
   xaxis_ann = data_ann_date
 
+; calculate regression
+  rc_mon = new(dimsizes(data_mon_area_avg(:,0)), double)
+  rc_mon_data = new(dimsizes(data_mon_area_avg), double)
+  yint_mon = new(dimsizes(data_mon_area_avg(:,0)), double)
+
+  do nc = 0, 11
+    rc_mon(nc) = regCoef(data_mon_area_avg&time, data_mon_area_avg(nc,:))
+    yint_mon(nc) = rc_mon@yintercept
+    rc_mon_data(nc,:) = rc_mon(nc)*data_mon_area_avg&time+yint_mon(nc)
+  end do
+    rc_mon = rc_mon*365
+    rc_mon@units = data_mon_area_avg@units+"/year"
+
+  rc_DJF = regCoef(data_DJF_area_avg&time, data_DJF_area_avg)
+  rc_DJF_data = rc_DJF*data_DJF_area_avg&time+rc_DJF@yintercept
+  rc_DJF = rc_DJF*365
+  rc_DJF@units = data_DJF_area_avg@units+"/year"
+
+  rc_MAM = regCoef(data_MAM_area_avg&time, data_MAM_area_avg)
+  rc_MAM_data = rc_MAM*data_MAM_area_avg&time+rc_MAM@yintercept
+  rc_MAM = rc_MAM*365
+  rc_MAM@units = data_MAM_area_avg@units+"/year"
+
+  rc_JJA = regCoef(data_JJA_area_avg&time, data_JJA_area_avg)
+  rc_JJA_data = rc_JJA*data_JJA_area_avg&time+rc_JJA@yintercept
+  rc_JJA = rc_JJA*365
+  rc_JJA@units = data_JJA_area_avg@units+"/year"
+
+  rc_SON = regCoef(data_SON_area_avg&time, data_SON_area_avg)
+  rc_SON_data = rc_SON*data_SON_area_avg&time+rc_SON@yintercept
+  rc_SON = rc_SON*365
+  rc_SON@units = data_SON_area_avg@units+"/year"
+
+  rc_ANN = regCoef(data_ann_area_avg&time, data_ann_area_avg)
+  rc_ANN_data = rc_ANN*data_ann_area_avg&time+rc_ANN@yintercept
+  rc_ANN = rc_ANN*365
+  rc_ANN@units = data_ann_area_avg@units+"/year"
+
+  rc_MON = regCoef(data_area_avg&time, data_area_avg)
+  rc_MON_data = rc_MON*data_area_avg&time+rc_MON@yintercept
+  rc_MON = rc_MON*365
+  rc_MON@units = data_area_avg@units+"/year"
+
 ; plot
-  fin_name = "../plots/"+run_name+"_climpact_"+var
+  plot_name = "../plots/"+run_name+"_climpact_"+var
 
   print(systemfunc("date"))
   print("Plotting")
@@ -203,9 +252,10 @@ begin
   res@tmXBLabelsOn = True
   res@lbLabelsOn = True
 
-  wks = gsn_open_wks("pdf", fin_name)
+  wks = gsn_open_wks("pdf", plot_name)
   plot0 = new(18, graphic)
   plot1 = new(18, graphic)
+  regl = new(dimsizes(plot1), graphic)
   cmap_cmocean_balance = read_colormap_file("cmocean_balance")
   cmap_MPL_Reds = read_colormap_file("MPL_Reds")
 
@@ -215,28 +265,70 @@ else
   res@cnFillPalette = cmap_cmocean_balance
 end if
   
+; area weights
+  lat = data_mon_avg&lat
+  lon = data_mon_avg&lon
+  nlat = dimsizes(lat)
+
+  dlon   = abs(lon(2)-lon(1))*rr
+  dx     = dlon*cos(lat*rad)
+  dy     = new (nlat, typeof(dx))
+  dy(0)  = abs(lat(2)-lat(1))*rr
+  dy(1:nlat-2)  = abs(lat(2:nlat-1)-lat(0:nlat-3))*rr*0.5   
+  dy(nlat-1)    = abs(lat(nlat-1)-lat(nlat-2))*rr
+
+  data_wgt = dx*dy
+
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" avg"
+    aavg = wgt_areaave_Wrap(data_mon_avg(n,:,:), data_wgt, 1.0, 0)
+    sd = stddev(data_mon_avg(n,:,:))
+    res@gsnLeftString = var+" "+mon(n)+" avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
     plot0(n) = gsn_csm_contour_map_ce(wks, data_mon_avg(n,:,:), res)
+    delete(aavg)
+    delete(sd)
   end do
 
-  res@gsnLeftString = var+" DJF avg"
+  aavg = wgt_areaave_Wrap(data_DJF_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_DJF_avg)
+  res@gsnLeftString = var+" DJF avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(12) = gsn_csm_contour_map_ce(wks, data_DJF_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MAM avg"
+  aavg = wgt_areaave_Wrap(data_MAM_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_MAM_avg)
+  res@gsnLeftString = var+" MAM avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(13) = gsn_csm_contour_map_ce(wks, data_MAM_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" JJA avg"
+  aavg = wgt_areaave_Wrap(data_JJA_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_JJA_avg)
+  res@gsnLeftString = var+" JJA avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(14) = gsn_csm_contour_map_ce(wks, data_JJA_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" SON avg"
+  aavg = wgt_areaave_Wrap(data_SON_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_SON_avg)
+  res@gsnLeftString = var+" SON avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(15) = gsn_csm_contour_map_ce(wks, data_SON_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MON avg"
+  aavg = wgt_areaave_Wrap(data_time_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_time_avg)
+  res@gsnLeftString = var+" MON avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(16) = gsn_csm_contour_map_ce(wks, data_time_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" ANN avg"
+  aavg = wgt_areaave_Wrap(data_ann_time_avg, data_wgt, 1.0, 0)
+  sd = stddev(data_ann_time_avg)
+  res@gsnLeftString = var+" ANN avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(17) = gsn_csm_contour_map_ce(wks, data_ann_time_avg, res)
+  delete(aavg)
+  delete(sd)
 
 ; time series
   resxy                      = True
@@ -256,28 +348,47 @@ end if
   resxy@xyLineColor = (/"black"/)
   resxy@gsnLeftString = ""
 
+  rline = True
+  rline@gsLineColor       = "red" ;73
+  rline@gsLineDashPattern = 0
+  rline@gsLineThicknessF  = 4
+
   do n=0,11
     resxy@tiYAxisString = var+" "+mon(n)
+    resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_mon_area_avg_std(n))+", RC="+sprintf("%5.4f", rc_mon(n))
     plot1(n) = gsn_csm_xy(wks, xaxis_ann, data_mon_area_avg(n,:), resxy)
+    regl(n) = gsn_add_polyline(wks, plot1(n), xaxis_ann, rc_mon_data(n,:), rline)
   end do
 
   resxy@tiYAxisString = var+" DJF"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_DJF_area_avg_std)+", RC="+sprintf("%5.4f", rc_DJF)
   plot1(12) = gsn_csm_xy(wks, xaxis_ann, data_DJF_area_avg, resxy)
+  regl(12) = gsn_add_polyline(wks, plot1(12), xaxis_ann, rc_DJF_data, rline)
 
   resxy@tiYAxisString = var+" MAM"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_MAM_area_avg_std)+", RC="+sprintf("%5.4f", rc_MAM)
   plot1(13) = gsn_csm_xy(wks, xaxis_ann, data_MAM_area_avg, resxy)
+  regl(13) = gsn_add_polyline(wks, plot1(13), xaxis_ann, rc_MAM_data, rline)
 
   resxy@tiYAxisString = var+" JJA"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_JJA_area_avg_std)+", RC="+sprintf("%5.4f", rc_JJA)
   plot1(14) = gsn_csm_xy(wks, xaxis_ann, data_JJA_area_avg, resxy)
+  regl(14) = gsn_add_polyline(wks, plot1(14), xaxis_ann, rc_JJA_data, rline)
 
   resxy@tiYAxisString = var+" SON"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_SON_area_avg_std)+", RC="+sprintf("%5.4f", rc_SON)
   plot1(15) = gsn_csm_xy(wks, xaxis_ann, data_SON_area_avg, resxy)
+  regl(15) = gsn_add_polyline(wks, plot1(15), xaxis_ann, rc_SON_data, rline)
 
   resxy@tiYAxisString = var+" MON"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_area_avg_std)+", RC="+sprintf("%5.4f", rc_MON)
   plot1(16) = gsn_csm_xy(wks, xaxis, data_area_avg, resxy)
+  regl(16) = gsn_add_polyline(wks, plot1(16), xaxis, rc_MON_data, rline)
 
   resxy@tiYAxisString = var+" ANN"
+  resxy@gsnLeftString = "SD="+sprintf("%5.4f", data_ann_area_avg_std)+", RC="+sprintf("%5.4f", rc_ANN)
   plot1(17) = gsn_csm_xy(wks, xaxis_ann, data_ann_area_avg, resxy)
+  regl(17) = gsn_add_polyline(wks, plot1(17), xaxis_ann, rc_ANN_data, rline)
 
 ; Panel plots
   resP                    = True

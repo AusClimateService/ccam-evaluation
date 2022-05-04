@@ -257,9 +257,25 @@ begin
   cmap_MPL_Reds = read_colormap_file("MPL_Reds")
   res@cnFillPalette = cmap_cmocean_balance
   
+; area weights
+  lat = data_mon_avg&lat
+  lon = data_mon_avg&lon
+  nlat = dimsizes(lat)
+
+  dlon   = abs(lon(2)-lon(1))*rr
+  dx     = dlon*cos(lat*rad)
+  dy     = new (nlat, typeof(dx))
+  dy(0)  = abs(lat(2)-lat(1))*rr
+  dy(1:nlat-2)  = abs(lat(2:nlat-1)-lat(0:nlat-3))*rr*0.5   
+  dy(nlat-1)    = abs(lat(nlat-1)-lat(nlat-2))*rr
+
+  data_wgt = dx*dy
+
 ; average
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" avg"
+    aavg = wgt_areaave_Wrap(data_mon_avg(n,:,:), data_wgt, 1.0, 0)
+    sd = stddev(data_mon_avg(n,:,:))
+    res@gsnLeftString = var+" "+mon(n)+" avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
 
     stats = stat_dispersion(data_mon_avg, False)
     dmin = stats(3)
@@ -289,6 +305,8 @@ begin
     res@cnLevelSpacingF = mnmxint(2)
 
     plot0(n) = gsn_csm_contour_map_ce(wks0, data_mon_avg(n,:,:), res)
+    delete(aavg)
+    delete(sd)
   end do
 
   ; append seasons into 1 large array
@@ -322,17 +340,33 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" DJF avg"
+  aavg = wgt_areaave_Wrap(av_DJF_avg, data_wgt, 1.0, 0)
+  sd = stddev(av_DJF_avg)
+  res@gsnLeftString = var+" DJF avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(12) = gsn_csm_contour_map_ce(wks0, av_DJF_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MAM avg"
+  aavg = wgt_areaave_Wrap(av_MAM_avg, data_wgt, 1.0, 0)
+  sd = stddev(av_MAM_avg)
+  res@gsnLeftString = var+" MAM avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(13) = gsn_csm_contour_map_ce(wks0, av_MAM_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" JJA avg"
+  aavg = wgt_areaave_Wrap(av_JJA_avg, data_wgt, 1.0, 0)
+  sd = stddev(av_JJA_avg)
+  res@gsnLeftString = var+" JJA avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(14) = gsn_csm_contour_map_ce(wks0, av_JJA_avg, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" SON avg"
+  aavg = wgt_areaave_Wrap(av_SON_avg, data_wgt, 1.0, 0)
+  sd = stddev(av_SON_avg)
+  res@gsnLeftString = var+" SON avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(15) = gsn_csm_contour_map_ce(wks0, av_SON_avg, res)
+  delete(aavg)
+  delete(sd)
 
   stats = stat_dispersion(av_ANN_avg, False)
   dmin = stats(3)
@@ -359,8 +393,12 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" ANN avg"
+  aavg = wgt_areaave_Wrap(av_ANN_avg, data_wgt, 1.0, 0)
+  sd = stddev(av_ANN_avg)
+  res@gsnLeftString = var+" ANN avg,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot0(16) = gsn_csm_contour_map_ce(wks0, av_ANN_avg, res)
+  delete(aavg)
+  delete(sd)
 
   ; Panel plots
   resP                    = True
@@ -372,7 +410,9 @@ begin
 
 ; variance
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" var"
+    aavg = wgt_areaave_Wrap(data_mon_var(n,:,:), data_wgt, 1.0, 0)
+    sd = stddev(data_mon_var(n,:,:))
+    res@gsnLeftString = var+" "+mon(n)+" var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
 
     stats = stat_dispersion(data_mon_var, False)
     dmin = stats(3)
@@ -402,6 +442,8 @@ begin
     res@cnLevelSpacingF = mnmxint(2)
 
     plot1(n) = gsn_csm_contour_map_ce(wks1, data_mon_var(n,:,:), res)
+    delete(aavg)
+    delete(sd)
   end do
 
   ; append seasons into 1 large array
@@ -436,17 +478,33 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" DJF var"
+  aavg = wgt_areaave_Wrap(av_DJF_var, data_wgt, 1.0, 0)
+  sd = stddev(av_DJF_var)
+  res@gsnLeftString = var+" DJF var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot1(12) = gsn_csm_contour_map_ce(wks1, av_DJF_var, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MAM var"
+  aavg = wgt_areaave_Wrap(av_MAM_var, data_wgt, 1.0, 0)
+  sd = stddev(av_MAM_var)
+  res@gsnLeftString = var+" MAM var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot1(13) = gsn_csm_contour_map_ce(wks1, av_MAM_var, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" JJA var"
+  aavg = wgt_areaave_Wrap(av_JJA_var, data_wgt, 1.0, 0)
+  sd = stddev(av_JJA_var)
+  res@gsnLeftString = var+" JJA var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot1(14) = gsn_csm_contour_map_ce(wks1, av_JJA_var, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" SON var"
+  aavg = wgt_areaave_Wrap(av_SON_var, data_wgt, 1.0, 0)
+  sd = stddev(av_SON_var)
+  res@gsnLeftString = var+" SON var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot1(15) = gsn_csm_contour_map_ce(wks1, av_SON_var, res)
+  delete(aavg)
+  delete(sd)
 
   stats = stat_dispersion(av_ANN_var, False)
   dmin = stats(3)
@@ -473,8 +531,12 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
   
-  res@gsnLeftString = var+" ANN var"
+  aavg = wgt_areaave_Wrap(av_ANN_var, data_wgt, 1.0, 0)
+  sd = stddev(av_ANN_var)
+  res@gsnLeftString = var+" ANN var,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot1(16) = gsn_csm_contour_map_ce(wks1, av_ANN_var, res)
+  delete(aavg)
+  delete(sd)
 
   ; Panel plots
   resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~variance added value"
@@ -483,7 +545,9 @@ begin
 
 ; 99 percentile
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" 99p"
+    aavg = wgt_areaave_Wrap(data_mon_99p(n,:,:), data_wgt, 1.0, 0)
+    sd = stddev(data_mon_99p(n,:,:))
+    res@gsnLeftString = var+" "+mon(n)+" 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
 
     stats = stat_dispersion(data_mon_99p, False)
     dmin = stats(3)
@@ -513,6 +577,8 @@ begin
     res@cnLevelSpacingF = mnmxint(2)
 
     plot2(n) = gsn_csm_contour_map_ce(wks2, data_mon_99p(n,:,:), res)
+    delete(aavg)
+    delete(sd)
   end do
 
   ; append seasons into 1 large array
@@ -547,17 +613,33 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" DJF 99p"
+  aavg = wgt_areaave_Wrap(av_DJF_99p, data_wgt, 1.0, 0)
+  sd = stddev(av_DJF_99p)
+  res@gsnLeftString = var+" DJF 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot2(12) = gsn_csm_contour_map_ce(wks2, av_DJF_99p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MAM 99p"
+  aavg = wgt_areaave_Wrap(av_MAM_99p, data_wgt, 1.0, 0)
+  sd = stddev(av_MAM_99p)
+  res@gsnLeftString = var+" MAM 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot2(13) = gsn_csm_contour_map_ce(wks2, av_MAM_99p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" JJA 99p"
+  aavg = wgt_areaave_Wrap(av_JJA_99p, data_wgt, 1.0, 0)
+  sd = stddev(av_JJA_99p)
+  res@gsnLeftString = var+" JJA 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot2(14) = gsn_csm_contour_map_ce(wks2, av_JJA_99p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" SON 99p"
+  aavg = wgt_areaave_Wrap(av_SON_99p, data_wgt, 1.0, 0)
+  sd = stddev(av_SON_99p)
+  res@gsnLeftString = var+" SON 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot2(15) = gsn_csm_contour_map_ce(wks2, av_SON_99p, res)
+  delete(aavg)
+  delete(sd)
 
   stats = stat_dispersion(av_ANN_99p, False)
   dmin = stats(3)
@@ -584,8 +666,12 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
   
-  res@gsnLeftString = var+" ANN 99p"
+  aavg = wgt_areaave_Wrap(av_ANN_99p, data_wgt, 1.0, 0)
+  sd = stddev(av_ANN_99p)
+  res@gsnLeftString = var+" ANN 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot2(16) = gsn_csm_contour_map_ce(wks2, av_ANN_99p, res)
+  delete(aavg)
+  delete(sd)
 
   ; Panel plots
   resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~99th percentile added value"
@@ -594,7 +680,9 @@ begin
 
 ; 01 percentile
   do n=0,11
-    res@gsnLeftString = var+" "+mon(n)+" 01p"
+    aavg = wgt_areaave_Wrap(data_mon_01p(n,:,:), data_wgt, 1.0, 0)
+    sd = stddev(data_mon_01p(n,:,:))
+    res@gsnLeftString = var+" "+mon(n)+" 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
 
     stats = stat_dispersion(data_mon_01p, False)
     dmin = stats(3)
@@ -624,6 +712,8 @@ begin
     res@cnLevelSpacingF = mnmxint(2)
     
     plot3(n) = gsn_csm_contour_map_ce(wks3, data_mon_01p(n,:,:), res)
+    delete(aavg)
+    delete(sd)
   end do
 
   ; append seasons into 1 large array
@@ -658,17 +748,33 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
 
-  res@gsnLeftString = var+" DJF 01p"
+  aavg = wgt_areaave_Wrap(av_DJF_01p, data_wgt, 1.0, 0)
+  sd = stddev(av_DJF_01p)
+  res@gsnLeftString = var+" DJF 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot3(12) = gsn_csm_contour_map_ce(wks3, av_DJF_01p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" MAM 01p"
+  aavg = wgt_areaave_Wrap(av_MAM_01p, data_wgt, 1.0, 0)
+  sd = stddev(av_MAM_01p)
+  res@gsnLeftString = var+" MAM 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot3(13) = gsn_csm_contour_map_ce(wks3, av_MAM_01p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" JJA 01p"
+  aavg = wgt_areaave_Wrap(av_JJA_01p, data_wgt, 1.0, 0)
+  sd = stddev(av_JJA_01p)
+  res@gsnLeftString = var+" JJA 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot3(14) = gsn_csm_contour_map_ce(wks3, av_JJA_01p, res)
+  delete(aavg)
+  delete(sd)
 
-  res@gsnLeftString = var+" SON 01p"
+  aavg = wgt_areaave_Wrap(av_SON_01p, data_wgt, 1.0, 0)
+  sd = stddev(av_SON_01p)
+  res@gsnLeftString = var+" SON 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot3(15) = gsn_csm_contour_map_ce(wks3, av_SON_01p, res)
+  delete(aavg)
+  delete(sd)
 
   stats = stat_dispersion(av_ANN_01p, False)
   dmin = stats(3)
@@ -695,8 +801,12 @@ begin
   res@cnMaxLevelValF = mnmxint(1)
   res@cnLevelSpacingF = mnmxint(2)
   
-  res@gsnLeftString = var+" ANN 01p"
+  aavg = wgt_areaave_Wrap(av_ANN_01p, data_wgt, 1.0, 0)
+  sd = stddev(av_ANN_01p)
+  res@gsnLeftString = var+" ANN 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)
   plot3(16) = gsn_csm_contour_map_ce(wks3, av_ANN_01p, res)
+  delete(aavg)
+  delete(sd)
 
   ; Panel plots
   resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~01th percentile added value"
