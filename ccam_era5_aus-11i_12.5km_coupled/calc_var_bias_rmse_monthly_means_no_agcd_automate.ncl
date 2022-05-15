@@ -129,13 +129,13 @@ begin
   gdd_regrid&lon = newlon
 
   print(systemfunc("date"))
-  print("Finished regridding, masking data")
+  print("Finished regridding")
   gdd_var_month = gdd_regrid
-  gdd_var_month = mask(gdd_regrid, conform(gdd_regrid, lsmask, (/1, 2/)), 1)
+  ;gdd_var_month = mask(gdd_regrid, conform(gdd_regrid, lsmask, (/1, 2/)), 1) ; don't mask out data
   delete(gdd_regrid)
 
   rcm_var_month = rcm_regrid
-  rcm_var_month = mask(rcm_regrid, conform(rcm_regrid, lsmask, (/1, 2/)), 1)
+  ;rcm_var_month = mask(rcm_regrid, conform(rcm_regrid, lsmask, (/1, 2/)), 1)
   delete(rcm_regrid)
 
   rcm_var_ann = month_to_annual(rcm_var_month, 1)
