@@ -464,7 +464,7 @@ begin
 ;      end if
 ;      end if
 ;    end if
-
+    cnres@cnLevelSelectionMode = "ManualLevels"
     cnres@cnMinLevelValF = mnmxint(0)
     cnres@cnMaxLevelValF = mnmxint(1)
     cnres@cnLevelSpacingF = mnmxint(2)
