@@ -1,5 +1,5 @@
 #!/bin/sh
-#PBS -N plot_seas_means
+#PBS -N vectors_plt
 #PBS -P xv83
 #PBS -q normalbw
 #PBS -l walltime=2:00:00

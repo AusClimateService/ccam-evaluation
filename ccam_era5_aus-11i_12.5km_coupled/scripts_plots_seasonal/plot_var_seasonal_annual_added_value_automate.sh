@@ -24,10 +24,10 @@ yrLast='2015'
 run_name='"ccam_era5_aus-11i_12.5km_coupled"'
 
 var='"pr"'
-ncl plot_av_seasonal_annual_only_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name
+ncl plot_var_seasonal_annual_added_value_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name
 
 var='"tasmax"'
-ncl plot_av_seasonal_annual_only_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name
+ncl plot_var_seasonal_annual_added_value_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name
 
 var='"tasmin"'
-ncl plot_av_seasonal_annual_only_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name
+ncl plot_var_seasonal_annual_added_value_automate.ncl var=$var yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name

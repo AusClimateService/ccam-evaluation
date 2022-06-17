@@ -1,5 +1,5 @@
 #!/bin/sh
-#PBS -N plot_seas_bias
+#PBS -N plot_avg
 #PBS -P xv83
 #PBS -q normalbw
 #PBS -l walltime=6:00:00
@@ -26,12 +26,12 @@ run_name='"ccam_era5_aus-11i_12.5km_coupled"'
 
 var='"pr"'
 info='"rainfall"'
-ncl plot_var_seasonal_annual_bias_rmse_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info
+ncl plot_var_seasonal_annual_average_variance_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info
 
 var='"tasmin"'
 info='"Minimum_temperature"'
-ncl plot_var_seasonal_annual_bias_rmse_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info
+ncl plot_var_seasonal_annual_average_variance_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info
 
 var='"tasmax"'
 info='"Maximum_temperature"'
-ncl plot_var_seasonal_annual_bias_rmse_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info
+ncl plot_var_seasonal_annual_average_variance_automate.ncl var=$var period=$period yrStrt=$yrStrt yrLast=$yrLast run_name=$run_name info=$info

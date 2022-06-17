@@ -1,4 +1,4 @@
-; plot Added Value (AV)
+; plot climpact Added Value (AV)
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
@@ -10,23 +10,23 @@ begin
   re     = 6371220.0
   rr     = re*rad
 
-  f0=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_JAN_added_value.nc", "r")
-  f1=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_FEB_added_value.nc", "r")
-  f2=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_MAR_added_value.nc", "r")
-  f3=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_APR_added_value.nc", "r")
-  f4=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_MAY_added_value.nc", "r")
-  f5=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_JUN_added_value.nc", "r")
-  f6=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_JUL_added_value.nc", "r")
-  f7=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_AUG_added_value.nc", "r")
-  f8=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_SEP_added_value.nc", "r")
-  f9=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_OCT_added_value.nc", "r")
-  f10=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_NOV_added_value.nc", "r")
-  f11=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_DEC_added_value.nc", "r")
-  f12=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_DJF_added_value.nc", "r")
-  f13=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_MAM_added_value.nc", "r")
-  f14=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_JJA_added_value.nc", "r")
-  f15=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_SON_added_value.nc", "r")
-  f16=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_"+var+"_ANN_added_value.nc", "r")
+  f0=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_JAN_added_value.nc", "r")
+  f1=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_FEB_added_value.nc", "r")
+  f2=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_MAR_added_value.nc", "r")
+  f3=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_APR_added_value.nc", "r")
+  f4=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_MAY_added_value.nc", "r")
+  f5=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_JUN_added_value.nc", "r")
+  f6=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_JUL_added_value.nc", "r")
+  f7=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_AUG_added_value.nc", "r")
+  f8=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_SEP_added_value.nc", "r")
+  f9=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_OCT_added_value.nc", "r")
+  f10=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_NOV_added_value.nc", "r")
+  f11=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_DEC_added_value.nc", "r")
+  f12=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_DJF_added_value.nc", "r")
+  f13=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_MAM_added_value.nc", "r")
+  f14=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_JJA_added_value.nc", "r")
+  f15=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_SON_added_value.nc", "r")
+  f16=addfile("../calculated/"+run_name+"_"+yrStrt+"-"+yrLast+"_climpact_"+var+"_ANN_added_value.nc", "r")
 
   av_JAN_avg = f0->av_JAN_avg
   av_JAN_var = f0->av_JAN_var
@@ -187,10 +187,10 @@ begin
   data_mon_01p(11,:,:) = av_DEC_01p
 
 ; plot
-  plot_name0 = "../plots_seasonal/"+run_name+"_"+var+"_avg_added_value_seasonal_annual_only"
-  plot_name1 = "../plots_seasonal/"+run_name+"_"+var+"_var_added_value_seasonal_annual_only"
-  plot_name2 = "../plots_seasonal/"+run_name+"_"+var+"_99p_added_value_seasonal_annual_only"
-  plot_name3 = "../plots_seasonal/"+run_name+"_"+var+"_01p_added_value_seasonal_annual_only"
+  plot_name0 = "../plots_seasonal/climpact_added_value/"+run_name+"_climpact_"+var+"_avg_seasonal_annual_added_value"
+  plot_name1 = "../plots_seasonal/climpact_added_value/"+run_name+"_climpact_"+var+"_var_seasonal_annual_added_value"
+;  plot_name2 = "../plots_seasonal/"+run_name+"_climpact_"+var+"_99p_added_value_seasonal_annual_only"
+;  plot_name3 = "../plots_seasonal/"+run_name+"_climpact_"+var+"_01p_added_value_seasonal_annual_only"
 
   print(systemfunc("date"))
   print("Plotting")
@@ -247,12 +247,13 @@ begin
 
   wks0 = gsn_open_wks("pdf", plot_name0) ; average
   wks1 = gsn_open_wks("pdf", plot_name1) ; variance
-  wks2 = gsn_open_wks("pdf", plot_name2) ; 99 percentile
-  wks3 = gsn_open_wks("pdf", plot_name3) ; 01 percentile
+;  wks2 = gsn_open_wks("pdf", plot_name2) ; 99 percentile
+;  wks3 = gsn_open_wks("pdf", plot_name3) ; 01 percentile
+
   plot0 = new(17, graphic)
   plot1 = new(17, graphic)
-  plot2 = new(17, graphic)
-  plot3 = new(17, graphic)
+;  plot2 = new(17, graphic)
+;  plot3 = new(17, graphic)
   cmap_cmocean_balance = read_colormap_file("cmocean_balance")
   cmap_MPL_Reds = read_colormap_file("MPL_Reds")
   res@cnFillPalette = cmap_cmocean_balance
@@ -426,9 +427,10 @@ begin
 
   ; Panel plots
   resP                    = True
-  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~average added value"
+  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~average added value"+"~C~"+info
   resP@gsnPanelLabelBar = False
   resP@gsnMaximize = True
+  resP@gsnPanelMainFontHeightF = 0.01
   gsn_panel(wks0, plot0(12:16), (/1, 5/), resP)
   delete(wks0)
 
@@ -471,7 +473,7 @@ begin
     plot1(n) = gsn_csm_contour_map_ce(wks1, data_mon_var(n,:,:), res)
     delete(aavg)
     delete(sd)
-  delete([/tp, pp, np/])
+    delete([/tp, pp, np/])
   end do
 
   ; append seasons into 1 large array
@@ -587,325 +589,229 @@ begin
   delete([/tp, pp, np/])
 
   ; Panel plots
-  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~variance added value"
+  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~variance added value"+"~C~"+info
   gsn_panel(wks1, plot1(12:16), (/1, 5/), resP)
   delete(wks1)
 
 ; 99 percentile
-  do n=0,11
-    aavg = wgt_areaave_Wrap(data_mon_99p(n,:,:), data_wgt, 1.0, 0)
-    sd = stddev(data_mon_99p(n,:,:))
-    tp = num(.not.ismissing(data_mon_99p(n,:,:)))
-    pp = num(where(data_mon_99p(n,:,:).gt.0, 1, 0))
-    np = num(where(data_mon_99p(n,:,:).lt.0, 1, 0))
-    res@gsnLeftString = var+" "+mon(n)+" 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-
-    stats = stat_dispersion(data_mon_99p, False)
-    dmin = stats(3)
-    dmax = stats(13)
-    mmin = stats(2)
-    mmax = stats(14)
-
-    ; calculate which is larger
-    if dmin .eq. dmax then
-      if abs(mmin) .gt. abs(mmax) then
-        mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-      else if abs(mmax) .gt. abs(mmin) then
-        mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-      end if
-      end if
-    else
-      if abs(dmin) .gt. abs(dmax) then
-        mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-      else if abs(dmax) .gt. abs(dmin) then
-        mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-      end if
-      end if
-    end if
-
-    res@cnMinLevelValF = mnmxint(0)
-    res@cnMaxLevelValF = mnmxint(1)
-    res@cnLevelSpacingF = mnmxint(2)
-
-    plot2(n) = gsn_csm_contour_map_ce(wks2, data_mon_99p(n,:,:), res)
-    delete(aavg)
-    delete(sd)
-  delete([/tp, pp, np/])
-  end do
-
-  ; append seasons into 1 large array
-  delete([/season0, season1, season/])
-  season0 = array_append_record(av_DJF_99p, av_MAM_99p, 0)
-  season1 = array_append_record(season0, av_JJA_99p, 0)
-  season =  array_append_record(season1, av_SON_99p, 0)
-
-  stats = stat_dispersion(season, False)
-  dmin = stats(3)
-  dmax = stats(13)
-  mmin = stats(2)
-  mmax = stats(14)
-
-  ; calculate which is larger and use the same scale for all seasons
-  if dmin .eq. dmax then
-    if abs(mmin) .gt. abs(mmax) then
-      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-    else if abs(mmax) .gt. abs(mmin) then
-      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-    end if
-    end if
-  else
-    if abs(dmin) .gt. abs(dmax) then
-      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-    else if abs(dmax) .gt. abs(dmin) then
-      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-    end if
-    end if
-  end if
-  res@cnMinLevelValF = mnmxint(0)
-  res@cnMaxLevelValF = mnmxint(1)
-  res@cnLevelSpacingF = mnmxint(2)
-
-  aavg = wgt_areaave_Wrap(av_DJF_99p, data_wgt, 1.0, 0)
-  sd = stddev(av_DJF_99p)
-  tp = num(.not.ismissing(av_DJF_99p))
-  pp = num(where(av_DJF_99p.gt.0, 1, 0))
-  np = num(where(av_DJF_99p.lt.0, 1, 0))
-  res@gsnLeftString = var+" DJF 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot2(12) = gsn_csm_contour_map_ce(wks2, av_DJF_99p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_MAM_99p, data_wgt, 1.0, 0)
-  sd = stddev(av_MAM_99p)
-  tp = num(.not.ismissing(av_MAM_99p))
-  pp = num(where(av_MAM_99p.gt.0, 1, 0))
-  np = num(where(av_MAM_99p.lt.0, 1, 0))
-  res@gsnLeftString = var+" MAM 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot2(13) = gsn_csm_contour_map_ce(wks2, av_MAM_99p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_JJA_99p, data_wgt, 1.0, 0)
-  sd = stddev(av_JJA_99p)
-  tp = num(.not.ismissing(av_JJA_99p))
-  pp = num(where(av_JJA_99p.gt.0, 1, 0))
-  np = num(where(av_JJA_99p.lt.0, 1, 0))
-  res@gsnLeftString = var+" JJA 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot2(14) = gsn_csm_contour_map_ce(wks2, av_JJA_99p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_SON_99p, data_wgt, 1.0, 0)
-  sd = stddev(av_SON_99p)
-  tp = num(.not.ismissing(av_SON_99p))
-  pp = num(where(av_SON_99p.gt.0, 1, 0))
-  np = num(where(av_SON_99p.lt.0, 1, 0))
-  res@gsnLeftString = var+" SON 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot2(15) = gsn_csm_contour_map_ce(wks2, av_SON_99p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  stats = stat_dispersion(av_ANN_99p, False)
-  dmin = stats(3)
-  dmax = stats(13)
-  mmin = stats(2)
-  mmax = stats(14)
-  ; calculate which is larger
-  if dmin .eq. dmax then
-    if abs(mmin) .gt. abs(mmax) then
-      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-    else if abs(mmax) .gt. abs(mmin) then
-      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-    end if
-    end if
-  else
-    if abs(dmin) .gt. abs(dmax) then
-      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-    else if abs(dmax) .gt. abs(dmin) then
-      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-    end if
-    end if
-  end if
-  res@cnMinLevelValF = mnmxint(0)
-  res@cnMaxLevelValF = mnmxint(1)
-  res@cnLevelSpacingF = mnmxint(2)
-  
-  aavg = wgt_areaave_Wrap(av_ANN_99p, data_wgt, 1.0, 0)
-  sd = stddev(av_ANN_99p)
-  tp = num(.not.ismissing(av_ANN_99p))
-  pp = num(where(av_ANN_99p.gt.0, 1, 0))
-  np = num(where(av_ANN_99p.lt.0, 1, 0))
-  res@gsnLeftString = var+" ANN 99p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot2(16) = gsn_csm_contour_map_ce(wks2, av_ANN_99p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  ; Panel plots
-  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~99th percentile added value"
-  gsn_panel(wks2, plot2(12:16), (/1, 5/), resP)
-  delete(wks2)
-
-; 01 percentile
-  do n=0,11
-    aavg = wgt_areaave_Wrap(data_mon_01p(n,:,:), data_wgt, 1.0, 0)
-    sd = stddev(data_mon_01p(n,:,:))
-    tp = num(.not.ismissing(data_mon_01p(n,:,:)))
-    pp = num(where(data_mon_01p(n,:,:).gt.0, 1, 0))
-    np = num(where(data_mon_01p(n,:,:).lt.0, 1, 0))
-    res@gsnLeftString = var+" "+mon(n)+" 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-
-    stats = stat_dispersion(data_mon_01p, False)
-    dmin = stats(3)
-    dmax = stats(13)
-    mmin = stats(2)
-    mmax = stats(14)
-
-    ; calculate which is larger
-    if dmin .eq. dmax then
-      if abs(mmin) .gt. abs(mmax) then
-        mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-      else if abs(mmax) .gt. abs(mmin) then
-        mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-      end if
-      end if
-    else
-      if abs(dmin) .gt. abs(dmax) then
-        mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-      else if abs(dmax) .gt. abs(dmin) then
-        mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-      end if
-      end if
-    end if
-
-    res@cnMinLevelValF = mnmxint(0)
-    res@cnMaxLevelValF = mnmxint(1)
-    res@cnLevelSpacingF = mnmxint(2)
-    
-    plot3(n) = gsn_csm_contour_map_ce(wks3, data_mon_01p(n,:,:), res)
-    delete(aavg)
-    delete(sd)
-  delete([/tp, pp, np/])
-  end do
-
-  ; append seasons into 1 large array
-  delete([/season0, season1, season/])
-  season0 = array_append_record(av_DJF_01p, av_MAM_01p, 0)
-  season1 = array_append_record(season0, av_JJA_01p, 0)
-  season =  array_append_record(season1, av_SON_01p, 0)
-
-  stats = stat_dispersion(season, False)
-  dmin = stats(3)
-  dmax = stats(13)
-  mmin = stats(2)
-  mmax = stats(14)
-
-  ; calculate which is larger and use the same scale for all seasons
-  if dmin .eq. dmax then
-    if abs(mmin) .gt. abs(mmax) then
-      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-    else if abs(mmax) .gt. abs(mmin) then
-      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-    end if
-    end if
-  else
-    if abs(dmin) .gt. abs(dmax) then
-      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-    else if abs(dmax) .gt. abs(dmin) then
-      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-    end if
-    end if
-  end if
-  res@cnMinLevelValF = mnmxint(0)
-  res@cnMaxLevelValF = mnmxint(1)
-  res@cnLevelSpacingF = mnmxint(2)
-
-  aavg = wgt_areaave_Wrap(av_DJF_01p, data_wgt, 1.0, 0)
-  sd = stddev(av_DJF_01p)
-  tp = num(.not.ismissing(av_DJF_01p))
-  pp = num(where(av_DJF_01p.gt.0, 1, 0))
-  np = num(where(av_DJF_01p.lt.0, 1, 0))
-  res@gsnLeftString = var+" DJF 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot3(12) = gsn_csm_contour_map_ce(wks3, av_DJF_01p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_MAM_01p, data_wgt, 1.0, 0)
-  sd = stddev(av_MAM_01p)
-  tp = num(.not.ismissing(av_MAM_01p))
-  pp = num(where(av_MAM_01p.gt.0, 1, 0))
-  np = num(where(av_MAM_01p.lt.0, 1, 0))
-  res@gsnLeftString = var+" MAM 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot3(13) = gsn_csm_contour_map_ce(wks3, av_MAM_01p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_JJA_01p, data_wgt, 1.0, 0)
-  sd = stddev(av_JJA_01p)
-  tp = num(.not.ismissing(av_JJA_01p))
-  pp = num(where(av_JJA_01p.gt.0, 1, 0))
-  np = num(where(av_JJA_01p.lt.0, 1, 0))
-  res@gsnLeftString = var+" JJA 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot3(14) = gsn_csm_contour_map_ce(wks3, av_JJA_01p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  aavg = wgt_areaave_Wrap(av_SON_01p, data_wgt, 1.0, 0)
-  sd = stddev(av_SON_01p)
-  tp = num(.not.ismissing(av_SON_01p))
-  pp = num(where(av_SON_01p.gt.0, 1, 0))
-  np = num(where(av_SON_01p.lt.0, 1, 0))
-  res@gsnLeftString = var+" SON 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot3(15) = gsn_csm_contour_map_ce(wks3, av_SON_01p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  stats = stat_dispersion(av_ANN_01p, False)
-  dmin = stats(3)
-  dmax = stats(13)
-  mmin = stats(2)
-  mmax = stats(14)
-  ; calculate which is larger
-  if dmin .eq. dmax then
-    if abs(mmin) .gt. abs(mmax) then
-      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
-    else if abs(mmax) .gt. abs(mmin) then
-      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
-    end if
-    end if
-  else
-    if abs(dmin) .gt. abs(dmax) then
-      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
-    else if abs(dmax) .gt. abs(dmin) then
-      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
-    end if
-    end if
-  end if
-  res@cnMinLevelValF = mnmxint(0)
-  res@cnMaxLevelValF = mnmxint(1)
-  res@cnLevelSpacingF = mnmxint(2)
-  
-  aavg = wgt_areaave_Wrap(av_ANN_01p, data_wgt, 1.0, 0)
-  sd = stddev(av_ANN_01p)
-  tp = num(.not.ismissing(av_ANN_01p))
-  pp = num(where(av_ANN_01p.gt.0, 1, 0))
-  np = num(where(av_ANN_01p.lt.0, 1, 0))
-  res@gsnLeftString = var+" ANN 01p,~C~AA="+sprintf("%5.4f", aavg)+", SD="+sprintf("%5.4f", sd)+"~C~PP="+pp+"/"+tp+", NP="+np
-  plot3(16) = gsn_csm_contour_map_ce(wks3, av_ANN_01p, res)
-  delete(aavg)
-  delete(sd)
-  delete([/tp, pp, np/])
-
-  ; Panel plots
-  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~01th percentile added value"
-  gsn_panel(wks3, plot3(12:16), (/1, 5/), resP)
-  delete(wks3)
+;  do n=0,11
+;    res@gsnLeftString = var+" "+mon(n)+" 99p"
+;
+;    stats = stat_dispersion(data_mon_99p, False)
+;    dmin = stats(3)
+;    dmax = stats(13)
+;    mmin = stats(2)
+;    mmax = stats(14)
+;
+;    ; calculate which is larger
+;    if dmin .eq. dmax then
+;      if abs(mmin) .gt. abs(mmax) then
+;        mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;      else if abs(mmax) .gt. abs(mmin) then
+;        mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;      end if
+;      end if
+;    else
+;      if abs(dmin) .gt. abs(dmax) then
+;        mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;      else if abs(dmax) .gt. abs(dmin) then
+;        mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;      end if
+;      end if
+;    end if
+;
+;    res@cnMinLevelValF = mnmxint(0)
+;    res@cnMaxLevelValF = mnmxint(1)
+;    res@cnLevelSpacingF = mnmxint(2)
+;
+;    plot2(n) = gsn_csm_contour_map_ce(wks2, data_mon_99p(n,:,:), res)
+;  end do
+;
+;  ; append seasons into 1 large array
+;  delete([/season0, season1, season/])
+;  season0 = array_append_record(av_DJF_99p, av_MAM_99p, 0)
+;  season1 = array_append_record(season0, av_JJA_99p, 0)
+;  season =  array_append_record(season1, av_SON_99p, 0)
+;
+;  stats = stat_dispersion(season, False)
+;  dmin = stats(3)
+;  dmax = stats(13)
+;  mmin = stats(2)
+;  mmax = stats(14)
+;
+;  ; calculate which is larger and use the same scale for all seasons
+;  if dmin .eq. dmax then
+;    if abs(mmin) .gt. abs(mmax) then
+;      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;    else if abs(mmax) .gt. abs(mmin) then
+;      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;    end if
+;    end if
+;  else
+;    if abs(dmin) .gt. abs(dmax) then
+;      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;    else if abs(dmax) .gt. abs(dmin) then
+;      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;    end if
+;    end if
+;  end if
+;  res@cnMinLevelValF = mnmxint(0)
+;  res@cnMaxLevelValF = mnmxint(1)
+;  res@cnLevelSpacingF = mnmxint(2)
+;
+;  res@gsnLeftString = var+" DJF 99p"
+;  plot2(12) = gsn_csm_contour_map_ce(wks2, av_DJF_99p, res)
+;
+;  res@gsnLeftString = var+" MAM 99p"
+;  plot2(13) = gsn_csm_contour_map_ce(wks2, av_MAM_99p, res)
+;
+;  res@gsnLeftString = var+" JJA 99p"
+;  plot2(14) = gsn_csm_contour_map_ce(wks2, av_JJA_99p, res)
+;
+;  res@gsnLeftString = var+" SON 99p"
+;  plot2(15) = gsn_csm_contour_map_ce(wks2, av_SON_99p, res)
+;
+;  stats = stat_dispersion(av_ANN_99p, False)
+;  dmin = stats(3)
+;  dmax = stats(13)
+;  mmin = stats(2)
+;  mmax = stats(14)
+;  ; calculate which is larger
+;  if dmin .eq. dmax then
+;    if abs(mmin) .gt. abs(mmax) then
+;      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;    else if abs(mmax) .gt. abs(mmin) then
+;      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;    end if
+;    end if
+;  else
+;    if abs(dmin) .gt. abs(dmax) then
+;      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;    else if abs(dmax) .gt. abs(dmin) then
+;      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;    end if
+;    end if
+;  end if
+;  res@cnMinLevelValF = mnmxint(0)
+;  res@cnMaxLevelValF = mnmxint(1)
+;  res@cnLevelSpacingF = mnmxint(2)
+  ;
+;  res@gsnLeftString = var+" ANN 99p"
+;  plot2(16) = gsn_csm_contour_map_ce(wks2, av_ANN_99p, res)
+;
+;  ; Panel plots
+;  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~99th percentile added value"+"~C~"+info
+;  gsn_panel(wks2, plot2(12:16), (/1, 5/), resP)
+;  delete(wks2)
+;
+;; 01 percentile
+;  do n=0,11
+;    res@gsnLeftString = var+" "+mon(n)+" 01p"
+;
+;    stats = stat_dispersion(data_mon_01p, False)
+;    dmin = stats(3)
+;    dmax = stats(13)
+;    mmin = stats(2)
+;    mmax = stats(14)
+;
+;    ; calculate which is larger
+;    if dmin .eq. dmax then
+;      if abs(mmin) .gt. abs(mmax) then
+;        mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;      else if abs(mmax) .gt. abs(mmin) then
+;        mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;      end if
+;      end if
+;    else
+;      if abs(dmin) .gt. abs(dmax) then
+;        mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;      else if abs(dmax) .gt. abs(dmin) then
+;        mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;      end if
+;      end if
+;    end if
+;
+;    res@cnMinLevelValF = mnmxint(0)
+;    res@cnMaxLevelValF = mnmxint(1)
+;    res@cnLevelSpacingF = mnmxint(2)
+    ;
+;    plot3(n) = gsn_csm_contour_map_ce(wks3, data_mon_01p(n,:,:), res)
+;  end do
+;
+;  ; append seasons into 1 large array
+;  delete([/season0, season1, season/])
+;  season0 = array_append_record(av_DJF_01p, av_MAM_01p, 0)
+;  season1 = array_append_record(season0, av_JJA_01p, 0)
+;  season =  array_append_record(season1, av_SON_01p, 0)
+;
+;  stats = stat_dispersion(season, False)
+;  dmin = stats(3)
+;  dmax = stats(13)
+;  mmin = stats(2)
+;  mmax = stats(14)
+;
+;  ; calculate which is larger and use the same scale for all seasons
+;  if dmin .eq. dmax then
+;    if abs(mmin) .gt. abs(mmax) then
+;      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;    else if abs(mmax) .gt. abs(mmin) then
+;      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;    end if
+;    end if
+;  else
+;    if abs(dmin) .gt. abs(dmax) then
+;      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;    else if abs(dmax) .gt. abs(dmin) then
+;      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;    end if
+;    end if
+;  end if
+;  res@cnMinLevelValF = mnmxint(0)
+;  res@cnMaxLevelValF = mnmxint(1)
+;  res@cnLevelSpacingF = mnmxint(2)
+;
+;  res@gsnLeftString = var+" DJF 01p"
+;  plot3(12) = gsn_csm_contour_map_ce(wks3, av_DJF_01p, res)
+;
+;  res@gsnLeftString = var+" MAM 01p"
+;  plot3(13) = gsn_csm_contour_map_ce(wks3, av_MAM_01p, res)
+;
+;  res@gsnLeftString = var+" JJA 01p"
+;  plot3(14) = gsn_csm_contour_map_ce(wks3, av_JJA_01p, res)
+;
+;  res@gsnLeftString = var+" SON 01p"
+;  plot3(15) = gsn_csm_contour_map_ce(wks3, av_SON_01p, res)
+;
+;  stats = stat_dispersion(av_ANN_01p, False)
+;  dmin = stats(3)
+;  dmax = stats(13)
+;  mmin = stats(2)
+;  mmax = stats(14)
+;  ; calculate which is larger
+;  if dmin .eq. dmax then
+;    if abs(mmin) .gt. abs(mmax) then
+;      mnmxint = nice_mnmxintvl(mmin, abs(mmin), 18, False)
+;    else if abs(mmax) .gt. abs(mmin) then
+;      mnmxint = nice_mnmxintvl(abs(mmax)*(-1), abs(mmax), 18, False)
+;    end if
+;    end if
+;  else
+;    if abs(dmin) .gt. abs(dmax) then
+;      mnmxint = nice_mnmxintvl(dmin, abs(dmin), 18, False)
+;    else if abs(dmax) .gt. abs(dmin) then
+;      mnmxint = nice_mnmxintvl(abs(dmax)*(-1), abs(dmax), 18, False)
+;    end if
+;    end if
+;  end if
+;  res@cnMinLevelValF = mnmxint(0)
+;  res@cnMaxLevelValF = mnmxint(1)
+;  res@cnLevelSpacingF = mnmxint(2)
+  ;
+;  res@gsnLeftString = var+" ANN 01p"
+;  plot3(16) = gsn_csm_contour_map_ce(wks3, av_ANN_01p, res)
+;
+;  ; Panel plots
+;  resP@gsnPanelMainString = run_name+" "+var+" "+yrStrt+"-"+yrLast+"~C~01th percentile added value"+"~C~"+info
+;  gsn_panel(wks3, plot3(12:16), (/1, 5/), resP)
+;  delete(wks3)
 end

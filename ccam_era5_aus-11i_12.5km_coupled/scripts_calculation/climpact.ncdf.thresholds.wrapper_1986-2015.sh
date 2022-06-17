@@ -26,4 +26,4 @@ set -xv
 
 cd $PBS_O_WORKDIR
 
-Rscript climpact.ncdf.wrapper_1986-2015.r
+Rscript climpact.ncdf.thresholds.wrapper_1986-2015.r

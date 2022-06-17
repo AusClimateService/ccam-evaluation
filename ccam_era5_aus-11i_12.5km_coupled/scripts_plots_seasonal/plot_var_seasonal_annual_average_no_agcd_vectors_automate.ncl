@@ -332,7 +332,7 @@ begin
   gdd_psl_var = dim_variance_n_Wrap(gdd_psl, 0)
 
 ; plot
-  plot_name = "../plots_seasonal/"+run_name+"_gdd_rcm_"+varu+"_"+varv+"_"+varp+"_seasonal_average"
+  plot_name = "../plots_seasonal/"+run_name+"_gdd_rcm_"+varu+"_"+varv+"_"+varp+"_seasonal_annual_average"
   cmap_cmocean_balance = read_colormap_file("cmocean_balance")
 
   print(systemfunc("date"))
@@ -778,4 +778,20 @@ begin
   resP@gsnMaximize = True
   gsn_panel(wks1, map0, (/3, 5/), resP)
 
+  fout = addfile("../calculated/plots/plot_"+var+"_seasonal_annual_average_no_agcd_vectors_automate.nc", "c")
+  fout->psl_ann_avg_diff = psl_ann_avg_diff
+  fout->psl_DJF_avg_diff = psl_DJF_avg_diff
+  fout->psl_MAM_avg_diff = psl_MAM_avg_diff
+  fout->psl_JJA_avg_diff = psl_JJA_avg_diff
+  fout->psl_SON_avg_diff = psl_SON_avg_diff
+  fout->ua_ann_avg_diff = ua_ann_avg_diff
+  fout->ua_DJF_avg_diff = ua_DJF_avg_diff
+  fout->ua_MAM_avg_diff = ua_MAM_avg_diff
+  fout->ua_JJA_avg_diff = ua_JJA_avg_diff
+  fout->ua_SON_avg_diff = ua_SON_avg_diff
+  fout->va_ann_avg_diff = va_ann_avg_diff
+  fout->va_DJF_avg_diff = va_DJF_avg_diff
+  fout->va_MAM_avg_diff = va_MAM_avg_diff
+  fout->va_JJA_avg_diff = va_JJA_avg_diff
+  fout->va_SON_avg_diff = va_SON_avg_diff
 end
