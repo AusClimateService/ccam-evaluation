@@ -2,11 +2,8 @@
 
 This file maintains a list of the xclim/climpact indices required for CCAM evaluation.
 
-List of xclim indices: https://xclim.readthedocs.io/en/stable/indicators.html
-
-List of climpact indices: https://github.com/ARCCSS-extremes/climpact/blob/master/www/user_guide/Climpact_user_guide.md#appendixa
-
-Please use the following table to track the metrics coded and what is still left to do.
+- xclim indices: https://xclim.readthedocs.io/en/stable/indicators.html
+- climpact indices: https://github.com/ARCCSS-extremes/climpact/blob/master/www/user_guide/Climpact_user_guide.md#appendixa
 
 (Note: view raw to see markdown table formatting.)
 
