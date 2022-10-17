@@ -49,7 +49,7 @@ This file maintains a list of the xclim/climpact indices required for CCAM evalu
 
 ---
 ### References
-Below are some references for climpact and xclim indices. Please see the [two indices lists](#list-of-indicators-for-each-package) above for references for specific indices
+Below are some references for climpact and xclim indices. Please see the [two indices lists](#list-of-indicators-for-each-package) above for specific index references
 #### Climpact
 - McKee T B, Doesken N J and Kleist J 1993 The relationship of drought frequency and duration to time scales Proceedings of the 8th Conference on Applied Climatology vol 17 (American Meteorological Society Boston, MA, USA) pp 179–83
 - Nairn J R and Fawcett R G 2013 Defining heatwaves: heatwave defined as a heat-impact event servicing all community and business sectors in Australia (Centre for Australian Weather and Climate Research) Online: http://www.cawcr.gov.au/technical-reports/CTR_060.pdf
