@@ -1,6 +1,5 @@
-# Evaluation protocol and standards for CCAM
+# Evaluation standards for CCAM
 
-## Standards (2022-10-17)
 ### Window length: 30 years
   - Historical: 1985-01-01 to 2014-12-31
   - Future: 2070-01-01 to 2099-12-31
