@@ -39,10 +39,10 @@
 | v200       | 200hPa meridional wind                              | ERA5         |                         |       |
 | v500       | 500hPa meridional wind                              | ERA5         |                         |       |
 | v850       | 850hPa meridional wind                              | ERA5         |                         |       |
-| sfcWind    | near-surface wind speed                             | ERA5?        |                         |       |
+| sfcWind    | near-surface wind speed                             |              |                         |       |
 | ps         | surface air pressure                                | ERA5         |                         |       |
 | psl        | sea level pressure                                  | ERA5         |                         |       |
-| huss       | near-surface specific humidity                      | ERA5?        |                         |       |
+| huss       | near-surface specific humidity                      |              |                         |       |
 | hurs       | near-surface relative humidity                      |              |                         |       |
 | zg200      | 200hPa geopotential height                          | ERA5         |                         |       |
 | zg500      | 500hPa geopotential height                          | ERA5         |                         |       |
