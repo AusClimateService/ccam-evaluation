@@ -30,31 +30,31 @@
 ### Variables to be evaluated
 | Variable   | Name                                                | Obs datasets | Timescale               | Notes |
 |------------|-----------------------------------------------------|--------------|-------------------------|-------|
+| CAPE       | convective available potential energy               |              |                         |       |
+| CINN       | convective inhibition                               |              |                         |       |
+| clt        | total cloud cover percentage                        |              |                         |       |
+| evspsbl    | evaporation including sublimation and transpiration |              |                         |       |
+| hurs       | near-surface relative humidity                      |              |                         |       |
+| huss       | near-surface specific humidity                      |              |                         |       |
+| mrso       | total soil moisture content                         |              |                         |       |
 | pr         | precipitation                                       | AGCD         | Daily, seasonal, annual |       |
-| tasmax     | daily maximum near-surface air temperature          | AGCD         | Daily, seasonal, annual |       |
-| tasmin     | daily minimum near-surface air temperature          | AGCD         | Daily, seasonal, annual |       |
-| u200       | 200hPa zonal wind                                   | ERA5         |                         |       |
-| u500       | 500hPa zonal wind                                   | ERA5         |                         |       |
-| u850       | 850hPa zonal wind                                   | ERA5         |                         |       |
-| v200       | 200hPa meridional wind                              | ERA5         |                         |       |
-| v500       | 500hPa meridional wind                              | ERA5         |                         |       |
-| v850       | 850hPa meridional wind                              | ERA5         |                         |       |
-| sfcWind    | near-surface wind speed                             |              |                         |       |
+| prhmax     | daily maximum hourly precipitation rate             |              |                         |       |
 | ps         | surface air pressure                                | ERA5         |                         |       |
 | psl        | sea level pressure                                  | ERA5         |                         |       |
-| huss       | near-surface specific humidity                      |              |                         |       |
-| hurs       | near-surface relative humidity                      |              |                         |       |
+| sfcWind    | near-surface wind speed                             |              |                         |       |
+| sfcWindmax | daily maximum near-surface wind speed               |              |                         |       |
+| tasmax     | daily maximum near-surface air temperature          | AGCD         | Daily, seasonal, annual |       |
+| tasmin     | daily minimum near-surface air temperature          | AGCD         | Daily, seasonal, annual |       |
+| uas        | eastward near-surface wind                          |              |                         |       |
+| ua200      | 200hPa eastward wind                                | ERA5         |                         |       |
+| ua500      | 500hPa eastward wind                                | ERA5         |                         |       |
+| ua850      | 850hPa eastward wind                                | ERA5         |                         |       |
+| vas        | northward near-surface wind                         |              |                         |       |
+| va200      | 200hPa northward wind                               | ERA5         |                         |       |
+| va500      | 500hPa northward wind                               | ERA5         |                         |       |
+| va850      | 850hPa northward wind                               | ERA5         |                         |       |
+| wsgsmax    | daily maximum near-surface wind speed of gust       |              |                         |       |
 | zg200      | 200hPa geopotential height                          | ERA5         |                         |       |
 | zg500      | 500hPa geopotential height                          | ERA5         |                         |       |
 | zg850      | 850hPa geopotential height                          | ERA5         |                         |       |
-| prhmax     | daily maximum hourly precipitation rate             |              |                         |       |
-| mrso       | total soil moisture content                         |              |                         |       |
-| sfcWindmax | daily maximum near-surface wind speed               |              |                         |       |
-| uas        | eastward near-surface wind                          |              |                         |       |
-| vas        | northward near-surface wind                         |              |                         |       |
-| clt        | total cloud cover percentage                        |              |                         |       |
-| evspsbl    | evaporation including sublimation and transpiration |              |                         |       |
-| CAPE       | convective available potential energy               |              |                         |       |
-| CINN       | convective inhibition                               |              |                         |       |
-| wsgsmax    | daily maximum near-surface wind speed of gust       |              |                         |       |
 | ???        | aerosol optical depth                               |              |                         |       |
