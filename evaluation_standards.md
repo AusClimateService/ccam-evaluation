@@ -18,8 +18,11 @@
     - There are some differences between xclim and climpact, see indices list above
 
 ### Observation datasets
-  - AGCDv1
-  - ERA5
+  - Daily
+    - AGCDv1
+  - Sub-daily
+    - ERA5
+    - BARRA
 
 ### Regridding
   - Observations and GCMs should be regridded to RCM/CCAM grid using conservative area weighted remapping
