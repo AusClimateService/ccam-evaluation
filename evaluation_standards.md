@@ -58,3 +58,21 @@
 | zg500      | 500hPa geopotential height                          | ERA5         |                         |       |
 | zg850      | 850hPa geopotential height                          | ERA5         |                         |       |
 | ???        | aerosol optical depth                               |              |                         |       |
+
+### Hazards to be evaluated
+| Hazard            | Tool/Index                                          | Variables required | Notes |
+|-------------------|-----------------------------------------------------|--------------------|-------|
+| Bushfires         | FFDI, C-Haines                                      |                    |       |
+| Tropical cyclones | Tempest extremes, CDD, OWZ                          |                    |       |
+| Hail              |                                                     |                    |       |
+| Flash flooding    |                                                     |                    |       |
+| Storm surges      |                                                     |                    |       |
+
+### Large scale drivers
+| Climate driver    | Methodology        | Variables required | Notes |
+|-------------------|--------------------|--------------------|-------|
+| ENSO              | Composite, impacts |                    |       |
+| IOD               |                    |                    |       |
+| SAM               |                    |                    |       |
+| MJO               |                    |                    |       |
+| Monsoon           |                    |                    |       |
