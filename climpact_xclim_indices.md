@@ -14,18 +14,18 @@ This file maintains a list of the xclim/climpact indices required for CCAM evalu
 | txn | Coldest daily maximum temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
 | txx | Warmest daily maximum temperature | :heavy_check_mark: | :heavy_check_mark: | Heatwaves, bushfires, extreme temperature | - |
 | txm | Mean daily maximum temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
-| tx10p | Percentage of days when daily maximum temperature is less than 10th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
-| tx90p | Percentage of days when daily maximum temperature is greater than 90th percentile | :heavy_check_mark: | :heavy_check_mark: | Heatwaves, bushfires, extreme temperature | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
+| tx10p | Percentage of days when daily maximum temperature is less than 10th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function. xclim defines ```tx10p``` as number of days, climpact defines it as percentage |
+| tx90p | Percentage of days when daily maximum temperature is greater than 90th percentile | :heavy_check_mark: | :heavy_check_mark: | Heatwaves, bushfires, extreme temperature | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function. xclim defines ```tx90p``` as number of days, climpact defines it as percentage |
 | tnn | Coldest daily minimum temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
 | tnx | Warmest daily minimum temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
 | tnm | Mean daily minimum temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
-| tn10p | Percentage of days when daily minimum temperature is less than 10th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
-| tn90p | Percentage of days when daily minimum temperature is greater than 90th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
+| tn10p | Percentage of days when daily minimum temperature is less than 10th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function. xclim defines ```tn10p``` as number of days, climpact defines it as percentage |
+| tn90p | Percentage of days when daily minimum temperature is greater than 90th percentile | :heavy_check_mark: | :heavy_check_mark: | - | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function. xclim defines ```tn90p``` as number of days, climpact defines it as percentage |
 | tmm | Mean daily mean temperature | :heavy_check_mark: | :heavy_check_mark: | - | - |
 | dtr | Daily temperature range | :heavy_check_mark: | :heavy_check_mark: | - | - |
-| hwn | Heatwave number | :heavy_check_mark: | :heavy_check_mark: | Heatwaves | Defined as 'heat wave frequency' in xclim. xclim uses absolute values, climpact uses 90th percentile or excess heat factor |
+| hwn | Heatwave number | :heavy_check_mark: | :heavy_check_mark: | Heatwaves | Defined as ```heat wave frequency``` in xclim. xclim uses absolute values, climpact uses 90th percentile or excess heat factor |
 | hwf | Heatwave frequency | - | :heavy_check_mark: | Heatwaves | - |
-| hwd | Heatwave duration | :heavy_check_mark: | :heavy_check_mark: | Heatwaves | Defined as 'heat wave max length' in xclim |
+| hwd | Heatwave duration | :heavy_check_mark: | :heavy_check_mark: | Heatwaves | Defined as ```heat wave max length``` in xclim |
 | hwm | Heatwave magnitude | - | :heavy_check_mark: | Heatwaves | - |
 | hwa | Heatwave amplitude | - | :heavy_check_mark: | Heatwaves | - |
 
@@ -33,7 +33,7 @@ This file maintains a list of the xclim/climpact indices required for CCAM evalu
 | Index | Description | xclim | Climpact | Hazard | Notes |
 | - | - | - | - | - | - |
 | rx1day | Maximum 1 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
-| rx5day | Maximum 5 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | Some differences between xclim & climpact due to centering of 5-day period |
+| rx5day | Maximum 5 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | Some differences between xclim & climpact due to centering of 5-day period. By definition the window should be on the last day, need to use ```fclimdex.compatible=TRUE``` in ```climpact.ncdf.wrapper.r``` to get the same result in climpact as xclim |
 | r10mm | Number of days when rainfall is greater than or equal to 10mm | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
 | r20mm | Number of days when rainfall is greater than or equal to 20mm | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
 | r95p | Amount of rainfall from very wet days  | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
