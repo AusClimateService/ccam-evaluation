@@ -60,3 +60,4 @@ Below are some references for climpact and xclim indices. Please see the [two in
 
 #### xclim
 - European Climate Assessment & Dataset, https://www.ecad.eu/
+- https://www.ecad.eu/documents/atbd.pdf
