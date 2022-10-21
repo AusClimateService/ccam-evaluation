@@ -23,7 +23,7 @@
 ## Climpact
 #### Pros
 - Supports percentile calculations
-- Calculates multiple heat wave metrics
+- Calculates multiple heat wave metrics using percentile or excess heat factor. This is preferred over using an absolute value for thresholds
 
 #### Cons
 - Differences in rx5day calculation, centering window may not be accurate based on definition (it should center on the last day of the 5-day window)
