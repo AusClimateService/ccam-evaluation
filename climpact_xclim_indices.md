@@ -33,7 +33,7 @@ This file maintains a list of the xclim/climpact indices required for CCAM evalu
 | Index | Description | xclim | Climpact | Hazard | Notes |
 | - | - | - | - | - | - |
 | rx1day | Maximum 1 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
-| rx5day | Maximum 5 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | Some differences between xclim & climpact due to centering of 5-day period. By definition the window should be on the last day, need to use ```fclimdex.compatible=TRUE``` in ```climpact.ncdf.wrapper.r``` to get the same result in climpact as xclim |
+| rx5day | Maximum 5 day precipitation | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | Some differences between xclim & climpact due to centering of 5-day period. By definition the window should be on the last day, need to use ```fclimdex.compatible=TRUE``` in ```climpact.ncdf.wrapper.r``` to get the same result in climpact as xclim. See also: https://search.r-project.org/CRAN/refmans/climdex.pcic/html/climdex.rx5day.html |
 | r10mm | Number of days when rainfall is greater than or equal to 10mm | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
 | r20mm | Number of days when rainfall is greater than or equal to 20mm | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | - |
 | r95p | Amount of rainfall from very wet days  | :heavy_check_mark: | :heavy_check_mark: | Heavy rainfall, floods | xclim doesn't calculate percentiles, percentile needs to be pre-calculated as a DataArray and fed into function |
