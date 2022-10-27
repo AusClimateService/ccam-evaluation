@@ -1,12 +1,12 @@
 ## xclim
 #### Pros
 - Scalable, fast
-- Python more widely used by evaluation group
+- Python more widely used by the evaluation group
 - Can read multiple input files (chunks)
 - Supports compound indices
 
 #### Cons
-- Calculating percentiles requires rechunking and a lot of resources or percentiles to be pre-computed
+- Calculating percentiles requires rechunking and a lot of resources, or percentiles need to be pre-computed
 - Calculates some heat wave metrics/indices but defines them using absolute values
 
 ## icclim
@@ -24,8 +24,10 @@
 #### Pros
 - Supports percentile calculations
 - Calculates multiple heat wave metrics using percentile or excess heat factor. This is preferred over using an absolute value for thresholds
+- Package is widely used
 
 #### Cons
 - Differences in rx5day calculation, centering window may not be accurate based on definition (it should center on the last day of the 5-day window)
 - Requires input data to be 1 file for each variable, cannot read multiple files/chunks
 - May be slower than xclim, less scalable
+- Less expertise in R among the evaluation group
