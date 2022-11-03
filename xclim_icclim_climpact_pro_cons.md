@@ -16,7 +16,7 @@
 - Interface might be a bit friendlier than xclim, uses API
 - Supports user-defined indices
 - Supports compound indices
-- Development lead by CERFACS [https://github.com/cerfacs-globc/icclim]
+- Development led by CERFACS [https://github.com/cerfacs-globc/icclim]
 
 #### Cons
 - Calculating percentiles requires rechunking and a lot of resources
