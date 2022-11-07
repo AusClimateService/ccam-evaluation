@@ -20,6 +20,10 @@
 ### Observation datasets
   - Daily
     - AGCDv1
+      - There is a single day difference (2013-05-02) in tmin between `/g/data/xv83/agcd-csiro/tmin/daily` and `/g/data/zv2/agcd/v1/tmin/mean/r005/01day`
+          
+          <img src="https://user-images.githubusercontent.com/34051150/200422503-33ef8cb1-56a1-4864-9698-96958e5d7359.png" width="250" height="250">
+
   - Sub-daily
     - ERA5
     - BARRA
