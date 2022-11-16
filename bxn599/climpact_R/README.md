@@ -1,6 +1,6 @@
 # R script to calculate Climpact/Climdex indices
 
-Uses R script from Climpact (https://github.com/ARCCSS-extremes/climpact/). Takes ~8 hours to run on CCAM 1980-2019 25km data when calculating all indices.
+Uses R script from [Climpact](https://github.com/ARCCSS-extremes/climpact/). Takes ~8 hours to run on CCAM 1980-2019 25km data when calculating all indices.
 
 Requires the following modules on Gadi:
  - module load R/4.1.0
