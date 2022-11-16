@@ -11,12 +11,15 @@
   - Use fractional weighting when generating masks to allow for more accurate masking when extending analysis to CMIP6 models
 
 ### Indices
-  - https://github.com/AusClimateService/ccam-evaluation/blob/main/climpact_xclim_indices.md
+  - A table comparing xclim/icclim/climpact can be found [here](https://github.com/AusClimateService/ccam-evaluation/blob/main/climpact_xclim_indices.md)
   - Use icclim to calculate indices
     - icclim code
        - [BARPA](https://github.com/AusClimateService/BARPA_evaluation/tree/main/chs/indices)
        - [CCAM](https://github.com/AusClimateService/ccam-evaluation/tree/main/bxn599/indices)
     - There are some differences between xclim and climpact, see indices list above
+
+### Standard evaluation tools (developed by Chun-Hsu Su)
+  - See [here](https://github.com/AusClimateService/BARPA_evaluation/blob/main/lib/lib_standards.py)
 
 ### Observation datasets
   - Daily
