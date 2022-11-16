@@ -16,27 +16,25 @@ clusters = gp.read_file("zip://" + file0)
 subclusters = gp.read_file("zip://" + file1)
 superclusters = gp.read_file("zip://" + file2)
 
-res    = 0.1
-latbnd = np.asarray([np.arange(-52.3-(res), 8.7, res),np.arange(- 52.3+(res), 8.7+(2*res), res)]).T
-lonbnd = np.asarray([np.arange(89.3-(res), 182.0, res),np.arange(89.3+(res), 182.0+(2*res), res)]).T
+res    = 0.125
+latbnd = np.asarray([np.arange(-53.25-(res), 12.75, res),np.arange(- 53.25+(res), 12.75+(2*res), res)]).T
+lonbnd = np.asarray([np.arange(88.75-(res), 207.25, res),np.arange(88.75+(res), 207.25+(2*res), res)]).T
 lat    = latbnd.mean(axis=1)
 lon    = lonbnd.mean(axis=1)
 
-subclusters_mask = regionmask.mask_geopandas(subclusters, lon, lat)
+land_mask = regionmask.defined_regions.natural_earth_v5_0_0.land_10.mask(lon, lat)
 
-subclusters_mask = subclusters_mask.rename("subclusters_mask")
+land_mask = land_mask.rename("land_mask")
 
-ids = subclusters_mask.to_numpy()
+ids = land_mask.to_numpy()
 miss = -999
 np.nan_to_num(ids, copy=False, nan=miss)
 ids = np.ma.masked_values(ids,miss)
-lbl = np.asarray(["Wet_Tropics","Rangelands_North","Monsoonal_North_East","Monsoonal_North_West",\
-                  "East_Coast_South","Central_Slopes","Murray_Basin","Southern_and_South_Western_Flatlands_West",\
-                  "Southern_and_South_Western_Flatlands_East","Southern_Slopes_Vic_NSW_East","Southern_Slopes_Vic_West","Southern_Slopes_Tas_East",\
-                  "Southern_Slopes_Tas_West","East_Coast_North","Rangelands_South"])
+lbl = np.asarray(["global"])
+names = np.asarray(["Global - Land"])
 
 # Create netCDF dimensions
-dset = Dataset("ccam_nrm_subclusters_fullname.nc",mode="w")
+dset = Dataset("ccam_landmask.nc",mode="w")
 dset.createDimension("lat" ,size=lat.size)
 dset.createDimension("lon" ,size=lon.size)
 dset.createDimension("nb"  ,size=2       )
@@ -44,11 +42,12 @@ dset.createDimension("n"   ,size=lbl.size)
 
 # Create netCDF variables
 X  = dset.createVariable("lat"        ,lat.dtype,("lat"      ))
-XB = dset.createVariable("lat_bounds" ,lat.dtype,("lat","nb" ))
+XB = dset.createVariable("lat_bnds"   ,lat.dtype,("lat","nb" ))
 Y  = dset.createVariable("lon"        ,lon.dtype,("lon"      ))
-YB = dset.createVariable("lon_bounds" ,lon.dtype,("lon","nb" ))
+YB = dset.createVariable("lon_bnds"   ,lon.dtype,("lon","nb" ))
 I  = dset.createVariable("ids"        ,ids.dtype,("lat","lon"))
 L  = dset.createVariable("labels"     ,lbl.dtype,("n"        ))
+N  = dset.createVariable("names"      ,lbl.dtype,("n"        ))
 
 # Load data and encode attributes
 X [...] = lat
@@ -63,5 +62,7 @@ I[...]  = ids
 I.labels= "labels"
 
 L[...]  = lbl
+
+N[...]  = names
 
 dset.close()

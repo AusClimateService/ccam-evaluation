@@ -16,9 +16,9 @@ clusters = gp.read_file("zip://" + file0)
 subclusters = gp.read_file("zip://" + file1)
 superclusters = gp.read_file("zip://" + file2)
 
-res    = 0.1
-latbnd = np.asarray([np.arange(-52.3-(res), 8.7, res),np.arange(- 52.3+(res), 8.7+(2*res), res)]).T
-lonbnd = np.asarray([np.arange(89.3-(res), 182.0, res),np.arange(89.3+(res), 182.0+(2*res), res)]).T
+res    = 0.125
+latbnd = np.asarray([np.arange(-53.25-(res), 12.75, res),np.arange(- 53.25+(res), 12.75+(2*res), res)]).T
+lonbnd = np.asarray([np.arange(88.75-(res), 207.25, res),np.arange(88.75+(res), 207.25+(2*res), res)]).T
 lat    = latbnd.mean(axis=1)
 lon    = lonbnd.mean(axis=1)
 
