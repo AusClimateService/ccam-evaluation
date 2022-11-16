@@ -7,19 +7,20 @@
 
 ### Regions
   - NRM cluster and subclusters
-  - Masks are generated using Damien Irving's script
-    - https://github.com/AusClimateService/model-evaluation/blob/master/spatial_selection.py
+  - Masks are generated using Damien Irving's [script](https://github.com/AusClimateService/model-evaluation/blob/master/report_EOFY22/spatial_selection.py)
   - Use fractional weighting when generating masks to allow for more accurate masking when extending analysis to CMIP6 models
 
 ### Indices
   - https://github.com/AusClimateService/ccam-evaluation/blob/main/climpact_xclim_indices.md
-  - Use xclim to generate indices
-    - xclim code: https://github.com/AusClimateService/BARPA_evaluation/tree/main/lib
+  - Use icclim to calculate indices
+    - icclim code
+       - [BARPA](https://github.com/AusClimateService/BARPA_evaluation/tree/main/chs/indices)
+       - [CCAM](https://github.com/AusClimateService/ccam-evaluation/tree/main/bxn599/indices)
     - There are some differences between xclim and climpact, see indices list above
 
 ### Observation datasets
   - Daily
-    - AGCDv1 (`/g/data/xv83/agcd-csiro/tmin/daily`)
+    - AGCDv1 (`/g/data/xv83/agcd-csiro/`)
       - Use the commercial copy in xv83 for analysis
       - There is a single day difference (2013-05-02) in tmin between `/g/data/xv83/agcd-csiro/tmin/daily` and `/g/data/zv2/agcd/v1/tmin/mean/r005/01day`
           
