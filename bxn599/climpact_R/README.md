@@ -17,4 +17,4 @@ Input variables:
  - tasmin
  - Each variable must be concatenated into a single file (e.g., ccam_rainfall_19800101-20191231.nc)
 
-Base installation of R scripts are located here (the R script will reference files in this directory) : /g/data/xv83/bxn599/CaRSA/climpact
+Base installation of R scripts are located here (the R script will reference files in this directory) : ```/g/data/xv83/bxn599/ACS/climpact```
