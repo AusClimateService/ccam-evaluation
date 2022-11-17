@@ -23,24 +23,26 @@ script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run
 INSTITUTION=none
 MODEL=none
 GCM=ERA5
-SCENARIO=evaluation
+SCENARIO=historical
 REALISATION=none
 IN_VERSION=v1
-IN_ROOT_DIR=/g/data/xv83/bxn599/era5/daily_aus
+IN_ROOT_DIR=/g/data/xv83/bxn599/ACS/data/era5/raw_test
 DOMAIN=GLO-r025
-OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/era5
+OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/era5_rt52
 OUT_VERSION=v1
 #SLICE_MODE=year
 TIME_PERIOD="1995-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
+LAT_BNDS="-54.0 14.0"
+LON_BNDS="88.0 208.0" # ERA5 is -180 to 180
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
 label=${DOMAIN}_${GCM}_${SCENARIO}_${OUT_VERSION}
 subdir=${DOMAIN}/${INSTITUTION}/${GCM}/${SCENARIO}/${REALISATION}/${MODEL}
 
-slice_list="year month DJF MAM JJA SON"
+slice_list="year" # month DJF MAM JJA SON
 
 echo $index_list
 
@@ -68,20 +70,24 @@ for var_index in $index_list; do
     for var_name in ${var_list}; do
       if [ "$var_name" == "tasmax" ]; then
                     var_name=mx2t
+                    TIME_AGG="max --hshift"
             fi
       if [ "$var_name" == "tasmin" ]; then
                     var_name=mn2t
+                    TIME_AGG="min --hshift"
             fi
       if [ "$var_name" == "pr" ]; then
-                    var_name=tp
+                    var_name=mtpr
+                    TIME_AGG="mean --hshift"
             fi
       if [ "$var_name" == "tas" ]; then
-                    var_name=2t
+                    var_name=t2m
+                    TIME_AGG=mean
             fi
   
       echo "${var_name} - $index"
   
-      indir=${IN_ROOT_DIR}
+      indir=${IN_ROOT_DIR}/${var_name}
       input_files="${indir}/${var_name}*.nc"
       first_file=`ls ${indir}/${var_name}*.nc | head -n 1`
       last_file=`ls ${indir}/${var_name}*.nc | tail -n 1`
@@ -97,7 +103,7 @@ for var_index in $index_list; do
         output_file=${outdir}/${index}_${label}_${SLICE_MODE}_${tmp/ /-}.nc
       fi
       
-      cmd="${cmd} --input_files ${input_files} --variable ${var_name}"
+      cmd="${cmd} --input_files ${input_files} --variable ${var_name} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --time_agg ${TIME_AGG} --drop_time_bounds"
     done
   
     rm ${output_file}
@@ -130,18 +136,22 @@ for var_index in $index_list; do
     for var_name1 in ${var_list1}; do
       if [ "$var_name1" == "tasmax" ]; then
                     var_name1=mx2t
+                    TIME_AGG1="max --hshift"
             fi
       if [ "$var_name1" == "tasmin" ]; then
                     var_name1=mn2t
+                    TIME_AGG1="max --hshift"
             fi
       if [ "$var_name1" == "pr" ]; then
-                    var_name1=tp
+                    var_name1=mtpr
+                    TIME_AGG1="mean --hshift"
             fi
       if [ "$var_name1" == "tas" ]; then
-                    var_name1=2t
+                    var_name1=t2m
+                    TIME_AGG1=mean
             fi
   
-      indir1=${IN_ROOT_DIR}
+      indir1=${IN_ROOT_DIR}/${var_name1}
       input_files1="${indir1}/${var_name1}*.nc"
       first_file1=`ls ${indir1}/${var_name1}*.nc | head -n 1`
       last_file1=`ls ${indir1}/${var_name1}*.nc | tail -n 1`
@@ -161,18 +171,22 @@ for var_index in $index_list; do
     for var_name2 in ${var_list2}; do
       if [ "$var_name2" == "tasmax" ]; then
                     var_name2=mx2t
+                    TIME_AGG2="max --hshift"
             fi
       if [ "$var_name2" == "tasmin" ]; then
                     var_name2=mn2t
+                    TIME_AGG2="min --hshift"
             fi
       if [ "$var_name2" == "pr" ]; then
-                    var_name2=tp
+                    var_name2=mtpr
+                    TIME_AGG2="mean --hshift"
             fi
       if [ "$var_name2" == "tas" ]; then
-                    var_name2=2t
+                    var_name2=t2m
+                    TIME_AGG2=mean
             fi
 
-      indir2=${IN_ROOT_DIR}
+      indir2=${IN_ROOT_DIR}/${var_name2}
       input_files2="${indir2}/${var_name2}*.nc"
       first_file2=`ls ${indir2}/${var_name2}*.nc | head -n 1`
       last_file2=`ls ${indir2}/${var_name2}*.nc | tail -n 1`
@@ -189,7 +203,7 @@ for var_index in $index_list; do
       fi
     done
       
-    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --input_files ${input_files2} --variable ${var_name2}"
+    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --time_agg ${TIME_AGG1} --input_files ${input_files2} --variable ${var_name2} --time_agg ${TIME_AGG2} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --drop_time_bounds"
   
     rm ${output_file}
     

@@ -30,16 +30,23 @@ IN_ROOT_DIR=/g/data/xv83/agcd-csiro
 DOMAIN=AUS-r005
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/agcd
 OUT_VERSION=v1
-SLICE_MODE=year
-TIME_PERIOD=="1995-01-01 2014-12-31"
-START_DATE="1995-01-01"
-END_DATE="2014-12-31"
+#SLICE_MODE=month
+TIME_PERIOD="1995-01-01 2014-12-31"
+START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
+END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
 label=${DOMAIN}_${GCM}_${SCENARIO}_${OUT_VERSION}
 subdir=${DOMAIN}/${INSTITUTION}/${GCM}/${SCENARIO}/${REALISATION}/${MODEL}
 
+slice_list="year month DJF MAM JJA SON"
+
+echo $index_list
+
+for slice in $slice_list; do
+	SLICE_MODE=$slice
+	echo $SLICE_MODE
 for var_index in $index_list; do
 	count=$(echo $var_index | tr -cd ':' | wc -c)
 	
@@ -94,9 +101,10 @@ for var_index in $index_list; do
 	  done
 	
 		rm ${output_file}
-	        cmd="${cmd} ${index} ${output_file}"
-	
-	        echo $cmd
+	  
+	  cmd="${cmd} ${index} ${output_file}"
+	  echo $cmd
+		
 		$cmd
 	fi
 
@@ -166,27 +174,15 @@ for var_index in $index_list; do
 
 			indir2=${IN_ROOT_DIR}/${var_name2}/daily
 			input_files2="${indir2}/${var_name2}*.nc"
-#			first_file2=`ls ${indir2}/${var_name2}*.nc | head -n 1`
-#			last_file2=`ls ${indir2}/${var_name2}*.nc | tail -n 1`
-#			first_file2=`basename ${first_file2/.nc/}`
-#			last_file2=`basename ${last_file2/.nc/}`
-#
-#			if [ "${TIME_PERIOD}" == "" ]; then
-#				tstart2=`echo ${first_file2##*_} | cut -d'-' -f1`
-#				tend2=`echo ${last_file2##*_} | cut -d'-' -f2`
-#				output_file=${outdir}/${index}_${label}_${SLICE_MODE}_${tstart2}-${tend2}.nc
-#			else
-#				tmp=`echo ${TIME_PERIOD//-/}`
-#				output_file=${outdir}/${index}_${label}_${SLICE_MODE}_${tmp/ /-}.nc
-#			fi
 	  done
 			
 		cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --input_files ${input_files2} --variable ${var_name2}"
 	
 		rm ${output_file}
-	        cmd="${cmd} ${index} ${output_file}"
+	  
+	  cmd="${cmd} ${index} ${output_file}"
+	  echo $cmd
 	
-	        echo $cmd
 		$cmd
 	fi
 
@@ -196,4 +192,5 @@ for var_index in $index_list; do
 	else
 		touch success.agcd.${index}
 	fi
+done
 done
