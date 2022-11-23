@@ -1,12 +1,12 @@
 #!/bin/bash
-#PBS -l walltime=04:00:00
+#PBS -l walltime=6:00:00
 #PBS -l ncpus=16
 #PBS -l mem=180GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
 #PBS -q normal
-#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83
+#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39
 
 # Environment
 #
@@ -20,16 +20,15 @@ icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
-INSTITUTION=CSIRO
-MODEL=CCAM
-GCM=NCC-NorESM2-MM
+INSTITUTION=none
+MODEL=none
+GCM=AGCD
 SCENARIO=historical
-REALISATION=r1i1p1f1
+REALISATION=none
 IN_VERSION=v1
-#IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
-IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
-DOMAIN=AUS-r001
-OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/ccam
+IN_ROOT_DIR=/g/data/xv83/agcd-csiro
+DOMAIN=AUS-r005
+OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/agcd
 OUT_VERSION=v1
 #SLICE_MODE=month
 TIME_PERIOD="1985-01-01 2014-12-31"
@@ -68,21 +67,21 @@ for var_index in $index_list; do
 	
 		for var_name in ${var_list}; do
 			if [ "$var_name" == "tasmax" ]; then
-	          	      var_name=tasmax
+	          	      var_name=tmax
 		        fi
 			if [ "$var_name" == "tasmin" ]; then
-	        	        var_name=tasmin
+	        	        var_name=tmin
 		        fi
 			if [ "$var_name" == "pr" ]; then
-	                	var_name=pr
+	                	var_name=precip
 		        fi
 			if [ "$var_name" == "tas" ]; then
-	                	var_name=tas
+	                	var_name=tavg
 		        fi
 	
 			echo "${var_name} - $index"
 	
-			indir=${IN_ROOT_DIR}/${var_name}
+			indir=${IN_ROOT_DIR}/${var_name}/daily
 			input_files="${indir}/${var_name}*.nc"
 			first_file=`ls ${indir}/${var_name}*.nc | head -n 1`
 			last_file=`ls ${indir}/${var_name}*.nc | tail -n 1`
@@ -130,19 +129,19 @@ for var_index in $index_list; do
 	
 		for var_name1 in ${var_list1}; do
 			if [ "$var_name1" == "tasmax" ]; then
-	          	      var_name1=tasmax
+	          	      var_name1=tmax
 		        fi
 			if [ "$var_name1" == "tasmin" ]; then
-	        	        var_name1=tasmin
+	        	        var_name1=tmin
 		        fi
 			if [ "$var_name1" == "pr" ]; then
-	                	var_name1=pr
+	                	var_name1=precip
 		        fi
 			if [ "$var_name1" == "tas" ]; then
-	                	var_name1=tas
+	                	var_name1=tavg
 		        fi
 	
-			indir1=${IN_ROOT_DIR}/${var_name1}
+			indir1=${IN_ROOT_DIR}/${var_name1}/daily
 			input_files1="${indir1}/${var_name1}*.nc"
 			first_file1=`ls ${indir1}/${var_name1}*.nc | head -n 1`
 			last_file1=`ls ${indir1}/${var_name1}*.nc | tail -n 1`
@@ -161,19 +160,19 @@ for var_index in $index_list; do
 
 		for var_name2 in ${var_list2}; do
 			if [ "$var_name2" == "tasmax" ]; then
-	          	      var_name2=tasmax
+	          	      var_name2=tmax
 		        fi
 			if [ "$var_name2" == "tasmin" ]; then
-	        	        var_name2=tasmin
+	        	        var_name2=tmin
 		        fi
 			if [ "$var_name2" == "pr" ]; then
-	                	var_name2=pr
+	                	var_name2=precip
 		        fi
 			if [ "$var_name2" == "tas" ]; then
-	                	var_name2=tas
+	                	var_name2=tavg
 		        fi
 
-			indir2=${IN_ROOT_DIR}/${var_name2}
+			indir2=${IN_ROOT_DIR}/${var_name2}/daily
 			input_files2="${indir2}/${var_name2}*.nc"
 	  done
 			
@@ -189,9 +188,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.ccam.${index}
+		touch fail.agcd.${index}
 	else
-		touch success.ccam.${index}
+		touch success.agcd.${index}
 	fi
 done
 done
