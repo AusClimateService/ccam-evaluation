@@ -19,7 +19,6 @@
 icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-# CSIRO's AGCD data
 INSTITUTION=none
 MODEL=none
 GCM=ERA5
@@ -31,7 +30,7 @@ DOMAIN=GLO-r025
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/era5
 OUT_VERSION=v1
 #SLICE_MODE=year
-TIME_PERIOD="1995-01-01 2014-12-31"
+TIME_PERIOD="1985-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 LAT_BNDS="-54.0 14.0"

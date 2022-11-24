@@ -2,11 +2,11 @@
 
 data=ccam
 
-indices_tasmax="tasmax:tx tasmax:su tasmax:txx tasmax:csu tasmax:id tasmax:txn tasmax:tx90p tasmax:tx10p"
-indices_tasmin="tasmin:tn tasmin:tr tasmin:tnx tasmin:fd tasmin:cfd tasmin:tnn tasmin:tn90p tasmin:tn10p"
-indices_prcp="pr:cdd pr:prcptot pr:rr1 pr:sdii pr:cwd pr:rr pr:r10mm pr:r20mm pr:rx1day pr:rx5day pr:r75p pr:r75ptot pr:r95p pr:r95ptot pr:r99p pr:r99ptot"
-indices_tas="tas:tg tas:tg90p tas:tg10p"
-indices_bi="tasmax:tasmin:dtr tasmax:tasmin:etr tasmax:tasmin:vdtr tas:pr:cd tas:pr:cw tas:pr:wd tas:pr:ww"
+indices_tasmax="tasmax:TX tasmax:SU tasmax:TXx tasmax:CSU tasmax:ID tasmax:TXn tasmax:TX90p tasmax:TX10p"
+indices_tasmin="tasmin:TN tasmin:TR tasmin:TNx tasmin:FD tasmin:CFD tasmin:TNn tasmin:TN90p tasmin:TN10p"
+indices_prcp="pr:CDD pr:PRCPTOT pr:RR1 pr:SDII pr:CWD pr:RR pr:R10mm pr:R20mm pr:RX1day pr:RX5day pr:R75p pr:R75pTOT pr:R95p pr:R95pTOT pr:R99p pr:R99pTOT"
+indices_tas="tas:TG tas:TG90p tas:TG10p"
+indices_bi="tasmax:tasmin:DTR tasmax:tasmin:ETR tasmax:tasmin:vDTR tas:pr:CD tas:pr:CW tas:pr:WD tas:pr:WW"
 
 all_index_list="${indices_tasmax} ${indices_tasmin} ${indices_prcp} ${indices_tas}" ## don't include ${indices_bi} in list due to running a separate script with longer walltime
 index_list_bi="${indices_bi}"
