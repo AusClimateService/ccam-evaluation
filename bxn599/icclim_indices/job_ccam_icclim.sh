@@ -20,14 +20,14 @@ icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 INSTITUTION=CSIRO
-MODEL=CCAM
+MODEL=CSIRO-CCAM-2203
 GCM=NCC-NorESM2-MM
 SCENARIO=historical
 REALISATION=r1i1p1f1
 IN_VERSION=v1
 #IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
 IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
-DOMAIN=AUS-r001
+DOMAIN=AUS-10
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/ccam
 OUT_VERSION=v1
 #SLICE_MODE=month
