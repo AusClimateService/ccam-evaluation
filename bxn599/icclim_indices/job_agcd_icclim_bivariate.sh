@@ -22,7 +22,7 @@ script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run
 # CSIRO's AGCD data
 INSTITUTION=none
 MODEL=none
-GCM=AGCD
+GCM=-BOM-AGCD
 SCENARIO=historical
 REALISATION=none
 IN_VERSION=v1
