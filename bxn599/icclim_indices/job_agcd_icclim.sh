@@ -31,7 +31,7 @@ DOMAIN=AUS-r005
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/agcd
 OUT_VERSION=v1
 #SLICE_MODE=month
-TIME_PERIOD="1995-01-01 2014-12-31"
+TIME_PERIOD="1985-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
