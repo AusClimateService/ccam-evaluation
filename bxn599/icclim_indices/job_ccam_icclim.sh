@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l walltime=04:00:00
+#PBS -l walltime=08:00:00
 #PBS -l ncpus=16
 #PBS -l mem=180GB
 #PBS -l wd
@@ -28,10 +28,10 @@ IN_VERSION=v1
 #IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
 IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
 DOMAIN=AUS-10
-OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices/ccam
+OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices
 OUT_VERSION=v1
 #SLICE_MODE=month
-TIME_PERIOD="1985-01-01 2014-12-31"
+TIME_PERIOD="1979-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 

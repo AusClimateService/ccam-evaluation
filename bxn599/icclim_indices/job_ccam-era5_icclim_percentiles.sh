@@ -1,12 +1,12 @@
 #!/bin/bash
-#PBS -l walltime=08:00:00
+#PBS -l walltime=06:00:00
 #PBS -l ncpus=16
 #PBS -l mem=180GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
 #PBS -q normal
-#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39
+#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83
 
 # Environment
 #
@@ -19,19 +19,18 @@
 icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-# CSIRO's AGCD data
-INSTITUTION=none
-MODEL=none
-GCM=BOM-AGCD
-SCENARIO=historical
+INSTITUTION=CSIRO
+MODEL=CSIRO-CCAM-2203
+GCM=ECMWF-ERA5
+SCENARIO=evaluation
 REALISATION=none
 IN_VERSION=v1
-IN_ROOT_DIR=/g/data/xv83/agcd-csiro
-DOMAIN=AUS-r005
+IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
+DOMAIN=AUS-10
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices
 OUT_VERSION=v1
 #SLICE_MODE=month
-TIME_PERIOD="1979-01-01 2021-12-31"
+TIME_PERIOD="1985-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
@@ -67,21 +66,21 @@ for var_index in $index_list; do
 	
 		for var_name in ${var_list}; do
 			if [ "$var_name" == "tasmax" ]; then
-	          	      var_name=tmax
+	          	      var_name=tasmax
 		        fi
 			if [ "$var_name" == "tasmin" ]; then
-	        	        var_name=tmin
+	        	        var_name=tasmin
 		        fi
 			if [ "$var_name" == "pr" ]; then
-	                	var_name=precip
+	                	var_name=pr
 		        fi
 			if [ "$var_name" == "tas" ]; then
-	                	var_name=tavg
+	                	var_name=tas
 		        fi
 	
 			echo "${var_name} - $index"
 	
-			indir=${IN_ROOT_DIR}/${var_name}/daily
+			indir=${IN_ROOT_DIR}/${var_name}
 			input_files="${indir}/${var_name}*.nc"
 			first_file=`ls ${indir}/${var_name}*.nc | head -n 1`
 			last_file=`ls ${indir}/${var_name}*.nc | tail -n 1`
@@ -129,19 +128,19 @@ for var_index in $index_list; do
 	
 		for var_name1 in ${var_list1}; do
 			if [ "$var_name1" == "tasmax" ]; then
-	          	      var_name1=tmax
+	          	      var_name1=tasmax
 		        fi
 			if [ "$var_name1" == "tasmin" ]; then
-	        	        var_name1=tmin
+	        	        var_name1=tasmin
 		        fi
 			if [ "$var_name1" == "pr" ]; then
-	                	var_name1=precip
+	                	var_name1=pr
 		        fi
 			if [ "$var_name1" == "tas" ]; then
-	                	var_name1=tavg
+	                	var_name1=tas
 		        fi
 	
-			indir1=${IN_ROOT_DIR}/${var_name1}/daily
+			indir1=${IN_ROOT_DIR}/${var_name1}
 			input_files1="${indir1}/${var_name1}*.nc"
 			first_file1=`ls ${indir1}/${var_name1}*.nc | head -n 1`
 			last_file1=`ls ${indir1}/${var_name1}*.nc | tail -n 1`
@@ -160,19 +159,19 @@ for var_index in $index_list; do
 
 		for var_name2 in ${var_list2}; do
 			if [ "$var_name2" == "tasmax" ]; then
-	          	      var_name2=tmax
+	          	      var_name2=tasmax
 		        fi
 			if [ "$var_name2" == "tasmin" ]; then
-	        	        var_name2=tmin
+	        	        var_name2=tasmin
 		        fi
 			if [ "$var_name2" == "pr" ]; then
-	                	var_name2=precip
+	                	var_name2=pr
 		        fi
 			if [ "$var_name2" == "tas" ]; then
-	                	var_name2=tavg
+	                	var_name2=tas
 		        fi
 
-			indir2=${IN_ROOT_DIR}/${var_name2}/daily
+			indir2=${IN_ROOT_DIR}/${var_name2}
 			input_files2="${indir2}/${var_name2}*.nc"
 	  done
 			
@@ -188,9 +187,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.agcd.${index}
+		touch fail.ccam.${index}
 	else
-		touch success.agcd.${index}
+		touch success.ccam.${index}
 	fi
 done
 done
