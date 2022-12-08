@@ -34,7 +34,10 @@
     - BARRA
 
 ### Regridding
-  - Observations and GCMs should be regridded to RCM/CCAM grid using conservative area weighted remapping
+  - Observations and GCMs should be regridded to RCM/CCAM grid using conservative area weighted remapping if upscaling
+  - As discussed at model evaluation meeting on 25/11/2022
+    - Conventions for upscaling: conservative
+    - Conventions for downscaling: Bilinear suggested with no lapse rate adjustments
 
 ### Variables to be evaluated
 | Variable   | Name                                                | Obs datasets | Timescale               | Notes |
