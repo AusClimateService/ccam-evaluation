@@ -15,10 +15,10 @@
   - Use icclim to calculate indices
     - icclim code
        - [BARPA](https://github.com/AusClimateService/BARPA_evaluation/tree/main/chs/indices)
-       - [CCAM](https://github.com/AusClimateService/ccam-evaluation/tree/main/bxn599/indices)
+       - [CCAM](https://github.com/AusClimateService/ccam-evaluation/tree/main/bxn599/icclim_indices)
     - There are some differences between xclim and climpact, see indices list above
 
-### Standard evaluation tools (developed by Chun-Hsu Su)
+### Standard evaluation tools (developed by Chun-Hsu Su and Emma Howard)
   - See [here](https://github.com/AusClimateService/BARPA_evaluation/blob/main/lib/lib_standards.py)
 
 ### Observation datasets
