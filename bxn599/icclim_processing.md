@@ -3,9 +3,10 @@
 This file maintains a list of Obs (AGCDv1), reanalysis (ERA5), GCMs and downscaled runs which have been or are being processed using [icclim](https://github.com/AusClimateService/indices)
 
 For historical GCM/RCM data, period used is 19790101-20141231
+
 For AGCD/ERA5 and CCAM-ERA5, period used is 19790101-20211231
 
-Percentile indices (#16: TX10p, TX90p, TN10p, TN90p, TG10p, TG90p, R75p, R75pTOT, R95p, R95pTOT, R99p, R99pTOT, CD, CW, WD, WW), period used is 19850101-20141231
+For percentile indices (#16: TX10p, TX90p, TN10p, TN90p, TG10p, TG90p, R75p, R75pTOT, R95p, R95pTOT, R99p, R99pTOT, CD, CW, WD, WW), period used is 19850101-20141231
 
 See [indices.md](https://github.com/AusClimateService/model-evaluation/blob/master/indices.md) for a full table and documentation
 
