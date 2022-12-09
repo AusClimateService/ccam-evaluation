@@ -15,29 +15,34 @@
 
 #set -x
 
+#Directory structure:
+#/g/data/ia39/australian-climate-service/<status>/<activity>/<product>/<domain>/<RCM-institution>/<GCM-model-name>/<experiment-name>/<ensemble-member>/<RCM-model-name>/<RCM-version-ID>/<frequency-or-category>/<variable-name>
+#
+#Filenaming:
+#<variable-name>_<domain>_<GCM-model-name>_<experiment-name>_<ensemble-member>_<RCM-model-name>_<RCM-version-id>_<frequency-or-category>[_<StartTime-EndTime>].nc
+
 # Script definition
 icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 RCM_INSTITUTION=CSIRO
-RCM_MODEL_NAME=CSIRO-CCAM-2203
-GCM_MODEL_NAME=NCC-NorESM2-MM
-EXPERIMENT_NAME=historical
+RCM_MODEL=CSIRO-CCAM-2203
+GCM_MODEL=NCC-NorESM2-MM
+EXPERIMENT=historical
 ENSEMBLE_MEMBER=r1i1p1f1
-#IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
 IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
 DOMAIN=AUS-10
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices
 RCM_VERSION=v1
 #SLICE_MODE=month
-TIME_PERIOD="1985-01-01 2014-12-31"
+TIME_PERIOD="1979-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
-subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
+label=${DOMAIN}_${GCM_MODEL}_${EXPERIMENT}_${ENSEMBLE_MEMBER}_${RCM_MODEL}_${RCM_VERSION}
+subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL}/${EXPERIMENT}/${ENSEMBLE_MEMBER}/${RCM_MODEL}
 
 slice_list="year month DJF MAM JJA SON"
 
