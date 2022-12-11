@@ -1,0 +1,3 @@
+`prep_cmip6_cdo.sh` and `calc_omega500.sh` use CDO to select pressure levels from different variables (e.g., `ta500`). Note that the number of characters extracted in `$ofile` (Line 23 in `prep_cmip6_cdo.sh` and line 21 in `calc_omega500.sh`) needs to be modified to reflect the current model being analysed.
+
+If using iris and python (e.g., `prep_cmip6.py` and `submit_prep_cmip6.sh`, modified from Emma Howard's ILAMB scripts), there appear to be some minor differences in the 3D extracted level data and the original 4D data.

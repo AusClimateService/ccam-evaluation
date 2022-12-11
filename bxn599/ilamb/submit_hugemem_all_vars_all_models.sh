@@ -4,7 +4,7 @@
 #PBS -l walltime=48:00:00
 #PBS -q hugemem
 #PBS -P xv83
-#PBS -l storage=scratch/tp28+gdata/tp28+gdata/hh5+gdata/access+gdata/dp9+gdata/rt52+gdata/ia39+gdata/xv83+scratch/xv83+gdata/zv2+gdata/oi10
+#PBS -l storage=scratch/tp28+gdata/tp28+gdata/hh5+gdata/access+gdata/dp9+gdata/rt52+gdata/ia39+gdata/xv83+scratch/xv83+gdata/zv2+gdata/oi10+gdata/fs38
 #PBS -l mem=1470G
 #PBS -l ncpus=48
 
