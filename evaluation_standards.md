@@ -38,6 +38,7 @@
   - As discussed at model evaluation meeting on 25/11/2022
     - Conventions for upscaling: conservative
     - Conventions for downscaling: Bilinear suggested with no lapse rate adjustments
+    - Previously noted/discussed in Data & Code group, see [data_standards.md](https://github.com/AusClimateService/AusClimateService/blob/main/technical_notes/regridding.md)
 
 ### Variables to be evaluated
 | Variable   | Name                                                | Obs datasets | Timescale               | Notes |
