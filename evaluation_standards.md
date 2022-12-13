@@ -9,6 +9,7 @@
   - NRM cluster and subclusters
   - Masks are generated using Damien Irving's [script](https://github.com/AusClimateService/model-evaluation/blob/master/report_EOFY22/spatial_selection.py)
   - Use fractional weighting when generating masks to allow for more accurate masking when extending analysis to CMIP6 models
+    + As discussed at Model Evaluation meeting (2022-12-09), current plan is to downscale GCM to AGCD grid using Nearest Neighbour and then use geopandas and shapefiles to generate masks
 
 ### Indices
   - A table comparing xclim/icclim/climpact can be found [here](https://github.com/AusClimateService/model-evaluation/blob/master/indices.md)
