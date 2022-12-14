@@ -14,7 +14,7 @@ module load conda/analysis3
 
 cd $PBS_O_WORKDIR
 
-declare -a StringArray=("ta200" "ta300" "ta500" "ta850")
+declare -a StringArray=("ta300" "ta500" "ta600" "ta700" "ta850")
 
 for var in ${StringArray[@]}; do
 #  echo $var
