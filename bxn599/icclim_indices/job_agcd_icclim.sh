@@ -20,16 +20,15 @@ icclim_path=/g/data/xv83/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
-INSTITUTION=none
-MODEL=none
-GCM=BOM-AGCD
-SCENARIO=historical
-REALISATION=none
-IN_VERSION=v1
+RCM_INSTITUTION=none
+RCM_MODEL_NAME=none
+GCM_MODEL_NAME=BOM-AGCD
+EXPERIMENT_NAME=historical
+ENSEMBLE_MEMBER=none
 IN_ROOT_DIR=/g/data/xv83/agcd-csiro
 DOMAIN=AUS-r005
 OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices
-OUT_VERSION=v1
+RCM_VERSION=none
 #SLICE_MODE=month
 TIME_PERIOD="1979-01-01 2021-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
@@ -37,8 +36,8 @@ END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM}_${SCENARIO}_${OUT_VERSION}
-subdir=${DOMAIN}/${INSTITUTION}/${GCM}/${SCENARIO}/${REALISATION}/${MODEL}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${RCM_VERSION}
+subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"
 
@@ -56,7 +55,7 @@ for var_index in $index_list; do
 		var_list=${var_list/&/ }
 		echo $var_list
 		
-		outdir=${OUT_ROOT_DIR}/${subdir}/${OUT_VERSION}/climdex/${index}
+		outdir=${OUT_ROOT_DIR}/${subdir}/${RCM_VERSION}/climdex/${index}
 	        mkdir -p ${outdir} || true
 	
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"
@@ -118,7 +117,7 @@ for var_index in $index_list; do
 		var_list2=${var_list2/&/ }
 		echo $var_list2
 		
-		outdir=${OUT_ROOT_DIR}/${subdir}/${OUT_VERSION}/climdex/${index}
+		outdir=${OUT_ROOT_DIR}/${subdir}/${RCM_VERSION}/climdex/${index}
 	        mkdir -p ${outdir} || true
 	
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"

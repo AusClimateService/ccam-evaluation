@@ -36,7 +36,7 @@ for var in ${StringArray[@]}; do
 #   echo $ofile
     opath="./$var/$ofile"
 #   echo $opath
-    cdo -b F64 -vertsum -sellevel,"$level" -setattribute,"$var@units"="m s**-2" -chname,$ovar,$var -divc,9.8 $file $opath
+    cdo -b F64 -vertsum -sellevel,"$level" -setattribute,"$var@units"="m" -chname,$ovar,$var -divc,9.8 $file $opath
   done
 
 done
