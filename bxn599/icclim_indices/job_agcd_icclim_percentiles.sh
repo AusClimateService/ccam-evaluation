@@ -16,7 +16,7 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/bxn599/ACS/icclim
+icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
@@ -27,7 +27,7 @@ EXPERIMENT_NAME=historical
 ENSEMBLE_MEMBER=none
 IN_ROOT_DIR=/g/data/xv83/agcd-csiro
 DOMAIN=AUS-r005
-OUT_ROOT_DIR=/g/data/xv83/$USER/ACS/icclim_indices
+OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
 RCM_VERSION=none
 #SLICE_MODE=month
 TIME_PERIOD="1985-01-01 2014-12-31"

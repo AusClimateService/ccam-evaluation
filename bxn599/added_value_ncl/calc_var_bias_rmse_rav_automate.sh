@@ -26,8 +26,8 @@ obs_var_name='"precip"'
 rcm_var_name='"pr"'
 gdd_var_name='"pr"'
 ls_obs='"/g/data/zv2/agcd/v1/precip/calib/r005/01day/agcd_v1_precip_calib_r005_daily_"'
-ls_rcm='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/data/pr_day_surf.ccam_25.km."' # RCM run
-ls_gdd='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/pr_day_"' # global driving data
+ls_rcm='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/data/pr_day_surf.ccam_25.km."' # RCM run
+ls_gdd='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/pr_day_"' # global driving data
 
 ncl calc_var_added_value_bias_rmse_automate.ncl run_name=$run_name var=$var yyyy_start=$yyyy_start yyyy_end=$yyyy_end ls_obs=$ls_obs ls_rcm=$ls_rcm ls_gdd=$ls_gdd obs_var_name=$obs_var_name rcm_var_name=$rcm_var_name gdd_var_name=$gdd_var_name
 
@@ -36,8 +36,8 @@ obs_var_name='"tmax"'
 rcm_var_name='"tasmax"'
 gdd_var_name='"tasmax"'
 ls_obs='"/g/data/zv2/agcd/v1/tmax/mean/r005/01day/agcd_v1_tmax_mean_r005_daily_"'
-ls_rcm='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/data/tasmax_surf.ccam_25.km."' # RCM run
-ls_gdd='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/tasmax_day_"' # global driving data
+ls_rcm='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/data/tasmax_surf.ccam_25.km."' # RCM run
+ls_gdd='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/tasmax_day_"' # global driving data
 
 ncl calc_var_added_value_bias_rmse_automate.ncl run_name=$run_name var=$var yyyy_start=$yyyy_start yyyy_end=$yyyy_end ls_obs=$ls_obs ls_rcm=$ls_rcm ls_gdd=$ls_gdd obs_var_name=$obs_var_name rcm_var_name=$rcm_var_name gdd_var_name=$gdd_var_name
 
@@ -46,8 +46,8 @@ obs_var_name='"tmin"'
 rcm_var_name='"tasmin"'
 gdd_var_name='"tasmin"'
 ls_obs='"/g/data/zv2/agcd/v1/tmin/mean/r005/01day/agcd_v1_tmin_mean_r005_daily_"'
-ls_rcm='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/data/tasmin_surf.ccam_25.km."' # RCM run
-ls_gdd='"/g/data/xv83/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/tasmin_day_"' # global driving data
+ls_rcm='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/data/tasmin_surf.ccam_25.km."' # RCM run
+ls_gdd='"/g/data/xv83/users/bxn599/CaRSA/ccam_25km/noresm2-mm/gdd_data/tasmin_day_"' # global driving data
 
 ncl calc_var_added_value_bias_rmse_automate.ncl run_name=$run_name var=$var yyyy_start=$yyyy_start yyyy_end=$yyyy_end ls_obs=$ls_obs ls_rcm=$ls_rcm ls_gdd=$ls_gdd obs_var_name=$obs_var_name rcm_var_name=$rcm_var_name gdd_var_name=$gdd_var_name
 

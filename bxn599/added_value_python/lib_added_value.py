@@ -580,7 +580,7 @@ def upscale_helper(arr, LR, interp_method):
     print('USING EXPERIMENTAL XESMF PACKAGE')
     print('!!!!!!!!!!!!!!!!!!')
 
-    outpath = '/scratch/q49/bxn599/CaRSA/example_rav_cs/regrid_files'
+    outpath = '/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/regrid_files'
     method  = 'conservative_normed'
     filename = f'{outpath}/upscale_helper_{method}_{len(arr["lat"])}x{len(arr["lon"])}_{len(LR["lat"])}x{len(LR["lon"])}.nc'
     reuse_weights = True if os.path.isfile(filename) else False
@@ -622,7 +622,7 @@ def helper_match_resolution(X, HR, model, interp_method):
             print(f'HRlon: {dlonHR.data} < arrLon: {dlon.data}')
             print(f'Upscaling {model} to HR resolution')
 
-            outpath  = '/scratch/q49/bxn599/CaRSA/example_rav_cs/regrid_files'
+            outpath  = '/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/regrid_files'
             method   = 'conservative_normed'
             filename = f'{outpath}/upscale_helper_{model}2HR_{method}_{len(X["lat"])}x{len(X["lon"])}_{len(HR["lat"])}x{len(HR["lon"])}.nc'
             reuse_weights = True if os.path.isfile(filename) else False

@@ -1,5 +1,5 @@
 begin
-  f = addfile("/g/data/xv83/bxn599/CaRSA/mask_files/ccam_12.5km_masks.nc", "r")
+  f = addfile("/g/data/xv83/users/bxn599/CaRSA/mask_files/ccam_12.5km_masks.nc", "r")
   g = addfile("/g/data/xv83/mxt599/ccam_era5_aus-11i_12.5km_coupled/drs_cordex/CORDEX-CMIP6/output/AUS-11i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/fx/sftlf/sftlf_AUS-11i_ECMWF-ERA5_evaluation_r1i1p1f1_CSIRO-CCAM-2203_v1_fx_19870101-19871231.nc", "r")
 
   sftlf = g->sftlf
@@ -36,7 +36,7 @@ begin
     ;===================================================================
   fAtt               = True            ; assign file attributes
   fAtt@title         = "NCL Efficient Approach to netCDF Creation"  
-  fAtt@source_file   =  "/g/data/xv83/bxn599/CaRSA/mask_files/ccam_12.5km_masks.nc"
+  fAtt@source_file   =  "/g/data/xv83/users/bxn599/CaRSA/mask_files/ccam_12.5km_masks.nc"
   fAtt@Conventions   = "None"   
   fAtt@creation_date = systemfunc ("date")        
   fileattdef( fout, fAtt )            ; copy file attributes    

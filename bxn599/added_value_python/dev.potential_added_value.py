@@ -12,7 +12,7 @@ import gc
 try:
     dummy_fs = os.environ['PBS_JOBFS']
 except:
-    dummy_fs = '/scratch/q49/bxn599/tmp'
+    dummy_fs = '/g/data/xv83/users/bxn599/tmp'
 
 
 

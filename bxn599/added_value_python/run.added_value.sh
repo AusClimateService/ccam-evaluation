@@ -10,7 +10,7 @@
 
 # User specific aliases and functions
 export PATH="~/bin/:$PATH"
-export PYTHONPATH="${PYTHONPATH}:/scratch/q49/bxn599/CaRSA/example_rav_cs/"
+export PYTHONPATH="${PYTHONPATH}:/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/"
 
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
@@ -30,9 +30,9 @@ module load conda/analysis3-21.01 #unstable with xesmf conervative_normed and in
 # Init
 
 #< Where are the original scripts
-path=/scratch/q49/bxn599/CaRSA/example_rav_cs/
+path=/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/
 #< Where to save all the output
-outpath=/scratch/q49/bxn599/CaRSA/example_rav_cs/
+outpath=/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/
 
 #< Resolution
 res=0p11deg
@@ -154,7 +154,7 @@ echo !!!!!!!!!!!!!!!!!!!
 
 gdds=access1-0
 prefix_boxplot=${project}_${gdd}
-regions=/scratch/q49/bxn599/CaRSA/example_rav_cs/added_value.regions.barpa.${res}.remove_west_boundary.nc
+regions=/g/data/xv83/users/bxn599/CaRSA/example_rav_cs/added_value.regions.barpa.${res}.remove_west_boundary.nc
 varnames=tasmax,tasmin,pr
 python -W ignore $path/dev.added_value_boxplot.py --regions ${regions} --project ${project} --prefix ${prefix_boxplot} --ipath ${datapath} --resolution ${res} --op mse --gdds ${gdds} --varnames ${varnames} --yrStart ${yrStartPast} --yrEnd ${yrEndPast} --quantiles ${quantiles} --seasons ${seasons} -o ${plotpath} --interp_method ${interp_method}
 

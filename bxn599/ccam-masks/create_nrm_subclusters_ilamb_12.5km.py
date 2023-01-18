@@ -8,9 +8,9 @@ import pooch
 from netCDF4 import Dataset
 import regionmask
 
-file0="/g/data/xv83/bxn599/CaRSA/mask_files/shapefiles/NRM_clusters.zip"
-file1="/g/data/xv83/bxn599/CaRSA/mask_files/shapefiles/NRM_sub_clusters.zip"
-file2="/g/data/xv83/bxn599/CaRSA/mask_files/shapefiles/NRM_super_clusters.zip"
+file0="/g/data/xv83/users/bxn599/CaRSA/mask_files/shapefiles/NRM_clusters.zip"
+file1="/g/data/xv83/users/bxn599/CaRSA/mask_files/shapefiles/NRM_sub_clusters.zip"
+file2="/g/data/xv83/users/bxn599/CaRSA/mask_files/shapefiles/NRM_super_clusters.zip"
 
 clusters = gp.read_file("zip://" + file0)
 subclusters = gp.read_file("zip://" + file1)

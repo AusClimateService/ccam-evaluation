@@ -36,7 +36,7 @@ indices=NULL	#c("hw","tnn")
 thresholds.files=NULL#"./www/output/gridded/thresholds.test.1991-1997.nc"
 
 # Directory where Climpact is stored. Use full pathname. Leave as NULL if you are running this script from the Climpact directory (where this script was initially stored).
-root.dir="/g/data/xv83/bxn599/CaRSA/climpact"
+root.dir="/g/data/xv83/users/bxn599/CaRSA/climpact"
 
 
 #######################################################
