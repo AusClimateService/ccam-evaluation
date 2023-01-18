@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 data=cnrm-esm2-1
 

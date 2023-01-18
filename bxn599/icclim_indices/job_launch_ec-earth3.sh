@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 data=ec-earth3
 
