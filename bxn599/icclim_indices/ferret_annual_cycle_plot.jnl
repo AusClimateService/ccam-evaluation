@@ -1,0 +1,20 @@
+use climatological_axes
+use "/g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-BOM-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1/climdex/TXx/TXx_AUS-15_CSIRO-BOM-ACCESS-CM2_historical_r4i1p1f1_BOM-BARPA-R_v1_month_19850101-20141231.nc"
+let txx_cm2_lim=txx[d=2,t=1985-01-01:2014-12-31]
+let txx_cm2=txx_cm2_lim[gt=month_reg@MOD,y=-55:10@ave,x=90:210@ave]
+
+use "/g/data/xv83/users/bxn599/ACS/ilamb/DATA/txx/ERA5/ERA5_txx_19790101-20211231.nc"
+let txx_era5_lim=txx[d=3,t=1985-01-01:2014-12-31]
+let txx_era5=txx_era5_lim[gt=month_reg@MOD,y=-55:10@ave,x=90:210@ave]
+
+use "/g/data/xv83/users/bxn599/ACS/ilamb/MODELS/CCAM_ERA5/TXx/TXx_AUS-10_ECMWF-ERA5_evaluation_none_CSIRO-CCAM-2203_v1_month_19790101-20211231.nc"
+let txx_ccam_era5_lim=txx[d=4,t=1985-01-01:2014-12-31]
+let txx_ccam_era5=txx_ccam_era5_lim[gt=month_reg@MOD,y=-55:10@ave,x=90:210@ave]
+
+use "/g/data/xv83/users/bxn599/ACS/ilamb/DATA/txx/AGCDv1/AGCDv1_txx_19790101-20211231.nc "
+let txx_agcd_lim=txx[d=5,t=1985-01-01:2014-12-31]
+let txx_agcd=txx_agcd_lim[gt=month_reg@MOD,y=-55:10@ave,x=90:210@ave]
+
+plot/vlimits=22:28 txx_era5
+plot/overlay txx_cm2
+plot/overlay txx_ccam_era5

@@ -57,7 +57,8 @@ def prep_era5_for_ilamb(var):
 #variables = ['hus600','hus700','hus850','omega500','ta300','ta500','ta600','ta700','ta850','tas','ua200','ua300','ua500','ua850','va200','va300','va500','va850','zg200','zg500','zg850']
 
 # 24 variables, don't need hur600, hur700, hur850
-variables = ['hus600','hus700','hus850','omega500','ta300','ta500','ta600','ta700','ta850','tas','ua200','ua300','ua500','ua850','va200','va300','va500','va850','zg200','zg300','zg500','zg850','pr','psl']
+#variables = ['hus600','hus700','hus850','omega500','ta300','ta500','ta600','ta700','ta850','tas','ua200','ua300','ua500','ua850','va200','va300','va500','va850','zg200','zg300','zg500','zg850','pr','psl']
+variables = ['tas']
 print(len(variables))
 prep_era5_for_ilamb(variables[i])
-prep_era5_for_ilamb(variables[i+12])
+#prep_era5_for_ilamb(variables[i+12])

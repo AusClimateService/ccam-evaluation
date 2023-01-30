@@ -45,11 +45,11 @@ def prep_era5_for_ilamb(var):
     data.coord('time').guess_bounds()
     data.rename(var)
     try:
-        os.mkdir("/g/data/xv83/users/bxn599/ACS/ilamb/DATA/"+var)
-        os.mkdir("/g/data/xv83/users/bxn599/ACS/ilamb/DATA/"+var+"/ERA5")
+        os.mkdir("/g/data/xv83/bxn599/ACS/ilamb/DATA/"+var)
+        os.mkdir("/g/data/xv83/bxn599/ACS/ilamb/DATA/"+var+"/ERA5")
     except:
         1
-    iris.save(data,"/g/data/xv83/users/bxn599/ACS/ilamb/DATA/{var}/ERA5/ERA5_{var}.nc".format(var=var),zlib=True,packing='i2')
+    iris.save(data,"/g/data/xv83/bxn599/ACS/ilamb/DATA/{var}/ERA5/ERA5_{var}.nc".format(var=var),zlib=True,packing='i2')
     
     
         
