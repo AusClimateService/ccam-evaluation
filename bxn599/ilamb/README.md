@@ -12,7 +12,7 @@ Cannot use `R75/95/99pTOT` in ILAMB due to empty/FillValue grid points. This cau
 
 ### --study_limits issue
 There is an issue when using the `--study_limits` flag where data is shifted 1 month earlier, leading to an incorrect/out of phase annual cycle. 
-Data which fits the study limits period doesn't appear to be affected by this, but data longer (and possibly shorter, not tested) than the study limits period are affected. Removing the `--study_limits` flag solves this issue.
+Data which fits the study limits period doesn't appear to be affected by this, but data longer (and possibly shorter, not tested) than the study limits period are affected. Removing the `--study_limits` flag solves this issue. There doesn't seem to any noticeable increase in resources when *not* using the `--study_limits` flag.
 
 CMIP6_NorESM2-MM
 ![image](https://user-images.githubusercontent.com/34051150/215453088-7a51e084-fb12-42a8-aae9-fc1fd6feae40.png)
