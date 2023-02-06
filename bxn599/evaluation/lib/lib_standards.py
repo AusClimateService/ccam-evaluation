@@ -6,6 +6,7 @@ import spatial_selection
 import matplotlib as mpl
 from scipy.stats import theilslopes
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
 
 ## import plotting_functions
@@ -28,27 +29,8 @@ DOMAINS = {"CORDEX-AA": (-52.36, 12.21, 89.25, 206.57),  # as per CORDEX definit
 
 # Methods for regridding
 REGRID_UPSCALE_METHOD = "conservative"
-REGRID_DOWNSCALE_METHOD = "nearest_s2d"
+REGRID_DOWNSCALE_METHOD = "bilinear"
 REGRID_UPSCALE_METHOD_WITH_MASK = "conservative_normed"
-
-# Regions
-SHP_NRM = "/g/data/ia39/aus-ref-clim-data-nci/shapefiles/data/nrm_regions/nrm_regions.shp"
-SHP_AUS = "/g/data/ia39/aus-ref-clim-data-nci/shapefiles/data/australia/australia.shp"
-AUS_SHAPE = gp.read_file(SHP_AUS)
-
-# NRM sub clusters
-SUBNRM_SHAPE = gp.read_file(SHP_NRM)
-# NRM clusters
-NRM_SHAPE = SUBNRM_SHAPE.dissolve(by='ClusterNm', as_index=False)
-NRM_SHAPE = NRM_SHAPE.drop(columns=['SubClusNm', 'SubClusAb'])
-NRM_SHAPE = NRM_SHAPE[['ClusterNm', 'ClusterAb', 'SupClusNm', 'SupClusAb', 'geometry']]
-# NRM superclusters
-SUPNRM_SHAPE = NRM_SHAPE.dissolve(by='SupClusNm', as_index=False)
-SUPNRM_SHAPE = SUPNRM_SHAPE.drop(columns=['ClusterNm', 'ClusterAb'])
-SUPNRM_SHAPE = SUPNRM_SHAPE[['SupClusNm', 'SupClusAb', 'geometry']]
-
-# AGCD data quality mask
-AGCD_MASK = "/g/data/tp28/dev/evaluation_datasets/awap_mask.nc"
 
 # Standard Grids
 GRIDS = {}
@@ -62,11 +44,7 @@ GRIDS['AGCD_v1'] = xr.Dataset(
                      "lon": np.linspace(112, 156.25, 886)
                      }
                     )
-GRIDS['CCAM'] = xr.Dataset(
-                    {"lat": np.linspace(-52.3, 8.7, 611),
-                     "lon": np.linspace(89.3, 182.0, 928)
-                     }
-                    )
+# GRIDS['CCAM'] not implemented
 
 # Colormaps
 COLORMAPS = {}
@@ -340,7 +318,8 @@ def compute_score(ds1, ds2, metric, dims='time', allow_regrid=False, earlyperiod
         assert ds1.shape == ds2.shape, "ds1 and ds2 have different shape"
     
     # Regrid ds2 to ds1
-    ds2 = regrid(ds2, ds1)
+    if allow_regrid:
+        ds2 = regrid(ds2, ds1)
         
     if metric == 'RMSE':
         score = np.sqrt(((ds1 - ds2)**2).mean(dim=dims))
@@ -476,242 +455,6 @@ def regrid(ds_in, ds_ref):
         else:
             return regrid_safe(ds_in, ds_ref, REGRID_UPSCALE_METHOD)
 
-def region_aggregation(ds, aggregator, region=None):
-    """
-    Inputs:
-        ds: xarray.DataArray
-            Input data, 2d or 3d
-        aggregator: str
-            Name of x-array reduction method to apply. Valid entries:
-                ['weightmean','all','any','count','cumprod','cumsum','max',
-                'mean','median','min','prod','std','sum','ar']
-        region: str 
-            Choose from, Australia, Northern Australia, Rangelands, Eastern Australia, 
-            Southern Australia, Central Slopes, East Coast, Murray Basin, 
-            Monsoonal North, Rangelands, Southern Slopes, 
-            Southern and South-Western Flatlands, Wet Tropics
-    """
-
-    assert(aggregator in ['weightmean', 'all', 'any', 'count', 'cumprod', 'cumsum', 'max', 'mean', 'median', 'min', 'prod', 'std', 'sum', 'ar'])
-
-    dims = ['lat', 'lon']
-
-    if region is not None:
-        if aggregator in ['weightmean']:
-            mask = get_region_mask(ds, region, method='weight')
-        else:
-            mask = get_region_mask(ds, region, method='centre')
-            mask.values[mask.values == 0] = 1
-
-        if aggregator == 'weightmean':
-            result = (mask*ds).where(mask > 0).sum(dims) / mask.sum(dims)
-        else:
-            result = getattr(ds.where(mask > 0), aggregator)(dims)
-
-    else:
-        result = eval('ds.%s()' % aggregator)
-
-    return result
-
-#
-# APPLY DOMAIN INFORMATION
-#
-
-def get_subnrm_names():
-    """
-    Returns the labelling names of the various NRM sub regions.
-    
-    Returns:
-        list of str
-    """
-    return list(SUBNRM_SHAPE.SubClusNm)
-
-def get_nrm_names():
-    """
-    Returns the labelling names of the various NRM cluster egions.
-    
-    Returns:
-        list of str
-    """
-    return list(NRM_SHAPE.ClusterNm)
-
-def get_supernrm_names():
-    """
-    Returns the labelling names of the various Super NRM regions.
-    
-    Returns:
-        list of str
-    """
-    return list(SUPNRM_SHAPE.SupClusNm)
-
-def get_subnrm_shape(name):
-    """
-    Returns the GeoDataFrame of the selected NRM sub region.
-    
-    Returns:
-        GeoDataFrame
-    """
-    nrm_names = get_subnrm_names()
-    assert name in nrm_names, "Unknown NRM, only from {:}".format(nrm_names)
-    
-    index = nrm_names.index(name)
-    return SUBNRM_SHAPE.iloc[[index]]
-
-def get_nrm_shape(name):
-    """
-    Returns the GeoDataFrame of the selected NRM region.
-    
-    Returns:
-        GeoDataFrame
-    """
-    nrm_names = get_nrm_names()
-    assert name in nrm_names, "Unknown NRM, only from {:}".format(nrm_names)
-    
-    index = nrm_names.index(name)
-    return NRM_SHAPE.iloc[[index]]
-    
-def get_supernrm_shape(name):
-    """
-    Returns the GeoDataFrame of the selected Super NRM region.
-    
-    Returns:
-        GeoDataFrame
-    """
-    nrm_names = get_supernrm_names()
-    assert name in nrm_names, "Unknown NRM, only from {:}".format(nrm_names)
-    
-    index = nrm_names.index(name)
-    return SUPNRM_SHAPE.iloc[[index]]
-
-def get_region_shape(region):
-    available_regions = ['Australia'] + get_supernrm_names() + get_subnrm_names() + get_nrm_names()
-    assert region in available_regions, "Unknown region {:}: {:}".format(region, available_regions)
-    
-    if region == 'Australia':
-        return AUS_SHAPE
-    elif region in get_subnrm_names():
-        return get_subnrm_shape(region)
-    elif region in get_nrm_names():
-        return get_nrm_shape(region)
-    elif region in get_supernrm_names():
-        return get_supernrm_shape(region)
-     
-def apply_region_mask(ds, region, overlap_fraction=None):
-    """
-    Masks the xarray.DataArray to return data over specific regions.
-    
-    Inputs:
-        ds: xarray.DataArray
-            Input data to be masked
-        regions: str
-            Region to be masked. 
-            Choose from, Australia, 
-            
-            or sub-NRM clusters: {Wet Tropics, Rangelands (North), Monsoonal North (East), Monsoonal North (West), East Coast (South), Central Slopes, Murray Basin, Southern and South Western Flatlands (West), Southern and South Western Flatlands (East), Southern Slopes (Vic/NSW East), Southern Slopes (Vic West), Southern Slopes (Tas East), Southern Slopes (Tas West), East Coast (North), Rangelands (South)}
-            
-            or NRM clusters: {Central Slopes, East Coast, Monsoonal North, Murray Basin, Rangelands, Southern Slopes, Southern and South Western Flatlands, Wet Tropics}
-            
-            or super NRM clusters: {Eastern Australia, Northern Australia, Rangelands, Southern Australia}
-            
-        overlap_fraction: float
-            Fraction that a grid cell must overlap with a shape to be included.
-            If no fraction is provided, grid cells are selected if their centre
-            point falls within the shape.
-
-    Returns:
-        xarray.DataArray
-    """    
-    ds_out = ds
-    region_shape = get_region_shape(region)
-    ds_out = spatial_selection.select_shapefile_regions(ds, region_shape, overlap_fraction=overlap_fraction)
-    
-    return ds_out
-
-def add_region_land_mask(ds, region):
-    """
-    Add a dataarray named mask to the input xarray.DataArray.
-    
-    Inputs:
-        ds: xarray.DataArray
-            Input data to be masked
-        region: str
-            Choose from, Australia, 
-            
-            or sub-NRM clusters: {Wet Tropics, Rangelands (North), Monsoonal North (East), Monsoonal North (West), East Coast (South), Central Slopes, Murray Basin, Southern and South Western Flatlands (West), Southern and South Western Flatlands (East), Southern Slopes (Vic/NSW East), Southern Slopes (Vic West), Southern Slopes (Tas East), Southern Slopes (Tas West), East Coast (North), Rangelands (South)}
-            
-            or NRM clusters: {Central Slopes, East Coast, Monsoonal North, Murray Basin, Rangelands, Southern Slopes, Southern and South Western Flatlands, Wet Tropics}
-            
-            or super NRM clusters: {Eastern Australia, Northern Australia, Rangelands, Southern Australia}
-    Returns:
-        xarray.DataArray
-    """
-
-    ds_out = ds
-    mask = get_region_mask(ds, region)
-    mask_binary = np.where(np.isnan(mask), 0, 1)
-    ds_out['mask'] = (["lat", "lon"], mask_binary)
-        
-    return ds_out
-
-def get_region_mask(ds, region, method='centre', overlap_fraction=0.5):
-    """
-    Returns a land mask for a given region.
-
-    Inputs:
-        ds: xarray.DataArray
-            Input data to be masked
-        region: str
-            Choose from, Australia, 
-            
-            or sub-NRM clusters: {Wet Tropics, Rangelands (North), Monsoonal North (East), Monsoonal North (West), East Coast (South), Central Slopes, Murray Basin, Southern and South Western Flatlands (West), Southern and South Western Flatlands (East), Southern Slopes (Vic/NSW East), Southern Slopes (Vic West), Southern Slopes (Tas East), Southern Slopes (Tas West), East Coast (North), Rangelands (South)}
-            
-            or NRM clusters: {Central Slopes, East Coast, Monsoonal North, Murray Basin, Rangelands, Southern Slopes, Southern and South Western Flatlands, Wet Tropics}
-            
-            or super NRM clusters: {Eastern Australia, Northern Australia, Rangelands, Southern Australia}
-        overlap_fraction: float
-            Fraction that a grid cell must overlap with a shape to be included.
-            If no fraction is provided, grid cells are selected if their centre
-            point falls within the shape.
-    Returns:
-        xarray.DataArray
-    """
-
-    region_shape = get_region_shape(region)
-    
-    lat = ds['lat'].values
-    lon = ds['lon'].values
-
-    if method == 'centre':
-        mask_values = spatial_selection.centre_mask(region_shape, lon, lat, output="2D")
-    elif method == 'overlap':
-        mask_values = spatial_selection.fraction_overlap_mask(region_shape, lon, lat, overlap_fraction)
-    elif method == 'weight':
-        mask_values = spatial_selection.fraction_weight_mask(region_shape, lon, lat)
-    
-    ds_mask = xr.DataArray(
-        data = mask_values,
-        dims = ["lat", "lon"],
-        coords = dict(
-            lat = (["lat"], lat),
-            lon = (["lon"], lon)
-        ),
-        name = 'mask'
-    )
-    
-    return ds_mask
-
-def apply_agcd_data_mask(ds):
-    """
-    Apply masking based on AGCD data quality mask
-    Inputs:
-        ds: xarray.dataset
-    Output:
-        xarray.dataset
-            The same dataarray but with the mask applied.
-    """
-    amask = xr.open_dataset(AGCD_MASK)
-    amask_regrid = amask['data_mask'].interp_like(ds, method='nearest')
-    return ds.where(amask_regrid == 1)
 
 #
 # VISUALISATION
@@ -948,7 +691,7 @@ def set_xylim(ax, ds):
 def spatial_plot(ds, reference=None, 
                  cmap_variable='temp', cmap_class='hot', 
                  clabel=None,
-                 plot_difference=True, include_all_data=True):
+                 plot_difference=True, include_all_data=True, include_diff_avg=True):
     """
     Create spatial plots based on the input data content.
     Inputs:
@@ -968,6 +711,8 @@ def spatial_plot(ds, reference=None,
         include_all_data: boolean
             To include the spatial plots for all the data sources. 
             If False, only the reference data is plotted.
+        include_diff_avg: boolean
+	    To include difference average value in bottom left corner.
     """
     
     N = len(ds)
@@ -1021,8 +766,13 @@ def spatial_plot(ds, reference=None,
             ax2.set_aspect(1)
             
             ds_diff = (ds[s] - ds[reference])
+
+            if include_diff_avg:
+                diff_avg = ds_diff.mean()
+#                ax2.text(0.1, 0.1, np.round(diff_avg.values,2), size=12, horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
+                ax2.annotate(np.round(diff_avg.values,2), xy=(0,0), xycoords='axes fraction', fontsize=12, xytext=(1,1), textcoords='offset points', ha='left', va='bottom') 
             
-            if include_all_data:
+            if include_all_data :
                 ax1.set_xlabel("")
                 
                 ds_diff.name = '%s - %s' % (s, reference)
@@ -1040,3 +790,102 @@ def spatial_plot(ds, reference=None,
                 
         c += 1
     return
+
+
+def bar_plot(ax, scorecards, title, metric_map, style, units):
+    """
+    Create a bar plot based on the input data content to the figure handle ax across several axes
+    Inputs:
+        ax: matplotlib.pyplot.ax
+            A single object of matplotlib.axes
+        data_dict: dictionary of data values
+            The 3d data to be plotted. 
+            The data should be organised as
+                {label1: 
+                    {label2: 
+                        {label3: value}
+            in the current expected use-case, label1 is the metric, 
+            label2 is the model and label3 is the subregion. 
+        title: str
+            the subplot title
+        metric_map: a dictionary of strings
+            Which entries of label1 should be grouped on the same axes 
+        style: a dictionary of strings
+            Describes the plot style of elements of the third nest
+            Keys should match label3 keys
+            Entries should currently be 'fill' or 'line'
+        units: string
+            The units of the index, added to the axis label of 
+            metrics with units
+    """
+    colours = list(mcolors.TABLEAU_COLORS.keys())
+    axs = [ax]
+    # count number of metrics, models and regions; and set up the twinned axes
+    n_metrics = 0
+    for i,metric_group in enumerate(metric_map):
+        n_metrics += len(metric_map[metric_group])
+        if i>0:
+            axs.append(ax.twinx())
+            if i>1:
+                axs[i].spines.right.set_position(("axes", 1+i/10))         
+    n_models = len(style)
+    n_labels = len(scorecards[metric_map[metric_group][0]][list(style.keys())[0]].keys())
+    assert n_models <= 2, "Not yet configured for more than 2 models"
+    
+    bars = [] # holder for legend handles
+    j=0 # index for metrics
+    width = 1/n_metrics # width of bars
+    for i,metric_group in enumerate(metric_map):
+        # set up twinned axis properties (colours, labels, limits and ticks)
+        if "Additive" in metric_group or 'RMSE' in metric_group:
+            axs[i].set_ylabel(metric_group+" (%s)"%units)
+        else:
+            axs[i].set_ylabel(metric_group)
+        axs[i].yaxis.label.set_color(colours[j])
+        axs[i].tick_params(axis='y', colors=colours[j],)
+        ymax = np.max([np.max([np.max( \
+            np.abs(np.array(list(scorecards[metric][model].values())) -1*int('Corr' in metric_group) ))  \
+            for model in scorecards[metric]]) for metric in metric_map[metric_group]]) # max value in bar. symmetric around 1 for correlations
+        ymax_round = np.ceil(4*ymax/(10**int(np.log10(ymax))))*(10**int(np.log10(ymax)))/4 # round to a factor of 5 at appropriate significance
+        axs[i].set_ylim(-1*ymax_round+int('Corr' in metric_group),ymax_round+int('Corr' in metric_group))
+        ticks = np.linspace(-1*ymax_round+int('Corr' in metric_group),ymax_round+int('Corr' in metric_group),11)
+        if 'Corr' in metric_group: # stop correlation labels at 1
+            ticks = [t for t in ticks if t<=1]
+        axs[i].set_yticks(ticks)
+        for metric in metric_map[metric_group]:
+            # box styles
+            styles = {'fill' :{'color':colours[j],'label':metric},
+                      'lines':{'facecolor':'w','edgecolor':colours[j]},
+                      'cross': {'color': colours[j], 'hatch': 'x'}}
+            for k,model in enumerate(style):
+                score = np.array(list(scorecards[metric][model].values()))
+                if 'Corr' in metric: # if corr, plot bar between 1 and value 
+                    bars.append(axs[i].bar(np.arange(0,(1+n_models)*n_labels,\
+                            (1+n_models))+2*width*j+k*width,1-score,bottom=score, \
+                            width=width-0.01,**styles[style[model]]))
+                else: # otherwise, plot bar between 0 and value
+                    bars.append(axs[i].bar(np.arange(0,(1+n_models)*n_labels,\
+                            (1+n_models))+2*width*j+k*width,  score,bottom=0,\
+                            width=width-0.01,**styles[style[model]]))
+            j+=1                               
+    plt.title(title)    
+    styles = {'fill':{'color':'tab:grey'},'lines':{'facecolor':'w','edgecolor':'tab:grey'}}
+    # dummy bars for legend to bar style
+    for model in style:
+        bars.append(axs[0].bar([3],[-3],bottom=[-6],width=1,label=model,**styles[style[model]]))
+    
+    # set up axes-grid and x-ticks on first grid
+    axs[0].tick_params(axis='x', which='minor', bottom=True)
+    labels = list(scorecards[metric][model].keys())
+    labels = [SHORTHANDS[l].replace(" ","\n") for l in labels]
+    axs[0].set_xticks(range(1,(n_models+1)*len(labels),(n_models+1)),labels)
+    axs[0].set_xticks(np.arange(-0.5,(n_models+1)*n_labels,(n_models+1)),minor=True)
+    axs[0].grid(which='minor')
+    axs[0].grid(axis='y')
+    
+    # plot legends
+    leg1=axs[-1].legend(handles=bars[:-2],ncol=2,fontsize='small',bbox_to_anchor=[0,0,0.7,1],loc=0)
+    axs[0].legend(handles=bars[-2:],ncol=1,fontsize='small',bbox_to_anchor=[0.7,0,0.3,1],loc=0)
+    plt.gca().add_artist(leg1)    
+    return axs
+
