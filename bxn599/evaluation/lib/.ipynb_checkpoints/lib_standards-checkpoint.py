@@ -8,6 +8,7 @@ from scipy.stats import theilslopes
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
+import cartopy
 
 ## import plotting_functions
 
@@ -691,7 +692,7 @@ def set_xylim(ax, ds):
 def spatial_plot(ds, reference=None, 
                  cmap_variable='temp', cmap_class='hot', 
                  clabel=None,
-                 plot_difference=True, include_all_data=True):
+                 plot_difference=True, include_all_data=True, include_diff_avg=True):
     """
     Create spatial plots based on the input data content.
     Inputs:
@@ -711,6 +712,8 @@ def spatial_plot(ds, reference=None,
         include_all_data: boolean
             To include the spatial plots for all the data sources. 
             If False, only the reference data is plotted.
+        include_diff_avg: boolean
+	    To include difference average value in bottom left corner.
     """
     
     N = len(ds)
@@ -734,6 +737,9 @@ def spatial_plot(ds, reference=None,
     
     # Plot the reference first
     ax = plt.subplot(ny, N, 1, projection=ccrs.PlateCarree())
+    ax.add_feature(cartopy.feature.STATES, linewidth=0.3)
+    ax.add_feature(cartopy.feature.OCEAN, facecolor='white')
+    ax.add_feature(cartopy.feature.LAND, facecolor='grey')
     ax.set_aspect(1)
     ds[reference].plot.pcolormesh(**cmap, **clim, cbar_kwargs={'label': clabel, 'shrink': 1})
     ax.set_title(reference)
@@ -752,6 +758,9 @@ def spatial_plot(ds, reference=None,
         if include_all_data:
             M = N
             ax1 = plt.subplot(ny, N, 1+c, projection=ccrs.PlateCarree())
+            ax1.add_feature(cartopy.feature.STATES, linewidth=0.3)
+            ax1.add_feature(cartopy.feature.OCEAN, facecolor='white')
+            ax1.add_feature(cartopy.feature.LAND, facecolor='grey')
             ax1.set_aspect(1)
             ds[s].plot.pcolormesh(**cmap, **clim, cbar_kwargs={'label': clabel, 'shrink': 1})
             ax1.set_title(s)
@@ -761,11 +770,19 @@ def spatial_plot(ds, reference=None,
     
         if plot_difference:
             ax2 = plt.subplot(ny, N, M+1+c, projection=ccrs.PlateCarree())
+            ax2.add_feature(cartopy.feature.STATES, linewidth=0.3)
+            ax2.add_feature(cartopy.feature.OCEAN, facecolor='white')
+            ax2.add_feature(cartopy.feature.LAND, facecolor='grey')
             ax2.set_aspect(1)
             
             ds_diff = (ds[s] - ds[reference])
+
+            if include_diff_avg:
+                diff_avg = ds_diff.mean()
+#                ax2.text(0.1, 0.1, np.round(diff_avg.values,2), size=12, horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
+                ax2.annotate(np.round(diff_avg.values,2), xy=(0,0), xycoords='axes fraction', fontsize=12, xytext=(1,1), textcoords='offset points', ha='left', va='bottom') 
             
-            if include_all_data:
+            if include_all_data :
                 ax1.set_xlabel("")
                 
                 ds_diff.name = '%s - %s' % (s, reference)

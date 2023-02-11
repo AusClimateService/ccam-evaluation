@@ -2,7 +2,6 @@ import geopandas as gp
 import spatial_selection
 import xarray as xr
 import numpy as np
-import glob
 # Domain extents for analysis
 DOMAINS = {"CORDEX-AA": (-52.36, 12.21, 89.25, 206.57),  # as per CORDEX definition
            "Australia": (-44.5, -10, 112, 156.25)}  # as per AGCD
@@ -14,7 +13,7 @@ REGRID_UPSCALE_METHOD_WITH_MASK = "conservative_normed"
 
 # AGCD data quality mask
 #AGCD_MASK = "/g/data/tp28/dev/evaluation_datasets/awap_mask.nc"
-AGCD_MASK = "/g/data/xv83/users/bxn599/ACS/evaluation/BARPA_evaluation/AGCD_pr_weights_1960-2020.nc"
+AGCD_MASK = "/g/data/xv83/users/bxn599/ACS/evaluation/AGCDv1_precip_weights_1985-2014_average.nc"
 
 
 def region_aggregation(ds, aggregator, region=None):
@@ -100,12 +99,14 @@ def get_subnrm_shape(name):
     Returns:
         GeoDataFrame
     """
-    nrm_names = get_subnrm_names()
+    nrm_names = get_subnrm_names()+['All']
     assert name in nrm_names, "Unknown NRM, only from {:}".format(nrm_names)
     
     index = nrm_names.index(name)
     SHP_NRM = "/g/data/ia39/aus-ref-clim-data-nci/shapefiles/data/nrm_regions/nrm_regions.shp"
     SUBNRM_SHAPE = gp.read_file(SHP_NRM)
+    if name == 'All':
+        return SUBNRM_SHAPE
     return SUBNRM_SHAPE.iloc[[index]]
 
 def get_nrm_shape(name):
@@ -283,15 +284,5 @@ def apply_agcd_data_mask(ds):
             The same dataarray but with the mask applied.
     """
     amask = xr.open_dataset(AGCD_MASK)
-    amask_regrid = amask['weight'].interp_like(ds, method='nearest')
+    amask_regrid = amask['data_mask'].interp_like(ds, method='nearest')
     return ds.where(amask_regrid == 1)
-#    weight_files19 = glob.glob('/g/data/zv2/agcd/v1/precip/weight/r005/01day/agcd_v1_precip_weight_r005_daily_19[6,9]*.nc')
-#    weight_files20 = glob.glob('/g/data/zv2/agcd/v1/precip/weight/r005/01day/agcd_v1_precip_weight_r005_daily_2*.nc')
-#    weight_files = weight_files19+weight_files20
-#    weight_files.sort()
-#    ds_weight = xr.open_mfdataset(weight_files)
-#    count = (ds_weight['weight'] > 1.0).sum('time', keep_attrs=True)
-#    fraction = count / len(ds_weight['time'])
-#    amask = fraction > 0.9
-#    amask_regrid = amask.astype(float).interp_like(ds, method='nearest')
-#    return ds.where(amask_regrid == 1)

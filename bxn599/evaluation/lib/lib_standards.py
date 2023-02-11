@@ -8,6 +8,7 @@ from scipy.stats import theilslopes
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
+import cartopy
 
 ## import plotting_functions
 
@@ -29,6 +30,7 @@ DOMAINS = {"CORDEX-AA": (-52.36, 12.21, 89.25, 206.57),  # as per CORDEX definit
 
 # Methods for regridding
 REGRID_UPSCALE_METHOD = "conservative"
+#REGRID_DOWNSCALE_METHOD = "nearest_s2d"
 REGRID_DOWNSCALE_METHOD = "bilinear"
 REGRID_UPSCALE_METHOD_WITH_MASK = "conservative_normed"
 
@@ -44,15 +46,19 @@ GRIDS['AGCD_v1'] = xr.Dataset(
                      "lon": np.linspace(112, 156.25, 886)
                      }
                     )
-# GRIDS['CCAM'] not implemented
+GRIDS['CCAM'] = xr.Dataset(
+                    {"lat": np.linspace(-52.4, -8.8, 613),
+                     "lon": np.linspace(89.2, 182.0, 929)
+                     }
+                    )
 
 # Colormaps
 COLORMAPS = {}
 COLORMAPS['precip'] = {'error': 'BrBG',
                         'wet': 'Blues',   # for wet variables such as prcptot, r10mm, etc
                        'dry': 'Reds',    # for dry variables such as cdd
-                       'wet_diff': 'RdYlBu',
-                       'dry_diff': 'RdYlBu_r'}
+                       'wet_diff': 'BrBG',
+                       'dry_diff': 'BrBG_r'}
 COLORMAPS['temp'] = {'error': 'BrBG',
                     'hot': 'plasma',    # for hot variables such as TXx
                      'cold': 'viridis',  # for cold variables such as FD
@@ -444,7 +450,8 @@ def regrid(ds_in, ds_ref):
     """
     cellarea_in = get_gridarea(ds_in)
     cellarea_ref = get_gridarea(ds_ref)
-    
+    if len(ds_in.lat)== len(ds_ref.lat) and len(ds_in.lon)== len(ds_ref.lon) and (ds_in.lat == ds_ref.lat).all() and (ds_in.lon == ds_ref.lon).all():
+        return ds_in
     if cellarea_ref <= cellarea_in:
         # downscaling
         return regrid_safe(ds_in, ds_ref, REGRID_DOWNSCALE_METHOD)
@@ -475,7 +482,6 @@ def create_cmap(variable, variable_class, levels=None):
     assert variable in COLORMAPS.keys(), "Undefined {:} in COLORMAPS: {:}".format(variable, COLORMAPS.keys())
     assert variable_class in COLORMAPS[variable].keys(), "Undefined {:} in COLORMAPS: {:}".format(variable, COLORMAPS[variable].keys())
     cmap_name = COLORMAPS[variable][variable_class]
-    
     if levels is None:
         return {'cmap': eval('mpl.cm.%s' % cmap_name)}
     elif type(levels) == int:
@@ -489,7 +495,7 @@ def create_cmap(variable, variable_class, levels=None):
         norm = mpl.colors.BoundaryNorm(levels, cmap.N)
         return {'cmap': cmap, 'norm': norm}
 
-def get_clim(ds, low_percentile=0, high_percentile=100, force_binary=False):
+def get_clim(ds, low_percentile=0, high_percentile=100, force_binary=False, force_not_binary=False):
     """
     Estimate the limits for colorbar range, given the values of the xr.dataArray.
     
@@ -518,12 +524,13 @@ def get_clim(ds, low_percentile=0, high_percentile=100, force_binary=False):
         has_negative = True
         has_positive = True
 
-    if has_negative and has_positive:
+    if has_negative and has_positive and not force_not_binary:
+        print(force_not_binary)
         values = np.abs(ds.values)
         vmax = np.nanpercentile(values, high_percentile)
         vmin = -vmax
 
-    elif has_negative or has_positive:
+    else:# has_negative or has_positive:
         values = ds.values
         vmax = np.nanpercentile(values, high_percentile)
         vmin = np.nanpercentile(values, low_percentile)
@@ -631,8 +638,10 @@ def table_plot(ax, data_dict, vmin=None, vmax=None,
 
     if 'delta' in clabel.lower() or 'bias' in clabel.lower():
         clim = get_clim(ds_tmp, high_percentile=100, force_binary=True)
-    else:
-        clim = get_clim(ds_tmp, high_percentile=100)
+    else:#if 'tn' in clabel.lower():
+        clim = get_clim(ds_tmp, high_percentile=100, force_not_binary=True)
+#    else:
+#        clim = get_clim(ds_tmp, high_percentile=100)
         
     if vmin is not None:
         clim['vmin'] = vmin
@@ -647,7 +656,7 @@ def table_plot(ax, data_dict, vmin=None, vmax=None,
     else:
         cmap = create_cmap(cmap_variable, cmap_class)
 
-    ds_tmp.plot.pcolormesh(**clim, **cmap, cbar_kwargs={'shrink': shrink})
+    pcolormesh = ds_tmp.plot.pcolormesh(**clim, **cmap, cbar_kwargs={'shrink': shrink})
     if add_xticklabels:
         ax.set_xticks(xs_i, apply_shorthands(xs), rotation=xrotation)
     else:
@@ -666,7 +675,7 @@ def table_plot(ax, data_dict, vmin=None, vmax=None,
     if ylabel is not None:
         ax.set_ylabel(ylabel)
 
-    return
+    return pcolormesh
 
 def set_xylim(ax, ds):
     """
@@ -690,7 +699,7 @@ def set_xylim(ax, ds):
     
 def spatial_plot(ds, reference=None, 
                  cmap_variable='temp', cmap_class='hot', 
-                 clabel=None,
+                 clabel=None, high_percentile=90, low_percentile=0,
                  plot_difference=True, include_all_data=True, include_diff_avg=True):
     """
     Create spatial plots based on the input data content.
@@ -711,8 +720,10 @@ def spatial_plot(ds, reference=None,
         include_all_data: boolean
             To include the spatial plots for all the data sources. 
             If False, only the reference data is plotted.
+        tune: float or int
+            Tune the position of the 3rd y-axis
         include_diff_avg: boolean
-	    To include difference average value in bottom left corner.
+            To include difference average value in bottom left corner.
     """
     
     N = len(ds)
@@ -723,19 +734,25 @@ def spatial_plot(ds, reference=None,
     else:
         fig = plt.figure(figsize=(7, 7))
         ny = 1
-
-    cmap = create_cmap(cmap_variable, cmap_class)
-    clim = get_clim(ds[reference], high_percentile=90)
+    clim = get_clim(ds[reference], high_percentile=high_percentile,low_percentile=low_percentile,force_not_binary=True)
+    cmap = create_cmap(cmap_variable, cmap_class)#evels=10)#,levels=levels)
     
     if plot_difference:
-        cmap_diff = create_cmap(cmap_variable, cmap_class+"_diff")
         sources = list(ds.keys())
         sources.remove(reference)
         s1 = sources[0]
-        clim_diff = get_clim((ds[s1] - ds[reference]), high_percentile=90)
+        clim_diff = get_clim((ds[s1] - ds[reference]), high_percentile=high_percentile,low_percentile=low_percentile)
+        # discretise colormap
+        levels_diff =mpl.ticker.MaxNLocator(10).tick_values(**clim_diff)
+        delta = levels_diff[1]-levels_diff[0]
+        levels_diff2 = [levels_diff[0]-delta/2]+[x+delta/2 for x in levels_diff]
+        cmap_diff = create_cmap(cmap_variable, cmap_class+"_diff",levels=levels_diff2)
     
     # Plot the reference first
     ax = plt.subplot(ny, N, 1, projection=ccrs.PlateCarree())
+    ax.add_feature(cartopy.feature.STATES, linewidth=0.3)
+    ax.add_feature(cartopy.feature.OCEAN, facecolor='white')
+    ax.add_feature(cartopy.feature.LAND, facecolor='grey')
     ax.set_aspect(1)
     ds[reference].plot.pcolormesh(**cmap, **clim, cbar_kwargs={'label': clabel, 'shrink': 1})
     ax.set_title(reference)
@@ -754,8 +771,11 @@ def spatial_plot(ds, reference=None,
         if include_all_data:
             M = N
             ax1 = plt.subplot(ny, N, 1+c, projection=ccrs.PlateCarree())
+            ax1.add_feature(cartopy.feature.STATES, linewidth=0.3)
+            ax1.add_feature(cartopy.feature.OCEAN, facecolor='white')
+            ax1.add_feature(cartopy.feature.LAND, facecolor='grey')
             ax1.set_aspect(1)
-            ds[s].plot.pcolormesh(**cmap, **clim, cbar_kwargs={'label': clabel, 'shrink': 1})
+            ds[s].plot.pcolormesh(**cmap, cbar_kwargs={'label': clabel, 'shrink': 1})
             ax1.set_title(s)
             ax1.set_ylabel("")
             ax1.coastlines()
@@ -763,22 +783,24 @@ def spatial_plot(ds, reference=None,
     
         if plot_difference:
             ax2 = plt.subplot(ny, N, M+1+c, projection=ccrs.PlateCarree())
+            ax2.add_feature(cartopy.feature.STATES, linewidth=0.3)
+            ax2.add_feature(cartopy.feature.OCEAN, facecolor='white')
+            ax2.add_feature(cartopy.feature.LAND, facecolor='grey')
             ax2.set_aspect(1)
             
             ds_diff = (ds[s] - ds[reference])
-
+            
             if include_diff_avg:
                 diff_avg = ds_diff.mean()
-#                ax2.text(0.1, 0.1, np.round(diff_avg.values,2), size=12, horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
                 ax2.annotate(np.round(diff_avg.values,2), xy=(0,0), xycoords='axes fraction', fontsize=12, xytext=(1,1), textcoords='offset points', ha='left', va='bottom') 
-            
-            if include_all_data :
+
+            if include_all_data:
                 ax1.set_xlabel("")
                 
                 ds_diff.name = '%s - %s' % (s, reference)
-                ds_diff.plot.pcolormesh(**cmap_diff, **clim_diff, cbar_kwargs={'shrink': 1})
+                ds_diff.plot.pcolormesh(**cmap_diff, cbar_kwargs={'shrink': 1, 'ticks':levels_diff})
             else:
-                ds_diff.plot.pcolormesh(**cmap_diff, **clim_diff, cbar_kwargs={'label':"", 'shrink': 1})
+                ds_diff.plot.pcolormesh(**cmap_diff, cbar_kwargs={'label':"", 'shrink': 1, 'ticks':levels_diff[::2]})
                 ax2.set_title('%s - %s' % (s, reference))
                 ax2.set_ylabel("")
             
@@ -792,7 +814,7 @@ def spatial_plot(ds, reference=None,
     return
 
 
-def bar_plot(ax, scorecards, title, metric_map, style, units):
+def bar_plot(ax, scorecards, title, metric_map, style, units,tune=10, legend=True):
     """
     Create a bar plot based on the input data content to the figure handle ax across several axes
     Inputs:
@@ -827,7 +849,7 @@ def bar_plot(ax, scorecards, title, metric_map, style, units):
         if i>0:
             axs.append(ax.twinx())
             if i>1:
-                axs[i].spines.right.set_position(("axes", 1+i/10))         
+                axs[i].spines.right.set_position(("axes", 1+(i-1)/tune))         
     n_models = len(style)
     n_labels = len(scorecards[metric_map[metric_group][0]][list(style.keys())[0]].keys())
     assert n_models <= 2, "Not yet configured for more than 2 models"
@@ -835,6 +857,7 @@ def bar_plot(ax, scorecards, title, metric_map, style, units):
     bars = [] # holder for legend handles
     j=0 # index for metrics
     width = 1/n_metrics # width of bars
+    ymax_round = [0 for x in metric_map]
     for i,metric_group in enumerate(metric_map):
         # set up twinned axis properties (colours, labels, limits and ticks)
         if "Additive" in metric_group or 'RMSE' in metric_group:
@@ -843,12 +866,12 @@ def bar_plot(ax, scorecards, title, metric_map, style, units):
             axs[i].set_ylabel(metric_group)
         axs[i].yaxis.label.set_color(colours[j])
         axs[i].tick_params(axis='y', colors=colours[j],)
-        ymax = np.max([np.max([np.max( \
+        ymax = 1.05*np.max([np.max([np.max( \
             np.abs(np.array(list(scorecards[metric][model].values())) -1*int('Corr' in metric_group) ))  \
             for model in scorecards[metric]]) for metric in metric_map[metric_group]]) # max value in bar. symmetric around 1 for correlations
-        ymax_round = np.ceil(4*ymax/(10**int(np.log10(ymax))))*(10**int(np.log10(ymax)))/4 # round to a factor of 5 at appropriate significance
-        axs[i].set_ylim(-1*ymax_round+int('Corr' in metric_group),ymax_round+int('Corr' in metric_group))
-        ticks = np.linspace(-1*ymax_round+int('Corr' in metric_group),ymax_round+int('Corr' in metric_group),11)
+        ymax_round[i] = np.ceil(4*ymax/(10**int(np.log10(ymax))))*(10**int(np.log10(ymax)))/4 # round to a factor of 5 at appropriate significance
+        axs[i].set_ylim(-1*ymax_round[i]+int('Corr' in metric_group),ymax_round[i] +int('Corr' in metric_group))
+        ticks = np.linspace(-1*ymax_round[i] +int('Corr' in metric_group),ymax_round[i] +int('Corr' in metric_group),11)
         if 'Corr' in metric_group: # stop correlation labels at 1
             ticks = [t for t in ticks if t<=1]
         axs[i].set_yticks(ticks)
@@ -872,20 +895,21 @@ def bar_plot(ax, scorecards, title, metric_map, style, units):
     styles = {'fill':{'color':'tab:grey'},'lines':{'facecolor':'w','edgecolor':'tab:grey'}}
     # dummy bars for legend to bar style
     for model in style:
-        bars.append(axs[0].bar([3],[-3],bottom=[-6],width=1,label=model,**styles[style[model]]))
+        bars.append(axs[0].bar([3],[-2*ymax_round[0]],bottom=[-3*ymax_round[0]],width=1,label=model,**styles[style[model]]))
     
     # set up axes-grid and x-ticks on first grid
     axs[0].tick_params(axis='x', which='minor', bottom=True)
     labels = list(scorecards[metric][model].keys())
     labels = [SHORTHANDS[l].replace(" ","\n") for l in labels]
-    axs[0].set_xticks(range(1,(n_models+1)*len(labels),(n_models+1)),labels)
+    axs[0].set_xticks(range(1,(n_models+1)*len(labels),(n_models+1)),labels,fontsize='small')
     axs[0].set_xticks(np.arange(-0.5,(n_models+1)*n_labels,(n_models+1)),minor=True)
     axs[0].grid(which='minor')
     axs[0].grid(axis='y')
     
     # plot legends
-    leg1=axs[-1].legend(handles=bars[:-2],ncol=2,fontsize='small',bbox_to_anchor=[0,0,0.7,1],loc=0)
-    axs[0].legend(handles=bars[-2:],ncol=1,fontsize='small',bbox_to_anchor=[0.7,0,0.3,1],loc=0)
-    plt.gca().add_artist(leg1)    
-    return axs
+    if legend:
+        leg1=axs[-1].legend(handles=bars[:-2],ncol=2,bbox_to_anchor=[0,0.5,1,0.5],loc=0,framealpha=0.2)
+        axs[0].legend(handles=bars[-2:],ncol=1,bbox_to_anchor=[0,0.0,1,0.25],loc=0,framealpha=0.2)
+        plt.gca().add_artist(leg1)    
+    return axs,ymax_round
 
