@@ -27,6 +27,7 @@ _GCM_ENS = {'CSIRO-BOM-ACCESS-CM2': 'r4i1p1f1',
            'NCC-NorESM2-MM':'r1i1p1f1',
            'EC-Earth-Consortium-EC-Earth3':'r1i1p1f1',
            'CNRM-CERFACS-CNRM-ESM2-1':'r1i1p1f2',
+           'NCAR-CESM2':'r11i1p1f1',
            'CMCC-CMCC-ESM2':'r1i1p1f1'}
 
 _VERBOSE = False

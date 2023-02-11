@@ -29,6 +29,7 @@ _GCM_ENS = {'ACCESS-CM2': ('CSIRO-ARCCSS', 'r4i1p1f1', 'v20210607', 'v20210921')
             'NorESM2-MM': ('NCC','r1i1p1f1','v20191108','v20191108'),
             'EC-Earth3':('EC-Earth-Consortium','r1i1p1f1',"",""),
             'CNRM-ESM2-1':('CNRM-CERFACS','r1i1p1f2',"",""),
+            'CESM2':('NCAR','r11i1p1f1',"",""),
             'CMCC-ESM2':('CMCC','r1i1p1f1','','') }
 
 _VERBOSE = False
