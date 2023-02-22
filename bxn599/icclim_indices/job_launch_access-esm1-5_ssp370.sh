@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-data=ccam
+data=access-esm1-5
 
 #indices_tasmax="tasmax:TX tasmax:SU tasmax:TXx tasmax:CSU tasmax:ID tasmax:TXn tasmax:TX90p tasmax:TX10p"
 #indices_tasmin="tasmin:TN tasmin:TR tasmin:TNx tasmin:FD tasmin:CFD tasmin:TNn tasmin:TN90p tasmin:TN10p"
@@ -22,7 +22,7 @@ for index in $index_list_all; do
 		echo $index_list
 		jobname=index.${data}.${index_list//":"/"_"}
 		echo "Submit $jobname"
-		qsub -N $jobname -v index_list job_${data}_icclim.sh
+		qsub -N $jobname -v index_list job_${data}_icclim_ssp370.sh
 done
 
 for index in $index_list_per; do
@@ -30,5 +30,21 @@ for index in $index_list_per; do
 		echo $index_list
 		jobname=index.${data}.${index_list//":"/"_"}
 		echo "Submit $jobname"
-		qsub -N $jobname -v index_list job_${data}_icclim_percentiles.sh
+		qsub -N $jobname -v index_list job_${data}_icclim_percentiles_ssp370_near.sh
+done
+
+for index in $index_list_per; do
+		export index_list=$index
+		echo $index_list
+		jobname=index.${data}.${index_list//":"/"_"}
+		echo "Submit $jobname"
+		qsub -N $jobname -v index_list job_${data}_icclim_percentiles_ssp370_mid.sh
+done
+
+for index in $index_list_per; do
+		export index_list=$index
+		echo $index_list
+		jobname=index.${data}.${index_list//":"/"_"}
+		echo "Submit $jobname"
+		qsub -N $jobname -v index_list job_${data}_icclim_percentiles_ssp370_far.sh
 done

@@ -19,18 +19,17 @@
 icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-RCM_INSTITUTION=CSIRO
-RCM_MODEL_NAME=CSIRO-CCAM-2203
-GCM_MODEL_NAME=NCC-NorESM2-MM
-EXPERIMENT_NAME=historical
-ENSEMBLE_MEMBER=r1i1p1f1
-#IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/day
-IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
-DOMAIN=AUS-10
+RCM_INSTITUTION=BOM
+RCM_MODEL_NAME=BOM-BARPA-R
+GCM_MODEL_NAME=CSIRO-BOM-ACCESS-CM2
+EXPERIMENT_NAME=ssp126
+ENSEMBLE_MEMBER=r4i1p1f1
+IN_ROOT_DIR=/g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-BOM-ACCESS-CM2/ssp126/r4i1p1f1/BOM-BARPA-R/v1/day
+DOMAIN=AUS-15
 OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
 RCM_VERSION=v1
 #SLICE_MODE=month
-TIME_PERIOD="1985-01-01 2014-12-31"
+TIME_PERIOD="2070-01-01 2099-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
@@ -187,9 +186,9 @@ for var_index in $index_list; do
 
   if [ $? -ne 0 ]; then
     echo "Fail $index with $var_name"
-    touch fail.ccam.${index}
+    touch fail.barpa.access-cm2.ssp126.${index}
   else
-    touch success.ccam.${index}
+    touch success.barpa.access-cm2.ssp126.${index}
   fi
 done
 done

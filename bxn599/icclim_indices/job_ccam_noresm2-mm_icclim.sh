@@ -1,12 +1,12 @@
 #!/bin/bash 
-#PBS -l walltime=06:00:00
+#PBS -l walltime=08:00:00
 #PBS -l ncpus=16
 #PBS -l mem=180GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
 #PBS -q normal
-#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83+gdata/oi10+gdata/fs38
+#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83
 
 # Environment
 #
@@ -19,15 +19,15 @@
 icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-RCM_INSTITUTION=none
-RCM_MODEL_NAME=none
-GCM_MODEL_NAME=NCAR-CESM2
+RCM_INSTITUTION=CSIRO
+RCM_MODEL_NAME=CSIRO-CCAM-2203
+GCM_MODEL_NAME=NCC-NorESM2-MM
 EXPERIMENT_NAME=historical
-ENSEMBLE_MEMBER=r11i1p1f1
-IN_ROOT_DIR=/g/data/xv83/users/bxn599/ACS/data/cesm2/hist
-DOMAIN=GLOBAL-gn
+ENSEMBLE_MEMBER=r1i1p1f1
+IN_ROOT_DIR=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/day
+DOMAIN=AUS-10
 OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
-RCM_VERSION=none
+RCM_VERSION=v1
 #SLICE_MODE=month
 TIME_PERIOD="1979-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
@@ -35,7 +35,7 @@ END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
 subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"
@@ -186,9 +186,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.cesm2.${index}
+		touch fail.ccam.noresm2-mm.${index}
 	else
-		touch success.cesm2.${index}
+		touch success.ccam.noresm2-mm.${index}
 	fi
 done
 done

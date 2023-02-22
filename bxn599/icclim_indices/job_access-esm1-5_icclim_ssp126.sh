@@ -21,15 +21,15 @@ script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run
 
 RCM_INSTITUTION=none
 RCM_MODEL_NAME=none
-GCM_MODEL_NAME=NCAR-CESM2
-EXPERIMENT_NAME=historical
-ENSEMBLE_MEMBER=r11i1p1f1
-IN_ROOT_DIR=/g/data/xv83/users/bxn599/ACS/data/cesm2/hist
+GCM_MODEL_NAME=CSIRO-ACCESS-ESM1-5
+EXPERIMENT_NAME=ssp126
+ENSEMBLE_MEMBER=r6i1p1f1
+IN_ROOT_DIR=/g/data/xv83/users/bxn599/ACS/data/access-esm1-5/ssp126
 DOMAIN=GLOBAL-gn
 OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
 RCM_VERSION=none
 #SLICE_MODE=month
-TIME_PERIOD="1979-01-01 2014-12-31"
+TIME_PERIOD="2015-01-01 2100-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
@@ -186,9 +186,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.cesm2.${index}
+		touch fail.access-esm1-5.ssp126.${index}
 	else
-		touch success.cesm2.${index}
+		touch success.access-esm1-5.ssp126.${index}
 	fi
 done
 done

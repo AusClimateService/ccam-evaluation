@@ -1,12 +1,12 @@
 #!/bin/bash 
-#PBS -l walltime=06:00:00
+#PBS -l walltime=08:00:00
 #PBS -l ncpus=16
 #PBS -l mem=180GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
 #PBS -q normal
-#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83+gdata/oi10+gdata/fs38
+#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83
 
 # Environment
 #
@@ -19,15 +19,15 @@
 icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
 script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-RCM_INSTITUTION=none
-RCM_MODEL_NAME=none
-GCM_MODEL_NAME=NCAR-CESM2
+RCM_INSTITUTION=BOM
+RCM_MODEL_NAME=BOM-BARPA-R
+GCM_MODEL_NAME=EC-Earth-Consortium-EC-Earth3
 EXPERIMENT_NAME=historical
-ENSEMBLE_MEMBER=r11i1p1f1
-IN_ROOT_DIR=/g/data/xv83/users/bxn599/ACS/data/cesm2/hist
-DOMAIN=GLOBAL-gn
+ENSEMBLE_MEMBER=r1i1p1f1
+IN_ROOT_DIR=/g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/BOM-BARPA-R/v1/day
+DOMAIN=AUS-15
 OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
-RCM_VERSION=none
+RCM_VERSION=v1
 #SLICE_MODE=month
 TIME_PERIOD="1979-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
@@ -35,7 +35,7 @@ END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
 subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"
@@ -74,7 +74,7 @@ for var_index in $index_list; do
 	                	var_name=pr
 		        fi
 			if [ "$var_name" == "tas" ]; then
-	                	var_name=tas
+	                	var_name=tasmean
 		        fi
 	
 			echo "${var_name} - $index"
@@ -136,7 +136,7 @@ for var_index in $index_list; do
 	                	var_name1=pr
 		        fi
 			if [ "$var_name1" == "tas" ]; then
-	                	var_name1=tas
+	                	var_name1=tasmean
 		        fi
 	
 			indir1=${IN_ROOT_DIR}/${var_name1}
@@ -167,7 +167,7 @@ for var_index in $index_list; do
 	                	var_name2=pr
 		        fi
 			if [ "$var_name2" == "tas" ]; then
-	                	var_name2=tas
+	                	var_name2=tasmean
 		        fi
 
 			indir2=${IN_ROOT_DIR}/${var_name2}
@@ -186,9 +186,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.cesm2.${index}
+		touch fail.barpa.${index}
 	else
-		touch success.cesm2.${index}
+		touch success.barpa.${index}
 	fi
 done
 done

@@ -36,7 +36,7 @@
 
 ### Regridding
   - Observations and GCMs should be regridded to RCM grid using conservative area weighted remapping if upscaling
-  - As discussed at model evaluation meeting on 25/11/2022
+  - As discussed at model evaluation meeting on 2022-11-25:
     - Conventions for upscaling (regridding to a coarser grid): Conservative
     - Conventions for downscaling (regridding to a finer grid): Bilinear suggested with no lapse rate adjustments
     - Previously noted/discussed in Data & Code group, see [data_standards.md](https://github.com/AusClimateService/AusClimateService/blob/main/technical_notes/regridding.md)
