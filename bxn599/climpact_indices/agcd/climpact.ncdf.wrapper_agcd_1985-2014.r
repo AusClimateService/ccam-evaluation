@@ -18,7 +18,7 @@ outdir="./output_1985-2014/"
 file.template="var_daily_climpact.agcd_historical_NA_1985-2014.nc"
 
 # author data
-author.data=list(institution="My University", institution_id="MU")
+author.data=list(institution="CSIRO", institution_id="CSIRO")
 
 # reference period
 base.range=c(1985,2014)

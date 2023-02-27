@@ -23,4 +23,4 @@ set -xv
 
 cd $PBS_O_WORKDIR
 
-Rscript climpact.ncdf.wrapper_era5_reanalysis_1995-2014.r
+Rscript climpact.ncdf.wrapper_era5_reanalysis_1980-2020.r
