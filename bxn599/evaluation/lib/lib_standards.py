@@ -22,7 +22,8 @@ PERIODS = {"HISTORICAL_WHOLE": ('1985-01-01', '2014-12-31'),
            "HISTORICAL_LATE": ('2005-01-01', '2014-12-31'),
            "FUTURE_NEAR": ('2015-01-01', '2044-12-31'),
            "FUTURE_MID": ('2035-01-01', '2064-12-31'),
-           "FUTURE_FAR": ('2070-01-01', '2099-12-31')}
+           "FUTURE_FAR": ('2070-01-01', '2099-12-31'),
+           "FUTURE_WHOLE": ('2015-01-01', '2099-12-31')}
 
 # Domain extents for analysis
 DOMAINS = {"CORDEX-AA": (-52.36, 12.21, 89.25, 206.57),  # as per CORDEX definition
@@ -217,6 +218,9 @@ def compute_lr_slope(ds):
     
     pfit = ds.polyfit('time', deg=1)
     slope_values = pfit['polyfit_coefficients'][0,:]
+    
+    # convert slope units from per ns to per century
+    slope_values = slope_values*1e9*60*60*24*365*100
     
     ds_m = xr.DataArray(
         data = slope_values,
@@ -500,7 +504,7 @@ def get_clim(ds, low_percentile=0, high_percentile=100, force_binary=False, forc
     Estimate the limits for colorbar range, given the values of the xr.dataArray.
     
     Inputs:
-        ds: xarray.DataArray
+        ds: xarray.DataArray or numpy.ndarray
             Input data
         low_percentile: float
             Low end of the percentile, from 0..100
@@ -513,25 +517,39 @@ def get_clim(ds, low_percentile=0, high_percentile=100, force_binary=False, forc
     Returns:
         dict:
             Contains vmax and vmax
-    """
+    """    
     has_negative = False
     has_positive = False
-    if (ds.values < 0).sum() > 0:
-        has_negative = True
-    if (ds.values > 0).sum() > 0:
-        has_positive = True
+    if isinstance(ds, np.ndarray):
+        if (ds < 0).sum() > 0:
+            has_negative = True
+        if (ds > 0).sum() > 0:
+            has_positive = True
+    else:
+        if (ds.values < 0).sum() > 0:
+            has_negative = True
+        if (ds.values > 0).sum() > 0:
+            has_positive = True
+        
     if force_binary:
         has_negative = True
         has_positive = True
 
     if has_negative and has_positive and not force_not_binary:
         print(force_not_binary)
-        values = np.abs(ds.values)
+        if isinstance(ds, np.ndarray):
+            values = np.abs(ds)
+        else:
+            values = np.abs(ds.values)
+            
         vmax = np.nanpercentile(values, high_percentile)
         vmin = -vmax
 
     else:# has_negative or has_positive:
-        values = ds.values
+        if isinstance(ds, np.ndarray):
+            values = ds
+        else:
+            values = ds.values
         vmax = np.nanpercentile(values, high_percentile)
         vmin = np.nanpercentile(values, low_percentile)
 
@@ -813,6 +831,60 @@ def spatial_plot(ds, reference=None,
         c += 1
     return
 
+def spatial_plot_trend(ds, npa, cmap_variable='temp', cmap_class='hot', 
+                 clabel=None, high_percentile=100, low_percentile=0,
+                 include_area_avg=True, centre_colourbar=False):
+    """
+    Create spatial plots based on the input data content.
+    Inputs:
+        ds: dictionary of xarray.DataArray for plotting
+            ds = {'AGCD': ...,
+                    'ERA5': ...}
+        npa: numpy array of all data. Used to find max/min from all models
+        cmap_variable: str
+            For identifying the cmap to use, choose from lib_standards.COLORMAPS.keys()
+        cmap_class: str
+            For identifying the cmap to use, choose from lib_standards.COLORMAPS[cmap_variable].keys()
+        clabel: str
+            Label to the colorbar
+        include_area_avg: boolean
+            To include area average value in bottom left corner.
+        centre_colourbar: boolean
+            To centre the colour bar around zero.
+    """
+    
+    N = len(ds)
+    fig = plt.figure(figsize=(N*5, 7))
+    ny = 1
+    cmap = create_cmap(cmap_variable, cmap_class)
+    
+    s = list(ds.keys())[0]
+    
+    c = 0
+    
+    if centre_colourbar:
+        clim = get_clim(npa, high_percentile=high_percentile,low_percentile=low_percentile,force_not_binary=False)
+    else:
+        clim = get_clim(npa, high_percentile=high_percentile,low_percentile=low_percentile,force_not_binary=True)
+    for s in ds.keys():            
+        M = N
+        ax1 = plt.subplot(ny, N, 1+c, projection=ccrs.PlateCarree())
+        ax1.add_feature(cartopy.feature.STATES, linewidth=0.3)
+        ax1.add_feature(cartopy.feature.OCEAN, facecolor='white')
+        ax1.add_feature(cartopy.feature.LAND, facecolor='grey')
+        ax1.set_aspect(1)
+        ds[s].plot.pcolormesh(**cmap, **clim, cbar_kwargs={'label': clabel, 'shrink': 0.5})
+        ax1.set_title(s)
+        ax1.set_ylabel("")
+        ax1.coastlines()
+        set_xylim(ax1, ds[s])
+            
+        if include_area_avg:
+            area_avg = ds[s].mean()
+            ax1.annotate(np.round(area_avg.values,2), xy=(0,0), xycoords='axes fraction', fontsize=12, xytext=(1,1), textcoords='offset points', ha='left', va='bottom') 
+ 
+        c += 1
+    return
 
 def bar_plot(ax, scorecards, title, metric_map, style, units,tune=10, legend=True):
     """
