@@ -25,3 +25,14 @@ The difference between the two files only occurs for time steps [367:458].
 These two files can be found in `/g/data/xv83/users/bxn599/era5/hourly/tp/test`
 
 Concatenated data is calculated using the `-b F64` flag on all steps.
+
+## Instananeous and accumulation variables
+Some variables in ERA5 are instantaneous (i.e., valid at the specified timestep) whereas others are an accumulation (i.e., for the previous hour). See https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Table2 for a list of instananeous variables.
+
+For quick reference: 
+- `2t` (2m air temperature) is instananeous
+- `10u` (10m u component of wind) and `10v` (10m v component of wind) are instantaneous and are used to calculate `si10` (daily wind speed, /g/data/xv83/users/bxn599/ACS/data/era5/raw/si10)
+- `10fg` (10m wind gust since previous processing) is a maximum/minimum and therefore the timestep (validity time) is for the previous hour
+  - reanalysis: the minimum or maximum values are in the hour (the processing period) ending at the validity date/time. [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Minimum/maximumsincethepreviouspostprocessing)
+- `mtpr` (mean total precipitation rate) is rates/fluxes and therefore the timestep (validity time) is for the previous hour
+  - For the CDS time, or validity time, of 00 UTC, the mean rates/fluxes and accumulations are over the hour (3 hours for the EDA) ending at 00 UTC i.e. the mean or accumulation is during part of the previous day. [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Meanrates/fluxesandaccumulations)
