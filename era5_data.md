@@ -3,7 +3,7 @@
 ### Locations
 NCI Repo: `/g/data/rt52/era5`
   
-Hourly rainfall downloaded from ECMWF: `/g/data/xv83/bxn599/era5/hourly/tp`
+Hourly rainfall downloaded from ECMWF: `/g/data/xv83/users/bxn599/era5/hourly/tp`
   
 - `tp_20210101-20210530.nc` is 4D and has an exp_ver dimension, this is removed in `tp_20210101-20210530_remove_exp_ver.nc` using the following CDO command: `cdo --reduce_dim -sellevidx,1 tp_20210101-20210530.nc tp_20210101-20210530_remove_exp_ver.nc` 
   
@@ -22,6 +22,6 @@ The difference between the two files only occurs for time steps [367:458].
 
 <img src="https://user-images.githubusercontent.com/34051150/201282049-2c47a89b-5e73-45a4-967c-4118263a9c3d.png" width="250" height="250">
 
-These two files can be found in `/g/data/xv83/bxn599/era5/hourly/tp/test`
+These two files can be found in `/g/data/xv83/users/bxn599/era5/hourly/tp/test`
 
 Concatenated data is calculated using the `-b F64` flag on all steps.
