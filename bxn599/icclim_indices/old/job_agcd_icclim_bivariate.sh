@@ -17,7 +17,7 @@
 
 # Script definition
 icclim_path=/g/data/xv83/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
 INSTITUTION=none

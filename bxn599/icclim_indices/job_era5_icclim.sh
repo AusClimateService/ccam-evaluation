@@ -16,8 +16,8 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+icclim_path=/g/data/xv83/users/bxn599/ACS/indices
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 RCM_INSTITUTION=none
 RCM_MODEL_NAME=none
@@ -80,7 +80,7 @@ for var_index in $index_list; do
             fi
       if [ "$var_name" == "tas" ]; then
                     var_name=t2m
-                    TIME_AGG=mean
+                    TIME_AGG="mean"
             fi
   
       echo "${var_name} - $index"
@@ -101,7 +101,7 @@ for var_index in $index_list; do
         output_file=${outdir}/${index}_${label}_${SLICE_MODE}_${tmp/ /-}.nc
       fi
       
-      cmd="${cmd} --input_files ${input_files} --variable ${var_name} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --time_agg ${TIME_AGG} --drop_time_bounds"
+      cmd="${cmd} --input_files ${input_files} --variable ${var_name} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --sub_daily_agg ${TIME_AGG} --drop_time_bounds"
     done
   
     rm ${output_file}
@@ -138,7 +138,7 @@ for var_index in $index_list; do
             fi
       if [ "$var_name1" == "tasmin" ]; then
                     var_name1=t2m
-                    TIME_AGG1="max"
+                    TIME_AGG1="min"
             fi
       if [ "$var_name1" == "pr" ]; then
                     var_name1=mtpr
@@ -146,7 +146,7 @@ for var_index in $index_list; do
             fi
       if [ "$var_name1" == "tas" ]; then
                     var_name1=t2m
-                    TIME_AGG1=mean
+                    TIME_AGG1="mean"
             fi
   
       indir1=${IN_ROOT_DIR}/${var_name1}
@@ -181,7 +181,7 @@ for var_index in $index_list; do
             fi
       if [ "$var_name2" == "tas" ]; then
                     var_name2=t2m
-                    TIME_AGG2=mean
+                    TIME_AGG2="mean"
             fi
 
       indir2=${IN_ROOT_DIR}/${var_name2}
@@ -201,7 +201,7 @@ for var_index in $index_list; do
       fi
     done
       
-    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --time_agg ${TIME_AGG1} --input_files ${input_files2} --variable ${var_name2} --time_agg ${TIME_AGG2} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --drop_time_bounds"
+    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --sub_daily_agg ${TIME_AGG1} --input_files ${input_files2} --variable ${var_name2} --sub_daily_agg ${TIME_AGG2} --lat_bnds ${LAT_BNDS} --lon_bnds ${LON_BNDS} --drop_time_bounds"
   
     rm ${output_file}
     

@@ -1,7 +1,7 @@
 #!/bin/bash 
 #PBS -l walltime=06:00:00
 #PBS -l ncpus=16
-#PBS -l mem=180GB
+#PBS -l mem=128GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
@@ -16,8 +16,8 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+icclim_path=/g/data/xv83/users/bxn599/ACS/indices
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
 RCM_INSTITUTION=none
@@ -36,7 +36,7 @@ END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${RCM_VERSION}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
 subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"

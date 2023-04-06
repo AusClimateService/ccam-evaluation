@@ -1,12 +1,12 @@
 #!/bin/bash 
 #PBS -l walltime=06:00:00
 #PBS -l ncpus=16
-#PBS -l mem=180GB
+#PBS -l mem=30GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
 #PBS -q normal
-#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83+gdata/yb19
+#PBS -l storage=scratch/du7+gdata/du7+gdata/access+gdata/hh5+gdata/r87+gdata/ub4+gdata/rr3+gdata/al33+gdata/ma05+gdata/dp9+gdata/rr8+scratch/e53+gdata/wr45+gdata/rt52+gdata/wr45+gdata/hd50+gdata/tp28+scratch/hd50+scratch/tp28+gdata/xv83+gdata/ia39+scratch/xv83+gdata/oi10+gdata/fs38
 
 # Environment
 #
@@ -16,26 +16,27 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+icclim_path=/g/data/xv83/users/bxn599/ACS/indices
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
-RCM_INSTITUTION=BOM
-RCM_MODEL_NAME=BOM-BARRA-R2
-GCM_MODEL_NAME=ECMWF-ERA5
-EXPERIMENT_NAME=historical
-ENSEMBLE_MEMBER=hres
-IN_ROOT_DIR=/g/data/yb19/australian-climate-service/stage/ACS-BARRA2/output/AUS-11/BOM/ECMWF-ERA5/historical/hres/BOM-BARRA-R2/v1/day
-DOMAIN=AUS-11
+RCM_INSTITUTION=none
+RCM_MODEL_NAME=none
+GCM_MODEL_NAME=CSIRO-ACCESS-ESM1-5
+EXPERIMENT_NAME=ssp370
+ENSEMBLE_MEMBER=r6i1p1f1
+IN_ROOT_DIR=/g/data/xv83/users/bxn599/ACS/data/access-esm1-5/ssp370
+DOMAIN=GLOBAL-gn
 OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
-RCM_VERSION=v1
+RCM_VERSION=none
 #SLICE_MODE=month
-TIME_PERIOD="2008-01-01 2021-12-31"
+TIME_PERIOD="2035-01-01 2064-12-31"
+BASE_PERIOD="2035-01-01 2064-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}
 subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"
@@ -60,7 +61,7 @@ for var_index in $index_list; do
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"
 	
 		if [ "${TIME_PERIOD}" != "" ]; then
-			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE}"
+			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE} --base_period ${BASE_PERIOD}"
 		fi
 	
 		for var_name in ${var_list}; do
@@ -74,7 +75,7 @@ for var_index in $index_list; do
 	                	var_name=pr
 		        fi
 			if [ "$var_name" == "tas" ]; then
-	                	var_name=tasmean
+	                	var_name=tas
 		        fi
 	
 			echo "${var_name} - $index"
@@ -122,7 +123,7 @@ for var_index in $index_list; do
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"
 	
 		if [ "${TIME_PERIOD}" != "" ]; then
-			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE}"
+			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE} --base_period ${BASE_PERIOD}"
 		fi
 	
 		for var_name1 in ${var_list1}; do
@@ -136,7 +137,7 @@ for var_index in $index_list; do
 	                	var_name1=pr
 		        fi
 			if [ "$var_name1" == "tas" ]; then
-	                	var_name1=tasmean
+	                	var_name1=tas
 		        fi
 	
 			indir1=${IN_ROOT_DIR}/${var_name1}
@@ -167,7 +168,7 @@ for var_index in $index_list; do
 	                	var_name2=pr
 		        fi
 			if [ "$var_name2" == "tas" ]; then
-	                	var_name2=tasmean
+	                	var_name2=tas
 		        fi
 
 			indir2=${IN_ROOT_DIR}/${var_name2}
@@ -186,9 +187,9 @@ for var_index in $index_list; do
 
 	if [ $? -ne 0 ]; then
 		echo "Fail $index with $var_name"
-		touch fail.barra_2008-2021.${index}
+		touch fail.access-esm1-5.ssp370.mid.${index}
 	else
-		touch success.barra_2008-2021.${index}
+		touch success.access-esm1-5.ssp370.mid.${index}
 	fi
 done
 done

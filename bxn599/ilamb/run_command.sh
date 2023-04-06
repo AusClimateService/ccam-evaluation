@@ -2,7 +2,7 @@
 
 module use ~access/modules
 module use /g/data/hh5/public/modules
-module load conda/analysis3
+module load conda/analysis3-22.07
 
 cd $PBS_O_WORKDIR
 export ILAMB_ROOT=/g/data/xv83/users/bxn599/ACS/ilamb

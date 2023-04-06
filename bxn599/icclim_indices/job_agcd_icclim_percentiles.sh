@@ -1,7 +1,7 @@
 #!/bin/bash 
-#PBS -l walltime=06:00:00
+#PBS -l walltime=18:00:00
 #PBS -l ncpus=16
-#PBS -l mem=180GB
+#PBS -l mem=128GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
@@ -16,8 +16,8 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+icclim_path=/g/data/xv83/users/bxn599/ACS/indices
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 # CSIRO's AGCD data
 RCM_INSTITUTION=none
@@ -31,12 +31,13 @@ OUT_ROOT_DIR=/g/data/xv83/users/$USER/ACS/icclim_indices
 RCM_VERSION=none
 #SLICE_MODE=month
 TIME_PERIOD="1985-01-01 2014-12-31"
+BASE_PERIOD="1985-01-01 2014-12-31"
 START_DATE=$(echo $TIME_PERIOD | cut -d' ' -f1)
 END_DATE=$(echo $TIME_PERIOD | cut -d' ' -f2)
 
 mkdir -p ${OUT_ROOT_DIR} || true
 
-label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${RCM_VERSION}
+label=${DOMAIN}_${GCM_MODEL_NAME}_${EXPERIMENT_NAME}_${ENSEMBLE_MEMBER}_${RCM_MODEL_NAME}_${RCM_VERSION}
 subdir=${DOMAIN}/${RCM_INSTITUTION}/${GCM_MODEL_NAME}/${EXPERIMENT_NAME}/${ENSEMBLE_MEMBER}/${RCM_MODEL_NAME}
 
 slice_list="year month DJF MAM JJA SON"
@@ -61,7 +62,7 @@ for var_index in $index_list; do
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"
 	
 		if [ "${TIME_PERIOD}" != "" ]; then
-			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE}"
+			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE} --base_period ${BASE_PERIOD}"
 		fi
 	
 		for var_name in ${var_list}; do
@@ -123,7 +124,7 @@ for var_index in $index_list; do
 		cmd="${script} --slice_mode ${SLICE_MODE} --verbose"
 	
 		if [ "${TIME_PERIOD}" != "" ]; then
-			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE}"
+			cmd="${cmd} --start_date ${START_DATE} --end_date ${END_DATE} --base_period ${BASE_PERIOD}"
 		fi
 	
 		for var_name1 in ${var_list1}; do

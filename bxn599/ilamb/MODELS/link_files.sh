@@ -1,20 +1,20 @@
 #!/bin/bash
 
 # BARPA ACCESS-CM2
-ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-BOM-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-CM2/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-BOM-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-CM2/.
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-ARCCSS-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-CM2/.
+ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-ARCCSS-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-CM2/.
 
 # BARPA ACCESS-ESM1-5
-ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-BOM-ACCESS-ESM1-5/historical/r6i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-ESM1-5/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-BOM-ACCESS-ESM1-5/historical/r6i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-ESM1-5/.
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-ACCESS-ESM1-5/historical/r6i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-ESM1-5/.
+ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-ACCESS-ESM1-5/historical/r6i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ACCESS-ESM1-5/.
 
 # BARPA EC-Earth3
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_EC-Earth3/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_EC-Earth3/.
+ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_EC-Earth3/.
 
 # BARPA ERA5
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/ECMWF-ERA5/evaluation/none/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ERA5/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/ECMWF-ERA5/evaluation/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ERA5/.
+ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/ECMWF-ERA5/evaluation/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_ERA5/.
 
 # BARPA NorESM2-MM
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/NCC-NorESM2-MM/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/BARPA_NorESM2-MM/.
@@ -38,11 +38,11 @@ ln -s /g/data/xv83/users/bxn599/ACS/data/access-esm1-5/hist/mon/* /g/data/xv83/u
 
 # CMIP6 CESM2 # missing tasmax/tasmin, data won't be released https://bb.cgd.ucar.edu/cesm/threads/cesm2-cmip6-output-tasmax-and-tasmin.6016/
 #ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_gcm/GLOBAL-gn/none/******************/historical/r1i1p1f1/none/none/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CESM2/.
-ln -s /g/data/oi10/replicas/CMIP6/CMIP/NCAR/CESM2/historical/r11i1p1f1/Amon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CESM2/.
+#ln -s /g/data/oi10/replicas/CMIP6/CMIP/NCAR/CESM2/historical/r11i1p1f1/Amon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CESM2/.
 
 # CMIP6 CMCC-ESM2
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_gcm/GLOBAL-gn/none/CMCC-CMCC-ESM2/historical/r1i1p1f1/none/none/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CMCC-ESM2/.
-ln -s /g/data/xv83/users/bxn599/ACS/data/cmcc-esm2/hist/mon /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CMCC-ESM2/.
+ln -s /g/data/xv83/users/bxn599/ACS/data/cmcc-esm2/hist/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CMCC-ESM2/.
 #ln -s /g/data/oi10/replicas/CMIP6/CMIP/CMCC/CMCC-ESM2/historical/r1i1p1f1/Amon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMIP6_CMCC-ESM2/.
 
 # CMIP6 CNRM-ESM2-1

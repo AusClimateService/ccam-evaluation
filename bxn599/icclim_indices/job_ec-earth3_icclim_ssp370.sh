@@ -1,7 +1,7 @@
 #!/bin/bash 
 #PBS -l walltime=06:00:00
 #PBS -l ncpus=16
-#PBS -l mem=180GB
+#PBS -l mem=50GB
 #PBS -l wd
 #PBS -m n
 #PBS -P xv83
@@ -16,8 +16,8 @@
 #set -x
 
 # Script definition
-icclim_path=/g/data/xv83/users/bxn599/ACS/icclim
-script="/g/data/xv83/dbi599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
+icclim_path=/g/data/xv83/users/bxn599/ACS/indices
+script="/g/data/xv83/users/bxn599/miniconda3/envs/icclim/bin/python ${icclim_path}/run_icclim.py"
 
 RCM_INSTITUTION=none
 RCM_MODEL_NAME=none
