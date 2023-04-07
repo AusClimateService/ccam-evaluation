@@ -30,10 +30,10 @@ ids = subclusters_mask.to_numpy()
 miss = -999
 np.nan_to_num(ids, copy=False, nan=miss)
 ids = np.ma.masked_values(ids,miss)
-lbl = np.asarray(["Wet_Tropics","Rangelands_North","Monsoonal_North_East","Monsoonal_North_West",\
-                  "East_Coast_South","Central_Slopes","Murray_Basin","Southern_and_South_Western_Flatlands_West",\
-                  "Southern_and_South_Western_Flatlands_East","Southern_Slopes_Vic_NSW_East","Southern_Slopes_Vic_West","Southern_Slopes_Tas_East",\
-                  "Southern_Slopes_Tas_West","East_Coast_North","Rangelands_South"])
+lbl = np.asarray(["SC_Wet_Tropics","SC_Rangelands_North","SC_Monsoonal_North_East","SC_Monsoonal_North_West",\
+                  "SC_East_Coast_South","SC_Central_Slopes","SC_Murray_Basin","SC_Southern_and_South_Western_Flatlands_West",\
+                  "SC_Southern_and_South_Western_Flatlands_East","SC_Southern_Slopes_Vic_NSW_East","SC_Southern_Slopes_Vic_West","SC_Southern_Slopes_Tas_East",\
+                  "SC_Southern_Slopes_Tas_West","SC_East_Coast_North","SC_Rangelands_South"])
 
 # Create netCDF dimensions
 dset = Dataset("ccam_nrm_subclusters_fullname.nc",mode="w")
