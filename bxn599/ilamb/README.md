@@ -1,6 +1,6 @@
 # README
 
-This directory contains config files and scripts for running ILAMB
+This directory contains config files and scripts for running ILAMB. Output is viewable online [here](https://auscs.duckdns.org/).
 
 Cannot use `R75/95/99pTOT` in ILAMB due to empty/FillValue grid points. This causes a plotting issue and stops ILAMB from running successfully. In Climpact, these indices are calculated ANN only, not monthly
 
