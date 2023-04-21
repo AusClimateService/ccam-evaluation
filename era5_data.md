@@ -9,11 +9,11 @@ Hourly rainfall downloaded from ECMWF: `/g/data/xv83/users/bxn599/era5/hourly/tp
   
 Concatenated data: `/g/data/xv83/bxn599/ACS/data/era5/concatenated`
 
-## Instananeous and accumulation variables
-Some variables in ERA5 are instantaneous (i.e., valid at the specified timestep (validity time)) whereas others are an accumulation (e.g., for the previous hour or 3 hours). See [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Table2) for a list of instananeous variables.
+## instantaneous and accumulation variables
+Some variables in ERA5 are instantaneous (i.e., valid at the specified timestep (validity time)) whereas others are an accumulation (e.g., for the previous hour or 3 hours). See [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Table2) for a list of instantaneous variables.
 
 For quick reference: 
-- `2t` (2m air temperature) is instananeous
+- `2t` (2m air temperature) is instantaneous
 - `10u` (10m u component of wind) and `10v` (10m v component of wind) are instantaneous and are used to calculate `si10` (daily wind speed, `/g/data/xv83/users/bxn599/ACS/data/era5/raw/si10`)
 - `10fg` (10m wind gust since previous processing) is a maximum/minimum and therefore the timestep (validity time) is for the previous hour
   - reanalysis: the minimum or maximum values are in the hour (the processing period) ending at the validity date/time. [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Minimum/maximumsincethepreviouspostprocessing)
