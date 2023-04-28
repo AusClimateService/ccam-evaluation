@@ -24,6 +24,10 @@ ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_ccam/AUS-10/CSIRO/ECMWF-ERA5/evaluation/none/CSIRO-CCAM-2203/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_ERA5/.
 ln -s /g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_ERA5/.
 
+# CCAM EC-Earth3
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_ccam/AUS-10/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_NorESM2-MM/.
+ln -s /g/data/xv83/mxt599/ccam_ec-earth3_historical_aus-10i_12km/drs_cordex/CORDEX-CMIP6/output/AUS-10i/CSIRO/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_EC-Earth3/.
+
 # CCAM NorESM2
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_ccam/AUS-10/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_NorESM2-MM/.
 ln -s /g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CCAM_NorESM2-MM/.

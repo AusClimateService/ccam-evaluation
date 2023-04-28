@@ -16,20 +16,24 @@
 
 #========================
 # Start - Edit ME!
-#era5 historical data
+# CCAM ERA5 historical data
 #datadir=/g/data/xv83/mxt599/ccam_era5_evaluation_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/ECMWF-ERA5/evaluation/r1i1p1f1/CSIRO-CCAM-2203/v1
 #outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_era5_evaluation_aus-10i_12km
-#datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1
-#outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_noresm2-mm_historical_aus-10i_12km
-datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_ssp126_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/ssp126/r1i1p1f1/CSIRO-CCAM-2203/v1/
-outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_noresm2-mm_ssp126_aus-10i_12km
-#datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_ssp370_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/ssp370/r1i1p1f1/CSIRO-CCAM-2203/v1/
+# CCAM NorESM2 Hist
+datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_historical_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/historical/r1i1p1f1/CSIRO-CCAM-2203/v1
+outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_noresm2-mm_historical_aus-10i_12km
+# CCAM NorESM2 SSP126
+#datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_ssp126_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/ssp126/r1i1p1f1/CSIRO-CCAM-2203/v/
+#outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_noresm2-mm_ssp126_aus-10i_12km
+# CCAM NorESM2 SSP370
+#datadir=/g/data/xv83/mxt599/ccam_noresm2-mm_ssp370_aus-10i_12km/drs_cordex/CORDEX/output/AUS-10i/CSIRO/NCC-NorESM2-MM/ssp370/r1i1p1f1/CSIRO-CCAM-2203/v1
 #outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_noresm2-mm_ssp370_aus-10i_12km
-# # cm2 historical
-# datadir=/g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-BOM-ACCESS-CM2/historical/r4i1p1f1/BOM-BARPA-R/v1
+# CCAM EC-Earth3 Hist
+#datadir=/g/data/xv83/mxt599/ccam_ec-earth3_historical_aus-10i_12km/drs_cordex/CORDEX-CMIP6/output/AUS-10i/CSIRO/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/CSIRO-CCAM-2203/v1
+#outdir=/g/data/xv83/users/bxn599/ACS/qc/ccam_ec-earth3_historical_aus-10i_12km
 # sets="15min 1hr 6hr day mon"
 sets="1hr 6hr day mon"
-# sets="1hr 6hr"
+#sets="1hr 6hr"
 # sets="day mon"
 # sets="15min"
 #sets="mon day"
