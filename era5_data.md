@@ -21,7 +21,7 @@ cdo -P 14 -b F64 cat mtpr_era5_oper_sfc_19790101-19790131_cordex_aus.nc ... mtpr
 cdo -P 14 -b F64 sellonlatbox,88.0,208.0,-54.0,14.0 mtpr_era5_oper_sfc_19790101-19790131.nc mtpr_era5_oper_sfc_19790101-19790131_cordex_aus.nc
 ```
 #### Notes
-`mtpr` data needs to be concatenated first before calculating the daily mean as it is an accumulation variable and the timestep needs to be shifted back one hour (see below for more info)
+`mtpr` data needs to be concatenated first before calculating the daily mean as it is an accumulation variable and the timestep needs to be shifted back one hour (see below for more info and [here](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Meanrates/fluxesandaccumulations))
 
 ## Instantaneous and accumulation variables
 Some variables in ERA5 are instantaneous (i.e., valid at the specified timestep (validity time)) whereas others are an accumulation (e.g., for the previous hour or 3 hours). See [ERA5 documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Table2) for a list of instantaneous variables.
