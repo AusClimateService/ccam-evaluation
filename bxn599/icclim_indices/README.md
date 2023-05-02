@@ -6,4 +6,5 @@ Previously (2022-11-23), percentile calculations were output (lat, lon, time) bu
 
 ### Issues (2023-02-20), currently waiting for icclim to fix
 - R75pTOT/R95pTOT/R99pTOT in RCMs/GCMs (data with `kg m-2 s-1` units) have no/missing data
-- DTR/vDTR/ETR are converted to `degC` after calculation, causing RCMs/GCMs (data with `degK` units) to be offset by -273.15
+- ~~DTR/vDTR/ETR are converted to `degC` after calculation, causing RCMs/GCMs (data with `degK` units) to be offset by -273.15~~ 
+  - Fixed in icclim 6.3.0 (2023-05-3)
