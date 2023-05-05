@@ -9,12 +9,12 @@ ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CSIRO-
 ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/CSIRO-ACCESS-ESM1-5/historical/r6i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/ACCESS-ESM1-5_BARPA/.
 
 # BARPA CMCC-ESM2
-ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CMCC-CMCC-ESM2/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMCC-ESM2_BARPA/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CMCC-CMCC-ESM2/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CMCC-ESM2_BARPA/.
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/CMCC-CMCC-ESM2/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/CMCC-ESM2_BARPA/.
+ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/CMCC-CMCC-ESM2/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/CMCC-ESM2_BARPA/.
 
 # BARPA CESM2
-ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/NCAR-CESM2/historical/r11i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CESM2_BARPA/.
-ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/NCAR-CESM2/historical/r11i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars/CESM2_BARPA/.
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/NCAR-CESM2/historical/r11i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/CESM2_BARPA/.
+ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/NCAR-CESM2/historical/r11i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/CESM2_BARPA/.
 
 # BARPA EC-Earth3
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/EC-Earth3_BARPA/.
