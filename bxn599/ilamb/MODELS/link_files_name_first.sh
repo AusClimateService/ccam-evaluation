@@ -24,6 +24,10 @@ ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/ECMWF-ERA5/evaluation/none/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/ERA5_BARPA/.
 ln -s /g/data/ia39/australian-climate-service/release/CORDEX-CMIP6/output/AUS-15/BOM/ECMWF-ERA5/evaluation/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/ERA5_BARPA/.
 
+# BARPA MPI-ESM1-2-HR
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/MPI-M-MPI-ESM1-2-HR/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/MPI-ESM1-2-HR_BARPA/.
+ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/MPI-M-MPI-ESM1-2-HR/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/MPI-ESM1-2-HR_BARPA/.
+
 # BARPA NorESM2-MM
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_barpa/AUS-15/BOM/NCC-NorESM2-MM/historical/r1i1p1f1/BOM-BARPA-R/v1/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/NorESM2-MM_BARPA/.
 ln -s /g/data/ia39/australian-climate-service/test-data/CORDEX-CMIP6/output/AUS-15/BOM/NCC-NorESM2-MM/historical/r1i1p1f1/BOM-BARPA-R/v1/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/NorESM2-MM_BARPA/.
@@ -66,6 +70,11 @@ ln -s /g/data/xv83/users/bxn599/ACS/data/cnrm-esm2-1/hist/mon/* /g/data/xv83/use
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_gcm/GLOBAL-gn/none/EC-Earth-Consortium-EC-Earth3/historical/r1i1p1f1/none/none/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/EC-Earth3_CMIP6/.
 ln -s /g/data/xv83/users/bxn599/ACS/data/ec-earth3/hist/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/EC-Earth3_CMIP6/.
 #ln -s /g/data/oi10/replicas/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/Amon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/EC-Earth3_CMIP6/.
+
+# CMIP6 MPI-ESM1-2-HR
+ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_gcm/GLOBAL-gn/none/MPI-M-MPI-ESM1-2-HR/historical/r1i1p1f1/none/none/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/MPI-ESM1-2-HR_CMIP6/.
+ln -s /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/mon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/MPI-ESM1-2-HR_CMIP6/.
+#ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M-MPI-ESM1-2-HR/MPI-ESM1-2-HR/historical/r1i1p1f1/Amon/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/MPI-ESM1-2-HR_CMIP6/.
 
 # CMIP6 NorESM2-MM
 ln -s /g/data/xv83/users/bxn599/ACS/icclim_indices/ilamb_gcm/GLOBAL-gn/none/NCC-NorESM2-MM/historical/r1i1p1f1/none/none/climdex/* /g/data/xv83/users/bxn599/ACS/ilamb/MODELS_all_vars_name_first/NorESM2-MM_CMIP6/.

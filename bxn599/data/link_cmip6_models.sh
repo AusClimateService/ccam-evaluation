@@ -114,6 +114,25 @@ mkdir -p /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/tasmin
 mkdir -p /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/sfcWind
 mkdir -p /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/sfcWindmax
 
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/pr
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tas
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tasmax
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tasmin
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/sfcWind
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/sfcWindmax
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/pr
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tas
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tasmax
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tasmin
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/sfcWind
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/sfcWindmax
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/pr
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tas
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tasmax
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tasmin
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/sfcWind
+mkdir -p /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/sfcWindmax
+
 mkdir -p /g/data/xv83/users/bxn599/ACS/data/noresm2-mm/hist/pr
 mkdir -p /g/data/xv83/users/bxn599/ACS/data/noresm2-mm/hist/tas
 mkdir -p /g/data/xv83/users/bxn599/ACS/data/noresm2-mm/hist/tasmax
@@ -244,6 +263,25 @@ ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/EC-Earth-Consortium/EC-Earth3/ssp3
 ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/EC-Earth-Consortium/EC-Earth3/ssp370/r1i1p1f1/day/tasmin/gr/v20200310/*.nc /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/tasmin/.
 ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/EC-Earth-Consortium/EC-Earth3/ssp370/r1i1p1f1/day/sfcWind/gr/v20200310/*.nc /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/sfcWind/.
 ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/EC-Earth-Consortium/EC-Earth3/ssp370/r1i1p1f1/day/sfcWindmax/gr/v20200310/*.nc /g/data/xv83/users/bxn599/ACS/data/ec-earth3/ssp370/sfcWindmax/.
+
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/pr/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/pr/.
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/tas/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tas/.
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/tasmax/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tasmax/.
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/tasmin/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/tasmin/.
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/sfcWind/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/sfcWind/.
+ln -s /g/data/oi10/replicas/CMIP6/CMIP/MPI-M/MPI-ESM1-2-HR/historical/r1i1p1f1/day/sfcWindmax/gn/v20190710/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/hist/sfcWindmax/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/pr/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/pr/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/tas/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tas/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/tasmax/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tasmax/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/tasmin/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/tasmin/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/sfcWind/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/sfcWind/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp126/r1i1p1f1/day/sfcWindmax/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp126/sfcWindmax/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/pr/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/pr/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/tas/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tas/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/tasmax/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tasmax/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/tasmin/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/tasmin/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/sfcWind/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/sfcWind/.
+ln -s /g/data/oi10/replicas/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-HR/ssp370/r1i1p1f1/day/sfcWindmax/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/mpi-esm1-2-hr/ssp370/sfcWindmax/.
 
 ln -s /g/data/oi10/replicas/CMIP6/CMIP/NCC/NorESM2-MM/historical/r1i1p1f1/day/pr/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/noresm2-mm/hist/pr/.
 ln -s /g/data/oi10/replicas/CMIP6/CMIP/NCC/NorESM2-MM/historical/r1i1p1f1/day/tas/gn/v20191108/*.nc /g/data/xv83/users/bxn599/ACS/data/noresm2-mm/hist/tas/.
