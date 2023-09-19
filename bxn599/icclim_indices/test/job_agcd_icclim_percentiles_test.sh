@@ -98,7 +98,7 @@ for var_index in $index_list; do
         output_file=${outdir}/${index}_${label}_${SLICE_MODE}_${tmp/ /-}.nc
       fi
       
-      cmd="${cmd} --input_files ${input_files} --variable ${var_name} --drop_time_bounds"
+      cmd="${cmd} --input_files ${input_files} --variable ${var_name} --drop_time_bounds --save_thresh"
     done
   
     rm ${output_file}
@@ -177,7 +177,7 @@ for var_index in $index_list; do
       input_files2="${indir2}/${var_name2}*.nc"
     done
       
-    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --input_files ${input_files2} --variable ${var_name2} --drop_time_bounds"
+    cmd="${cmd} --input_files ${input_files1} --variable ${var_name1} --input_files ${input_files2} --variable ${var_name2} --drop_time_bounds --save_thresh"
   
     rm ${output_file}
     

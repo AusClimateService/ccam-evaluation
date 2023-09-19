@@ -9,8 +9,9 @@ indices_prcp="pr:CDD pr:PRCPTOT pr:RR1 pr:SDII pr:CWD pr:RR pr:R10mm pr:R20mm pr
 indices_tas="tas:TG"
 indices_percentile="tas:TG90p tas:TG10p tasmax:TX90p tasmax:TX10p tasmin:TN90p tasmin:TN10p pr:R75p pr:R75pTOT pr:R95p pr:R95pTOT pr:R99p pr:R99pTOT tas:pr:CD tas:pr:CW tas:pr:WD tas:pr:WW"
 indices_spi="pr:SPI3 pr:SPI6"
+indices_wind="sfcWind:FG sfcWind:FGcalm sfcWind:FG6Bft"
 
-index_list_all="${indices_tasmax} ${indices_tasmin} ${indices_prcp} ${indices_tas} ${indices_bi}" ## don't include ${indices_bi} in list due to running a separate script with longer walltime
+index_list_all="${indices_tasmax} ${indices_tasmin} ${indices_prcp} ${indices_tas} ${indices_bi} ${indices_wind}" ## don't include ${indices_bi} in list due to running a separate script with longer walltime
 index_list_per="${indices_percentile}"
 index_list_spi="${indices_spi}"
 
