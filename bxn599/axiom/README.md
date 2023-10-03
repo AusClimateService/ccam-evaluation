@@ -15,7 +15,8 @@ e.g.
 ```
 axiom drs_launch "/g/data/xv83/users/bxn599/ACS/axiom/ccam_cmcc-esm2_ssp126_aus-10i_12km/1M-payload-*.json" /g/data/xv83/users/bxn599/ACS/axiom/jobscript.sh /g/data/xv83/users/bxn599/ACS/axiom/ccam_cmcc-esm2_ssp126_aus-10i_12km
 ```
-Note that `jobscript.sh` uses Gadi Normal queue and `jobscript_sl.sh` uses Skylake queue
+Note that `jobscript.sh` uses Gadi Normal queue and `jobscript_sl.sh` uses Skylake queue.
+
 It is a good idea to save the logs in the same directory as the payloads so then `axiom drs_rerun_failures` can be used
 
 e.g.
