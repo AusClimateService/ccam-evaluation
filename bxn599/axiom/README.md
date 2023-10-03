@@ -1,4 +1,12 @@
-Modify `generate_payloads_loop_model_experiment.py` to run over the model, scenario, and years you want. These scripts should generate payloads for 1H, 6H, 1D, 1M. Example Python scripts to generate the payloads can be found in this repo.
+# Installation
+Please see the [axiom documentation](https://axiom.readthedocs.io/en/v0.1.6/installation.html) for installing axiom on gadi.
+
+After installing axiom, copy the json files in `/g/data/xv83/users/bxn599/ACS/axiom/axiom_dics` to `/your/home/.axiom` directory
+
+# Running axiom
+Modify `generate_payloads_loop_model_experiment.py` to run over the model, scenario, and years you want. 
+
+These scripts should generate payloads for 1H, 6H, 1D, 1M. Example Python scripts to generate the payloads can be found in this repo.
 
 To use `generate_payloads_loop_model_experiment.py` to generate the payload json files:
 ```
