@@ -1,4 +1,12 @@
-Modify `generate_payloads_loop_model_experiment.py` to run over the model, scenario, and years you want. These scripts should generate payloads for 1H, 6H, 1D, 1M. Example Python scripts to generate the payloads can be found in this repo.
+# Installation
+Please see the [axiom documentation](https://axiom.readthedocs.io/en/v0.1.6/installation.html) for installing axiom on gadi.
+
+After installing axiom, copy the json files in `/g/data/xv83/users/bxn599/ACS/axiom/axiom_dics` to `/your/home/.axiom` directory
+
+# Running axiom
+Modify `generate_payloads_loop_model_experiment.py` to run over the model, scenario, and years you want. 
+
+These scripts should generate payloads for 1H, 6H, 1D, 1M. Example Python scripts to generate the payloads can be found in this repo.
 
 To use `generate_payloads_loop_model_experiment.py` to generate the payload json files:
 ```
@@ -15,7 +23,8 @@ e.g.
 ```
 axiom drs_launch "/g/data/xv83/users/bxn599/ACS/axiom/ccam_cmcc-esm2_ssp126_aus-10i_12km/1M-payload-*.json" /g/data/xv83/users/bxn599/ACS/axiom/jobscript.sh /g/data/xv83/users/bxn599/ACS/axiom/ccam_cmcc-esm2_ssp126_aus-10i_12km
 ```
-Note that `jobscript.sh` uses Gadi Normal queue and `jobscript_sl.sh` uses Skylake queue
+Note that `jobscript.sh` uses Gadi Normal queue and `jobscript_sl.sh` uses Skylake queue.
+
 It is a good idea to save the logs in the same directory as the payloads so then `axiom drs_rerun_failures` can be used
 
 e.g.
