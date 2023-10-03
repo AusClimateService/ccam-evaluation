@@ -7,7 +7,7 @@ payload = Payload(
   input_files='/g/data/xv83/mxt599/ccam_cnrm-esm2-1_historical_aus-10i_12km/cordex/*.nc',
 
   # Specify the output directory (DRS structure will be built from here).
-  output_directory='/scratch/xv83/bxn599/ccam_cnrm-esm2-1_historical_aus-10i_12km/drs_cordex',
+  output_directory='/g/data/xv83/mxt599/ccam_cnrm-esm2-1_historical_aus-10i_12km/drs_cordex',
 
   # Specify the model, project and domain keys to read from configuration.
   model='CNRM-CERFACS-CNRM-ESM2-1',
@@ -46,7 +46,7 @@ freql = ['1H', '6H', '1D', '1M']
 for freq in freql:
   print(freq)
   payload.output_frequency = freq
-  for year in range(2000,2003): #include an extra year
+  for year in range(1951,2015): #include an extra year
     payload.start_year = year
     payload.end_year = year
-    payload.to_json(f'/g/data/xv83/users/bxn599/ACS/axiom/ccam_cnrm-esm2-1_historical_aus-10i_12km/payloads/{freq}-payloads-{year}.json')
+    payload.to_json(f'/g/data/xv83/users/bxn599/ACS/axiom/ccam_cnrm-esm2-1_historical_aus-10i_12km/{freq}-payloads-{year}.json')

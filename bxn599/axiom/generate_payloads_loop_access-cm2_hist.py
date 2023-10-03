@@ -49,4 +49,4 @@ for freq in freql:
   for year in range(1951,2015): #include an extra year
     payload.start_year = year
     payload.end_year = year
-    payload.to_json(f'/g/data/xv83/users/bxn599/ACS/axiom/ccam_access-cm2_historical_aus-10i_12km/payloads/{freq}-payload-{year}.json')
+    payload.to_json(f'/g/data/xv83/users/bxn599/ACS/axiom/ccam_access-cm2_historical_aus-10i_12km/{freq}-payload-{year}.json')
